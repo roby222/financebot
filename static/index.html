@@ -1606,7 +1606,10 @@ document.getElementById('add-form').addEventListener('submit', e=>{
   // Carica watchlist da JSON esterno
   try {
     const res = await fetch('watchlist.json');
-    WATCHLIST = await res.json();
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error('watchlist.json non è un array');
+    WATCHLIST = data;
   } catch (e) {
     console.error('Errore caricamento watchlist.json', e);
     WATCHLIST = WATCHLIST_DEFAULT;
