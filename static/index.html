@@ -744,7 +744,28 @@ const REFRESH  = 60;
 /* ═══════════════════════════════════════════════════════════
    WATCHLIST  (19 ETF pre-caricati)
 ═══════════════════════════════════════════════════════════ */
-// Watchlist caricata da watchlist.json all'avvio
+// Watchlist caricata da watchlist.json all'avvio (fallback hardcodato se fetch non disponibile)
+const WATCHLIST_DEFAULT = [
+  { id:'EXUS',  name:'Xtrackers MSCI World ex USA',        yf:'EXUS.MI',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
+  { id:'XMME',  name:'Xtrackers MSCI Emerging Markets',    yf:'XMME.MI',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
+  { id:'WEAT',  name:'WisdomTree Wheat',                   yf:'WEAT.MI',   driver:'FOOD',    dEmoji:'🌾', regime:'conflict' },
+  { id:'PHAG',  name:'WisdomTree Physical Silver',         yf:'PHAG.MI',   driver:'METALLI', dEmoji:'🥈', regime:'risk-off' },
+  { id:'COPA',  name:'WisdomTree Copper',                  yf:'COPA.MI',   driver:'CICLO',   dEmoji:'🏭', regime:'risk-on'  },
+  { id:'NUCL',  name:'VanEck Uranium & Nuclear',           yf:'NUCL.MI',   driver:'ENERGIA', dEmoji:'⚡', regime:'neutro'   },
+  { id:'GDIG',  name:'VanEck S&P Global Mining',           yf:'GDIG.MI',   driver:'METALLI', dEmoji:'🥈', regime:'neutro'   },
+  { id:'REMX',  name:'VanEck Rare Earth & Metals',         yf:'REMX.MI',   driver:'GEO',     dEmoji:'🌍', regime:'neutro'   },
+  { id:'QNTM',  name:'VanEck Quantum Computing',           yf:'QNTM.MI',   driver:'TECH',    dEmoji:'💻', regime:'risk-on'  },
+  { id:'GLUG',  name:'L&G Clean Water',                    yf:'GLUG.MI',   driver:'INFRA',   dEmoji:'🏗️', regime:'neutro'   },
+  { id:'RENW',  name:'L&G Clean Energy',                   yf:'RENW.MI',   driver:'ENERGIA', dEmoji:'⚡', regime:'risk-on'  },
+  { id:'BATT',  name:'L&G Battery Value-Chain',            yf:'BATT.MI',   driver:'METALLI', dEmoji:'🥈', regime:'risk-on'  },
+  { id:'SEME',  name:'iShares MSCI Global Semiconductors', yf:'SEME.MI',   driver:'TECH',    dEmoji:'💻', regime:'risk-on'  },
+  { id:'IWQU',  name:'iShares MSCI World Quality Factor',  yf:'IWQU.MI',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
+  { id:'SWDA',  name:'iShares Core MSCI World',            yf:'SWDA.MI',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
+  { id:'COPM',  name:'iShares Copper Miners',              yf:'COPM.MI',   driver:'METALLI', dEmoji:'🥈', regime:'neutro'   },
+  { id:'SGLE',  name:'Invesco Gold ETC EUR Hedged',        yf:'SGLE.MI',   driver:'PAURA',   dEmoji:'😰', regime:'risk-off' },
+  { id:'UKRN',  name:'Ukraine Reconstruction',             yf:'UKRN.MI',   driver:'GEO',     dEmoji:'🌍', regime:'neutro'   },
+  { id:'GRIDG', name:'First Trust Smart Grid Infra',       yf:'GRID.MI',   driver:'INFRA',   dEmoji:'🏗️', regime:'neutro'   },
+];
 let WATCHLIST = [];
 
 /* Extra simboli aggiunti dall'utente (localStorage) */
@@ -1588,7 +1609,8 @@ document.getElementById('add-form').addEventListener('submit', e=>{
     WATCHLIST = await res.json();
   } catch (e) {
     console.error('Errore caricamento watchlist.json', e);
-    toast('⚠️ watchlist.json non trovato');
+    WATCHLIST = WATCHLIST_DEFAULT;
+    toast('⚠️ watchlist.json non trovato — uso lista predefinita');
   }
   // Restore scenario button active state from localStorage
   document.querySelectorAll('.scen-btn').forEach(b => b.classList.remove('active'));
