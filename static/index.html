@@ -16,7 +16,7 @@
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;padding:20px 16px 60px}
 
 /* ── header ── */
-header{display:flex;align-items:center;justify-content:space-between;max-width:1280px;margin:0 auto 18px;flex-wrap:wrap;gap:10px}
+header{display:flex;align-items:center;justify-content:space-between;max-width:1440px;margin:0 auto 18px;flex-wrap:wrap;gap:10px}
 .logo{display:flex;align-items:center;gap:9px}
 .logo svg{width:24px;height:24px}
 .logo h1{font-size:1.1rem;font-weight:700;letter-spacing:-.4px}
@@ -47,7 +47,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 .refresh-btn:hover{color:var(--text);border-color:var(--accent)}
 
 /* add bar */
-.add-wrap{max-width:1280px;margin:0 auto 18px;position:relative}
+.add-wrap{max-width:1440px;margin:0 auto 18px;position:relative}
 .add-form{display:flex;gap:8px}
 .add-form input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:9px 14px;font-size:.88rem;outline:none;transition:.2s}
 .add-form input::placeholder{color:var(--muted)}
@@ -67,7 +67,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 .ac-tag.ex{background:rgba(139,148,158,.1);color:var(--muted)}
 
 /* views */
-.view{max-width:1280px;margin:0 auto;display:none}
+.view{max-width:1440px;margin:0 auto;display:none}
 .view.active{display:block}
 
 /* ── CARDS ── */
@@ -112,9 +112,9 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 .sig-load-bar{height:2px;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:1px;animation:loadbar 1.5s infinite;display:none}
 .sig-load-bar.active{display:block}
 @keyframes loadbar{0%{opacity:1}50%{opacity:.3}100%{opacity:1}}
-.signals-table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:880px}
+.signals-table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:780px}
 .signals-table thead tr{background:var(--surface2);position:sticky;top:0;z-index:2}
-.signals-table th{padding:9px 12px;text-align:left;font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;border-bottom:1px solid var(--border)}
+.signals-table th{padding:7px 8px;text-align:left;font-size:.62rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;border-bottom:1px solid var(--border)}
 .signals-table th.sortable{cursor:pointer;user-select:none;transition:.12s}
 .signals-table th.sortable:hover{color:var(--text)}
 .signals-table th.sort-asc{color:var(--accent)}
@@ -126,9 +126,9 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 .signals-table tbody tr{border-bottom:1px solid var(--border);transition:.12s}
 .signals-table tbody tr:last-child{border-bottom:none}
 .signals-table tbody tr:hover{background:var(--surface2)}
-.signals-table td{padding:9px 12px;vertical-align:middle;white-space:nowrap}
+.signals-table td{padding:7px 8px;vertical-align:middle;white-space:nowrap}
 .td-ticker{font-size:.75rem;font-weight:700;font-family:monospace;color:var(--accent);letter-spacing:.3px}
-.td-name{color:var(--text);font-size:.8rem;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+.td-name{color:var(--text);font-size:.78rem;max-width:150px;overflow:hidden;text-overflow:ellipsis}
 .td-price{font-variant-numeric:tabular-nums;font-weight:700}
 
 /* signal badges */
@@ -193,7 +193,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 #toast.err{border-color:var(--red);color:var(--red)}
 
 /* ── LEGEND ── */
-.legend{max-width:1280px;margin:18px auto 0;display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;font-size:.73rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px}
+.legend{max-width:1440px;margin:18px auto 0;display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;font-size:.73rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px}
 .legend-title{font-weight:700;color:var(--text);margin-right:4px}
 .legend-item{display:flex;align-items:center;gap:4px}
 
@@ -246,7 +246,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 .help-step p{margin:0;font-size:.82rem}
 
 /* ── MACRO BAR ── */
-.macro-bar{max-width:1280px;margin:0 auto 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.macro-bar{max-width:1440px;margin:0 auto 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .macro-section{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .macro-lbl{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
 .macro-item{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:.76rem}
@@ -384,14 +384,14 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
             <th class="r sortable" data-sort="price" onclick="sortBy('price')">Prezzo <span class="th-sort-icon">⇅</span></th>
             <th class="r sortable" data-sort="pct" onclick="sortBy('pct')">Var% <span class="th-sort-icon">⇅</span></th>
             <th class="c sortable" data-sort="signal" onclick="sortBy('signal')">SEGNALE <span class="th-sort-icon">⇅</span></th>
-            <th class="r sortable" data-sort="e1" onclick="sortBy('e1')">E1 30% <span class="th-sort-icon">⇅</span></th>
-            <th class="r sortable" data-sort="e2" onclick="sortBy('e2')">E2 30% <span class="th-sort-icon">⇅</span></th>
-            <th class="r sortable" data-sort="e3" onclick="sortBy('e3')">E3 40% <span class="th-sort-icon">⇅</span></th>
-            <th class="r sortable" data-sort="sell" onclick="sortBy('sell')">VENDI ≥ <span class="th-sort-icon">⇅</span></th>
-            <th class="r sortable" data-sort="target" onclick="sortBy('target')">Target <span class="th-sort-icon">⇅</span></th>
-            <th class="c sortable" data-sort="rsi" onclick="sortBy('rsi')">RSI <span class="th-sort-icon">⇅</span></th>
-            <th class="r sortable" data-sort="sma" onclick="sortBy('sma')">vs SMA50 <span class="th-sort-icon">⇅</span></th>
-            <th class="c sortable" data-sort="macd" onclick="sortBy('macd')">MACD <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="e1" onclick="sortBy('e1')" title="E1 — ingresso 30% a S1">E1 <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="e2" onclick="sortBy('e2')" title="E2 — ingresso 30% a mid S1-S2">E2 <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="e3" onclick="sortBy('e3')" title="E3 — ingresso 40% a S2">E3 <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="sell" onclick="sortBy('sell')" title="Vendi ≥ R1 (prima resistenza)">R1 <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="target" onclick="sortBy('target')" title="Target R2 (seconda resistenza)">R2 <span class="th-sort-icon">⇅</span></th>
+            <th class="c sortable" data-sort="rsi" onclick="sortBy('rsi')" title="RSI(14) — &lt;30 ipervenduto · &gt;70 ipercomprato">RSI <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="sma" onclick="sortBy('sma')" title="Distanza % dalla SMA50">SMA50 <span class="th-sort-icon">⇅</span></th>
+            <th class="c sortable" data-sort="macd" onclick="sortBy('macd')" title="MACD(12/26/9) — istogramma">MACD <span class="th-sort-icon">⇅</span></th>
           </tr>
         </thead>
         <tbody id="sig-tbody"></tbody>
@@ -674,15 +674,15 @@ Se non usavi la ladder e compravi tutto a 95 → avresti pagato 3% in più
           <p>19 ETF tematici selezionati per la loro sensibilità ai macro-trend geopolitici. Ogni ETF ha un <strong>driver</strong> (la tematica che guida il prezzo) e un <strong>regime ideale</strong> (contesto di mercato in cui performa meglio).</p>
           <table class="help-tbl">
             <tr><th>Driver</th><th>Tema</th><th>ETF</th></tr>
-            <tr><td>😰 PAURA</td><td>Safe haven, oro</td><td>SGLE (oro EUR-hedged)</td></tr>
-            <tr><td>🥈 METALLI</td><td>Metalli preziosi/industriali</td><td>PHAG (argento)</td></tr>
-            <tr><td>🏭 CICLO</td><td>Industriali ciclici, materie prime</td><td>COPA (rame), GDIG (mining), REMX (terre rare), BATT (batterie), COPM (copper miners)</td></tr>
-            <tr><td>⚡ ENERGIA</td><td>Nucleare, rinnovabili</td><td>NUCL (nucleare), RENW (clean energy)</td></tr>
+            <tr><td>😰 PAURA</td><td>Safe haven, oro fisico</td><td>SGLE (oro EUR-hedged)</td></tr>
+            <tr><td>🥈 METALLI</td><td>Metalli preziosi e critici (mining basket)</td><td>PHAG (argento fisico), GDIG (global mining — 40% gold miner), BATT (litio/batterie), COPM (copper miners — con gold miner nel basket)</td></tr>
+            <tr><td>🏭 CICLO</td><td>Materie prime cicliche pure (futures)</td><td>COPA (futures rame)</td></tr>
+            <tr><td>⚡ ENERGIA</td><td>Nucleare, rinnovabili</td><td>NUCL (uranio + nucleare), RENW (clean energy + grid)</td></tr>
             <tr><td>💻 TECH</td><td>Tecnologia, semiconduttori</td><td>QNTM (quantum computing), SEME (semiconduttori)</td></tr>
             <tr><td>📈 EQUITY</td><td>Azionario globale/qualità</td><td>SWDA (MSCI World), EXUS (World ex USA), XMME (Emerging Markets), IWQU (Quality Factor)</td></tr>
-            <tr><td>🏗️ INFRA</td><td>Infrastrutture</td><td>GLUG (acqua), GRIDG (smart grid)</td></tr>
-            <tr><td>🌍 GEO</td><td>Geopolitico diretto</td><td>UKRN (ricostruzione Ucraina)</td></tr>
-            <tr><td>🌾 FOOD</td><td>Agricoltura/grano</td><td>WEAT (grano)</td></tr>
+            <tr><td>🏗️ INFRA</td><td>Infrastrutture fisiche</td><td>GLUG (acqua), GRIDG (smart grid)</td></tr>
+            <tr><td>🌍 GEO</td><td>Geopolitico diretto / minerali strategici</td><td>UKRN (ricostruzione Ucraina), REMX (terre rare — 40% Cina, litio, tungsteno)</td></tr>
+            <tr><td>🌾 FOOD</td><td>Agricoltura/grano</td><td>WEAT (futures grano)</td></tr>
           </table>
           <div class="help-callout"><strong>Nota UKRN:</strong> L'Ukraine Reconstruction ETF ha bassissima liquidità e pochi scambi giornalieri. I dati tecnici (MACD, Bollinger) sono spesso assenti o non affidabili. Interpretare con cautela.</div>
         </div>
@@ -744,33 +744,36 @@ const REFRESH  = 60;
 /* ═══════════════════════════════════════════════════════════
    WATCHLIST  (19 ETF pre-caricati)
 ═══════════════════════════════════════════════════════════ */
-// driver: macro engine  |  regime: contesto favorevole  |  yf2: ticker fallback
+// driver: macro engine  |  regime: contesto favorevole ideale
 const WATCHLIST = [
-  { id:'EXUS',  name:'Xtrackers MSCI World ex USA',        yf:'EXUS.L',  yf2:'EXUS.DE',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
-  { id:'XMME',  name:'Xtrackers MSCI Emerging Markets',    yf:'XMME.L',  yf2:'XMME.DE',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
-  { id:'WEAT',  name:'WisdomTree Wheat',                   yf:'WEAT.L',  yf2:'WEAT.L',    driver:'FOOD',    dEmoji:'🌾', regime:'conflict' },
-  { id:'PHAG',  name:'WisdomTree Physical Silver',         yf:'PHAG.L',  yf2:'PHAG.L',    driver:'METALLI', dEmoji:'🥈', regime:'risk-off' },
-  { id:'COPA',  name:'WisdomTree Copper',                  yf:'COPA.L',  yf2:'COPA.L',    driver:'CICLO',   dEmoji:'🏭', regime:'risk-on'  },
-  { id:'NUCL',  name:'VanEck Uranium & Nuclear',           yf:'NUCL.L',  yf2:'NUCL.L',    driver:'ENERGIA', dEmoji:'⚡', regime:'neutro'   },
-  { id:'GDIG',  name:'VanEck S&P Global Mining',           yf:'GDIG.L',  yf2:'GDIG.L',    driver:'CICLO',   dEmoji:'🏭', regime:'risk-on'  },
-  { id:'REMX',  name:'VanEck Rare Earth & Metals',         yf:'REMX.MI', yf2:'REMX.L',    driver:'CICLO',   dEmoji:'🏭', regime:'risk-on'  },
-  { id:'QNTM',  name:'VanEck Quantum Computing',           yf:'QNTM.L',  yf2:'QNTM.L',    driver:'TECH',    dEmoji:'💻', regime:'risk-on'  },
-  { id:'GLUG',  name:'L&G Clean Water',                    yf:'GLUG.L',  yf2:'GLUG.L',    driver:'INFRA',   dEmoji:'🏗️', regime:'neutro'   },
-  { id:'RENW',  name:'L&G Clean Energy',                   yf:'RENW.L',  yf2:'RENW.L',    driver:'ENERGIA', dEmoji:'⚡', regime:'risk-on'  },
-  { id:'BATT',  name:'L&G Battery Value-Chain',            yf:'BATT.L',  yf2:'BATT.L',    driver:'CICLO',   dEmoji:'🏭', regime:'risk-on'  },
-  { id:'SEME',  name:'iShares MSCI Global Semiconductors', yf:'SEME.MI', yf2:'SEME.L',    driver:'TECH',    dEmoji:'💻', regime:'risk-on'  },
-  { id:'IWQU',  name:'iShares MSCI World Quality Factor',  yf:'IWQU.L',  yf2:'IWQU.DE',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
-  { id:'SWDA',  name:'iShares Core MSCI World',            yf:'SWDA.L',  yf2:'SWDA.DE',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
-  { id:'COPM',  name:'iShares Copper Miners',              yf:'COPM.L',  yf2:'COPM.MI',   driver:'CICLO',   dEmoji:'🏭', regime:'risk-on'  },
-  { id:'SGLE',  name:'Invesco Gold ETC EUR Hedged',        yf:'SGLE.MI', yf2:'SGLE.MI',   driver:'PAURA',   dEmoji:'😰', regime:'risk-off' },
-  { id:'UKRN',  name:'Ukraine Reconstruction',             yf:'UKRN.L',  yf2:'UKRN.L',    driver:'GEO',     dEmoji:'🌍', regime:'neutro'   },
-  { id:'GRIDG', name:'First Trust Smart Grid Infra',       yf:'GRIDG.L', yf2:'GRID.L',    driver:'INFRA',   dEmoji:'🏗️', regime:'neutro'   },
+  { id:'EXUS',  name:'Xtrackers MSCI World ex USA',        yf:'EXUS.MI',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
+  { id:'XMME',  name:'Xtrackers MSCI Emerging Markets',    yf:'XMME.MI',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
+  { id:'WEAT',  name:'WisdomTree Wheat',                   yf:'WEAT.MI',   driver:'FOOD',    dEmoji:'🌾', regime:'conflict' },
+  { id:'PHAG',  name:'WisdomTree Physical Silver',         yf:'PHAG.MI',   driver:'METALLI', dEmoji:'🥈', regime:'risk-off' },
+  { id:'COPA',  name:'WisdomTree Copper',                  yf:'COPA.MI',   driver:'CICLO',   dEmoji:'🏭', regime:'risk-on'  },
+  { id:'NUCL',  name:'VanEck Uranium & Nuclear',           yf:'NUCL.MI',   driver:'ENERGIA', dEmoji:'⚡', regime:'neutro'   },
+  { id:'GDIG',  name:'VanEck S&P Global Mining',           yf:'GDIG.MI',   driver:'METALLI', dEmoji:'🥈', regime:'neutro'   },
+  { id:'REMX',  name:'VanEck Rare Earth & Metals',         yf:'REMX.MI',   driver:'GEO',     dEmoji:'🌍', regime:'neutro'   },
+  { id:'QNTM',  name:'VanEck Quantum Computing',           yf:'QNTM.MI',   driver:'TECH',    dEmoji:'💻', regime:'risk-on'  },
+  { id:'GLUG',  name:'L&G Clean Water',                    yf:'GLUG.MI',   driver:'INFRA',   dEmoji:'🏗️', regime:'neutro'   },
+  { id:'RENW',  name:'L&G Clean Energy',                   yf:'RENW.MI',   driver:'ENERGIA', dEmoji:'⚡', regime:'risk-on'  },
+  { id:'BATT',  name:'L&G Battery Value-Chain',            yf:'BATT.MI',   driver:'METALLI', dEmoji:'🥈', regime:'risk-on'  },
+  { id:'SEME',  name:'iShares MSCI Global Semiconductors', yf:'SEME.MI',   driver:'TECH',    dEmoji:'💻', regime:'risk-on'  },
+  { id:'IWQU',  name:'iShares MSCI World Quality Factor',  yf:'IWQU.MI',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
+  { id:'SWDA',  name:'iShares Core MSCI World',            yf:'SWDA.MI',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
+  { id:'COPM',  name:'iShares Copper Miners',              yf:'COPM.MI',   driver:'METALLI', dEmoji:'🥈', regime:'neutro'   },
+  { id:'SGLE',  name:'Invesco Gold ETC EUR Hedged',        yf:'SGLE.MI',   driver:'PAURA',   dEmoji:'😰', regime:'risk-off' },
+  { id:'UKRN',  name:'Ukraine Reconstruction',             yf:'UKRN.MI',   driver:'GEO',     dEmoji:'🌍', regime:'neutro'   },
+  { id:'GRIDG', name:'First Trust Smart Grid Infra',       yf:'GRID.MI',   driver:'INFRA',   dEmoji:'🏗️', regime:'neutro'   },
 ];
 
 /* Extra simboli aggiunti dall'utente (localStorage) */
 let extraItems = JSON.parse(localStorage.getItem('fpb_extra') || '[]');
+let hiddenIds  = new Set(JSON.parse(localStorage.getItem('fpb_hidden') || '[]'));
 
-function allItems() { return [...WATCHLIST, ...extraItems]; }
+function allItems() {
+  return [...WATCHLIST, ...extraItems].filter(i => !hiddenIds.has(i.id));
+}
 
 /* ═══════════════════════════════════════════════════════════
    MACRO BENCHMARK TICKERS
@@ -989,15 +992,11 @@ async function fetchHistoricalRaw(ticker, range) {
 }
 
 async function fetchHistorical(item) {
-  // Try primary ticker then fallback, each with 3mo → 6mo → 1mo
-  const tickers = [...new Set([item.yf, item.yf2].filter(Boolean))];
-  const ranges  = ['3mo', '6mo', '1mo'];
+  const ranges = ['3mo', '6mo', '1mo'];
   let raw = null;
-  outer: for (const ticker of tickers) {
-    for (const range of ranges) {
-      raw = await fetchHistoricalRaw(ticker, range);
-      if (raw) break outer;
-    }
+  for (const range of ranges) {
+    raw = await fetchHistoricalRaw(item.yf, range);
+    if (raw) break;
   }
   if (!raw) return null;
 
@@ -1255,7 +1254,7 @@ function renderCards() {
         <div class="card-actions">
           ${sigBadge}
           <span class="mkt-badge ${mktCls(mState)}">${mktLbl(mState)}</span>
-          ${WATCHLIST.find(w=>w.id===item.id)?'':`<button class="del-btn" onclick="removeExtra('${item.id}')" title="Rimuovi">✕</button>`}
+          <button class="del-btn" onclick="removeItem('${item.id}')" title="Rimuovi dalla lista">✕</button>
         </div>
       </div>
       <div class="card-price-row">
@@ -1513,9 +1512,16 @@ async function addCustom(sym) {
   resetCountdown();
 }
 
-function removeExtra(id) {
-  extraItems = extraItems.filter(i=>i.id!==id);
-  localStorage.setItem('fpb_extra', JSON.stringify(extraItems));
+function removeItem(id) {
+  // Se è un extra, eliminalo dall'array; se è in watchlist, nascondilo
+  const isExtra = extraItems.find(i=>i.id===id);
+  if (isExtra) {
+    extraItems = extraItems.filter(i=>i.id!==id);
+    localStorage.setItem('fpb_extra', JSON.stringify(extraItems));
+  } else {
+    hiddenIds.add(id);
+    localStorage.setItem('fpb_hidden', JSON.stringify([...hiddenIds]));
+  }
   delete quotes[id]; delete signalCache[id];
   render();
   toast(`${id} rimosso`);
