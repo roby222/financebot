@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FinancePalmirioBot – Dashboard ETF</title>
+<style>
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2128;--border:#21262d;
+  --text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;
+  --green:#3fb950;--red:#f85149;--orange:#d29922;--purple:#bc8cff;
+  --green-bg:rgba(63,185,80,.13);--red-bg:rgba(248,81,73,.13);
+  --orange-bg:rgba(210,153,34,.13);--radius:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;padding:20px 16px 60px}
+
+/* ── header ── */
+header{display:flex;align-items:center;justify-content:space-between;max-width:1280px;margin:0 auto 18px;flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:9px}
+.logo svg{width:24px;height:24px}
+.logo h1{font-size:1.1rem;font-weight:700;letter-spacing:-.4px}
+.logo span{color:var(--accent)}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* tabs */
+.tabs{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px;gap:2px}
+.tab-btn{background:none;border:none;color:var(--muted);border-radius:5px;padding:4px 14px;font-size:.78rem;font-weight:600;cursor:pointer;transition:.15s;white-space:nowrap}
+.tab-btn.active{background:var(--accent);color:#0d1117}
+.tab-btn:not(.active):hover{color:var(--text);background:var(--border)}
+
+/* switcher */
+.switcher{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px;gap:2px}
+.switcher button{background:none;border:none;color:var(--muted);border-radius:5px;padding:3px 9px;font-size:.74rem;font-weight:600;cursor:pointer;transition:.15s}
+.switcher button.active{background:var(--accent);color:#0d1117}
+.switcher button:not(.active):hover{color:var(--text);background:var(--border)}
+
+/* status */
+.status-info{display:flex;align-items:center;gap:8px;font-size:.76rem;color:var(--muted)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.ring-wrap{display:flex;align-items:center;gap:5px}
+.countdown-ring{width:20px;height:20px;transform:rotate(-90deg)}
+.countdown-ring circle{fill:none;stroke:var(--border);stroke-width:3}
+.countdown-ring .prog{stroke:var(--accent);stroke-width:3;stroke-linecap:round;stroke-dasharray:47.1;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear}
+.refresh-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:3px 8px;font-size:.72rem;cursor:pointer;transition:.15s}
+.refresh-btn:hover{color:var(--text);border-color:var(--accent)}
+
+/* add bar */
+.add-wrap{max-width:1280px;margin:0 auto 18px;position:relative}
+.add-form{display:flex;gap:8px}
+.add-form input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:9px 14px;font-size:.88rem;outline:none;transition:.2s}
+.add-form input::placeholder{color:var(--muted)}
+.add-form input:focus{border-color:var(--accent)}
+.add-form button{background:var(--accent);color:#0d1117;border:none;border-radius:var(--radius);padding:9px 16px;font-size:.88rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:.2s}
+.add-form button:hover{opacity:.85}
+.add-form button:disabled{opacity:.4;cursor:default}
+.ac-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.4);display:none}
+.ac-drop.open{display:block}
+.ac-item{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;cursor:pointer;gap:10px;transition:.1s}
+.ac-item:hover,.ac-item.focused{background:var(--border)}
+.ac-left{display:flex;flex-direction:column;gap:1px;min-width:0}
+.ac-sym{font-size:.88rem;font-weight:700}
+.ac-name{font-size:.73rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:460px}
+.ac-tags{display:flex;gap:4px;flex-shrink:0}
+.ac-tag{font-size:.62rem;font-weight:600;padding:1px 5px;border-radius:4px;background:rgba(88,166,255,.12);color:var(--accent);text-transform:uppercase}
+.ac-tag.ex{background:rgba(139,148,158,.1);color:var(--muted)}
+
+/* views */
+.view{max-width:1280px;margin:0 auto;display:none}
+.view.active{display:block}
+
+/* ── CARDS ── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;position:relative;transition:.2s;animation:fadeIn .3s ease}
+.card:hover{border-color:#30363d;transform:translateY(-1px)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.card-id{flex:1;min-width:0}
+.card-short{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.card-name{font-size:.9rem;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-yf{font-size:.68rem;color:var(--muted);margin-top:2px}
+.card-actions{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.mkt-badge{font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.3px;text-transform:uppercase}
+.mkt-open{background:var(--green-bg);color:var(--green)}
+.mkt-pre,.mkt-post{background:var(--orange-bg);color:var(--orange)}
+.mkt-closed{background:rgba(139,148,158,.12);color:var(--muted)}
+.del-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 4px;border-radius:5px;line-height:1;transition:.15s}
+.del-btn:hover{color:var(--red);background:var(--red-bg)}
+.card-price-row{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.card-price{font-size:1.65rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.badge-ccy{background:rgba(88,166,255,.12);color:var(--accent);border-radius:5px;padding:1px 6px;font-size:.67rem;font-weight:600}
+.card-chg{display:inline-flex;align-items:center;gap:4px;font-size:.8rem;font-weight:600;padding:2px 8px;border-radius:20px;margin-bottom:12px}
+.up{color:var(--green);background:var(--green-bg)}.down{color:var(--red);background:var(--red-bg)}.flat{color:var(--muted);background:rgba(139,148,158,.1)}
+.card-stats{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;border-top:1px solid var(--border);padding-top:10px}
+.stat{display:flex;flex-direction:column;gap:1px}
+.stat-label{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.stat-value{font-size:.78rem;font-variant-numeric:tabular-nums}
+.range-row{grid-column:1/-1;display:flex;flex-direction:column;gap:3px}
+.range-labels{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted)}
+.range-bar{height:4px;background:var(--border);border-radius:2px;position:relative}
+.range-fill{position:absolute;height:100%;border-radius:2px;background:linear-gradient(90deg,var(--red),var(--green))}
+.range-dot{position:absolute;top:50%;width:7px;height:7px;background:#fff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 2px var(--surface)}
+.card.loading .card-price{background:var(--border);border-radius:4px;color:transparent;animation:shimmer 1.4s infinite}
+@keyframes shimmer{0%{opacity:.4}50%{opacity:.8}100%{opacity:.4}}
+
+/* ── SIGNALS TABLE ── */
+.signals-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:auto}
+.sig-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}
+.sig-header h2{font-size:.9rem;font-weight:700}
+.sig-meta{font-size:.73rem;color:var(--muted);display:flex;align-items:center;gap:8px}
+.sig-load-bar{height:2px;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:1px;animation:loadbar 1.5s infinite;display:none}
+.sig-load-bar.active{display:block}
+@keyframes loadbar{0%{opacity:1}50%{opacity:.3}100%{opacity:1}}
+.signals-table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:880px}
+.signals-table thead tr{background:var(--surface2);position:sticky;top:0;z-index:2}
+.signals-table th{padding:9px 12px;text-align:left;font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;border-bottom:1px solid var(--border)}
+.signals-table th.sortable{cursor:pointer;user-select:none;transition:.12s}
+.signals-table th.sortable:hover{color:var(--text)}
+.signals-table th.sort-asc{color:var(--accent)}
+.signals-table th.sort-desc{color:var(--accent)}
+.th-sort-icon{margin-left:3px;font-size:.6rem;opacity:.5}
+.sort-asc .th-sort-icon,.sort-desc .th-sort-icon{opacity:1;color:var(--accent)}
+.signals-table th.r,.signals-table td.r{text-align:right}
+.signals-table th.c,.signals-table td.c{text-align:center}
+.signals-table tbody tr{border-bottom:1px solid var(--border);transition:.12s}
+.signals-table tbody tr:last-child{border-bottom:none}
+.signals-table tbody tr:hover{background:var(--surface2)}
+.signals-table td{padding:9px 12px;vertical-align:middle;white-space:nowrap}
+.td-ticker{font-size:.75rem;font-weight:700;font-family:monospace;color:var(--accent);letter-spacing:.3px}
+.td-name{color:var(--text);font-size:.8rem;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+.td-price{font-variant-numeric:tabular-nums;font-weight:700}
+
+/* signal badges */
+.sig-badge{display:inline-flex;align-items:center;gap:3px;font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.sig-buy-strong{background:rgba(63,185,80,.2);color:#56d364;border:1px solid rgba(63,185,80,.3)}
+.sig-buy{background:rgba(63,185,80,.1);color:var(--green);border:1px solid rgba(63,185,80,.15)}
+.sig-hold{background:rgba(210,153,34,.1);color:var(--orange);border:1px solid rgba(210,153,34,.15)}
+.sig-sell{background:rgba(248,81,73,.1);color:var(--red);border:1px solid rgba(248,81,73,.15)}
+.sig-sell-strong{background:rgba(248,81,73,.2);color:#ff7b72;border:1px solid rgba(248,81,73,.3)}
+.sig-loading{background:rgba(139,148,158,.08);color:var(--muted);border:1px solid var(--border)}
+
+/* pivot levels */
+.lvl-buy{color:var(--green);font-variant-numeric:tabular-nums;font-weight:600}
+.lvl-sell{color:var(--red);font-variant-numeric:tabular-nums;font-weight:600}
+.lvl-stop{color:var(--muted);font-variant-numeric:tabular-nums}
+.lvl-target{color:var(--purple);font-variant-numeric:tabular-nums}
+
+/* RSI cell */
+.rsi-val{display:inline-block;padding:2px 7px;border-radius:5px;font-size:.78rem;font-weight:600;font-variant-numeric:tabular-nums}
+.rsi-os2{background:rgba(63,185,80,.2);color:#56d364}
+.rsi-os1{background:rgba(63,185,80,.1);color:var(--green)}
+.rsi-neu{color:var(--muted)}
+.rsi-ob1{background:rgba(248,81,73,.1);color:var(--red)}
+.rsi-ob2{background:rgba(248,81,73,.2);color:#ff7b72}
+
+/* vs SMA */
+.vs-pos{color:var(--green);font-size:.78rem}
+.vs-neg{color:var(--red);font-size:.78rem}
+.vs-neu{color:var(--muted);font-size:.78rem}
+
+/* macd arrow */
+.macd-up{color:var(--green);font-size:.9rem}
+.macd-dn{color:var(--red);font-size:.9rem}
+
+/* loading spinner in cell */
+.cell-loading{display:inline-block;width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── COMPACT TABLE ── */
+.compact-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:auto}
+.compact-table{width:100%;border-collapse:collapse;font-size:.84rem;min-width:700px}
+.compact-table thead tr{background:var(--surface2);position:sticky;top:0;z-index:2}
+.compact-table th{padding:9px 14px;text-align:left;font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;border-bottom:1px solid var(--border)}
+.compact-table th.r,.compact-table td.r{text-align:right}
+.compact-table tbody tr{border-bottom:1px solid var(--border);transition:.12s}
+.compact-table tbody tr:last-child{border-bottom:none}
+.compact-table tbody tr:hover{background:var(--surface2)}
+.compact-table td{padding:9px 14px;vertical-align:middle}
+.ct-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.ct-sym{font-size:.76rem;color:var(--muted);font-family:monospace}
+.ct-price{font-variant-numeric:tabular-nums;font-weight:700;font-size:.92rem;white-space:nowrap}
+.ct-chg{display:inline-flex;align-items:center;gap:3px;font-size:.76rem;font-weight:600;padding:2px 7px;border-radius:20px;white-space:nowrap}
+
+/* ── EMPTY ── */
+.empty{max-width:600px;margin:60px auto;text-align:center;color:var(--muted)}
+.empty svg{width:44px;height:44px;margin-bottom:14px;opacity:.35}
+.empty h2{font-size:1rem;margin-bottom:6px}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:30px;font-size:.82rem;transition:.25s;pointer-events:none;z-index:100;white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.err{border-color:var(--red);color:var(--red)}
+
+/* ── LEGEND ── */
+.legend{max-width:1280px;margin:18px auto 0;display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;font-size:.73rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px}
+.legend-title{font-weight:700;color:var(--text);margin-right:4px}
+.legend-item{display:flex;align-items:center;gap:4px}
+
+/* ── HELP BUTTON ── */
+.help-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:50%;width:26px;height:26px;font-size:.78rem;font-weight:700;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.help-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* ── HELP MODAL ── */
+.help-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:20px 16px;backdrop-filter:blur(3px)}
+.help-overlay.hidden{display:none}
+.help-modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:100%;max-width:900px;max-height:calc(100vh - 40px);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.6)}
+.help-modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.help-modal-head h2{font-size:.95rem;font-weight:700}
+.help-modal-head h2 span{color:var(--accent)}
+.help-close{background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:3px 10px;font-size:.78rem;cursor:pointer;transition:.15s}
+.help-close:hover{color:var(--red);border-color:var(--red)}
+.help-body{display:flex;flex:1;overflow:hidden}
+.help-nav{width:170px;flex-shrink:0;border-right:1px solid var(--border);padding:12px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.help-nav a{display:block;padding:6px 10px;border-radius:7px;font-size:.76rem;font-weight:600;color:var(--muted);text-decoration:none;cursor:pointer;transition:.12s;white-space:nowrap}
+.help-nav a:hover{color:var(--text);background:var(--surface2)}
+.help-nav a.active{color:var(--accent);background:rgba(88,166,255,.1)}
+.help-nav .nav-sep{height:1px;background:var(--border);margin:6px 4px}
+.help-content{flex:1;overflow-y:auto;padding:20px 24px}
+
+/* help content elements */
+.help-section{display:none}
+.help-section.active{display:block}
+.help-section h3{font-size:1rem;font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.help-section h4{font-size:.84rem;font-weight:700;color:var(--accent);margin:18px 0 8px}
+.help-section p{font-size:.83rem;color:var(--muted);line-height:1.65;margin-bottom:10px}
+.help-section p strong{color:var(--text)}
+.help-tbl{width:100%;border-collapse:collapse;font-size:.79rem;margin-bottom:14px}
+.help-tbl th{padding:7px 10px;text-align:left;font-size:.67rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.help-tbl td{padding:7px 10px;border-bottom:1px solid rgba(33,38,45,.6);vertical-align:top;line-height:1.5}
+.help-tbl tr:last-child td{border-bottom:none}
+.help-tbl td:first-child{font-weight:600;white-space:nowrap;color:var(--text)}
+.help-tbl td:not(:first-child){color:var(--muted)}
+.help-pill{display:inline-flex;align-items:center;gap:3px;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px;margin:1px}
+.help-pill.green{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.25)}
+.help-pill.red{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.25)}
+.help-pill.orange{background:rgba(210,153,34,.15);color:var(--orange);border:1px solid rgba(210,153,34,.25)}
+.help-pill.blue{background:rgba(88,166,255,.12);color:var(--accent);border:1px solid rgba(88,166,255,.2)}
+.help-pill.muted{background:rgba(139,148,158,.1);color:var(--muted);border:1px solid var(--border)}
+.help-callout{background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:10px 14px;margin:12px 0;font-size:.8rem;color:var(--muted);line-height:1.6}
+.help-callout strong{color:var(--text)}
+.help-code{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-family:monospace;font-size:.78rem;color:var(--text);line-height:1.8;margin:8px 0}
+.help-badge-row{display:flex;align-items:center;gap:8px;margin:6px 0;flex-wrap:wrap}
+.help-step{display:flex;gap:12px;margin:8px 0;align-items:flex-start}
+.help-step-num{width:22px;height:22px;background:rgba(88,166,255,.15);color:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;margin-top:1px}
+.help-step p{margin:0;font-size:.82rem}
+
+/* ── MACRO BAR ── */
+.macro-bar{max-width:1280px;margin:0 auto 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.macro-section{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.macro-lbl{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.macro-item{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:.76rem}
+.macro-item .mi-label{color:var(--muted);font-size:.66rem}
+.macro-item .mi-price{font-weight:700;font-variant-numeric:tabular-nums}
+.macro-item .mi-pct{font-size:.7rem;font-weight:600}
+.macro-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
+.regime-badge{font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;letter-spacing:.3px}
+.regime-risk-on {background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.25)}
+.regime-risk-off{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.25)}
+.regime-volatile{background:rgba(210,153,34,.15);color:var(--orange);border:1px solid rgba(210,153,34,.25)}
+.regime-unknown {background:rgba(139,148,158,.1);color:var(--muted);border:1px solid var(--border)}
+
+/* scenario buttons */
+.scen-group{display:flex;align-items:center;gap:5px}
+.scen-lbl{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.scen-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:3px 9px;font-size:.73rem;font-weight:600;cursor:pointer;transition:.15s;white-space:nowrap}
+.scen-btn:hover{color:var(--text);border-color:var(--accent)}
+.scen-btn.active.escalation{background:rgba(248,81,73,.15);color:var(--red);border-color:rgba(248,81,73,.4)}
+.scen-btn.active.tregua{background:rgba(63,185,80,.15);color:var(--green);border-color:rgba(63,185,80,.4)}
+.scen-btn.active.neutro{background:rgba(139,148,158,.15);color:var(--text);border-color:rgba(139,148,158,.4)}
+.scen-btn.active.volatile{background:rgba(210,153,34,.15);color:var(--orange);border-color:rgba(210,153,34,.4)}
+
+/* driver badge */
+.drv-badge{font-size:.68rem;font-weight:600;padding:1px 6px;border-radius:4px;background:rgba(139,148,158,.1);color:var(--muted);white-space:nowrap}
+.drv-PAURA  {background:rgba(248,81,73,.1);color:var(--red)}
+.drv-METALLI{background:rgba(188,140,255,.1);color:var(--purple)}
+.drv-CICLO  {background:rgba(210,153,34,.1);color:var(--orange)}
+.drv-TECH   {background:rgba(88,166,255,.1);color:var(--accent)}
+.drv-EQUITY {background:rgba(63,185,80,.1);color:var(--green)}
+.drv-ENERGIA{background:rgba(210,153,34,.12);color:var(--orange)}
+.drv-INFRA  {background:rgba(139,148,158,.1);color:var(--muted)}
+.drv-GEO    {background:rgba(188,140,255,.1);color:var(--purple)}
+.drv-FOOD   {background:rgba(63,185,80,.1);color:var(--green)}
+
+/* entry ladder */
+.e1{color:var(--green);font-variant-numeric:tabular-nums;font-weight:600}
+.e2{color:#6cc644;font-variant-numeric:tabular-nums;font-size:.78rem}
+.e3{color:var(--orange);font-variant-numeric:tabular-nums;font-size:.78rem}
+
+/* misc */
+.sep{color:var(--border)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+      <polyline points="16 7 22 7 22 13"/>
+    </svg>
+    <h1>Finance<span>Palmirio</span>Bot</h1>
+  </div>
+  <div class="header-right">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('cards')">📊 Live</button>
+      <button class="tab-btn" onclick="switchTab('signals')">📈 Segnali</button>
+      <button class="tab-btn" onclick="switchTab('compact')">☰ Tabella</button>
+    </div>
+    <div class="switcher" id="cur-sw">
+      <button class="active" onclick="setCurrency('native')">Nativa</button>
+      <button onclick="setCurrency('EUR')">EUR</button>
+      <button onclick="setCurrency('USD')">USD</button>
+    </div>
+    <div class="status-info">
+      <div class="dot"></div>
+      <span id="last-upd">—</span>
+      <div class="ring-wrap">
+        <svg class="countdown-ring" viewBox="0 0 20 20">
+          <circle cx="10" cy="10" r="7.5"/>
+          <circle class="prog" id="ring-prog" cx="10" cy="10" r="7.5"/>
+        </svg>
+        <span id="cd-lbl">60s</span>
+      </div>
+      <button class="refresh-btn" onclick="manualRefresh()">↺</button>
+      <button class="help-btn" onclick="openHelp()" title="Guida completa">?</button>
+    </div>
+  </div>
+</header>
+
+<div class="add-wrap">
+  <form class="add-form" id="add-form">
+    <input id="sym-input" type="text" placeholder="Cerca per ticker, ISIN o nome (es. SWDA, IE00…)" autocomplete="off" spellcheck="false"/>
+    <button type="submit" id="add-btn">+ Aggiungi</button>
+  </form>
+  <div class="ac-drop" id="ac-drop"></div>
+</div>
+
+<!-- CARDS -->
+<div id="view-cards" class="view active">
+  <div id="cards-grid" class="cards-grid"></div>
+  <div id="cards-empty" class="empty" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+    <h2>Nessun titolo</h2>
+  </div>
+</div>
+
+<!-- MACRO BAR (always visible) -->
+<div class="macro-bar" id="macro-bar">
+  <span class="macro-lbl">Macro</span>
+  <div class="macro-section" id="macro-items">
+    <span style="color:var(--muted);font-size:.75rem">Caricamento…</span>
+  </div>
+  <div class="macro-sep"></div>
+  <span class="regime-badge regime-unknown" id="regime-badge">Regime —</span>
+  <div class="macro-sep"></div>
+  <div class="scen-group">
+    <span class="scen-lbl">Scenario</span>
+    <button class="scen-btn neutro active"   id="scen-neutro"      onclick="setScenario('neutro')">⚖️ Neutro</button>
+    <button class="scen-btn volatile"        id="scen-volatile"    onclick="setScenario('volatile')">😵 Volatile</button>
+    <button class="scen-btn escalation"      id="scen-escalation"  onclick="setScenario('escalation')">🔥 Escalation</button>
+    <button class="scen-btn tregua"          id="scen-tregua"      onclick="setScenario('tregua')">🕊️ De-escalation</button>
+  </div>
+</div>
+
+<!-- SIGNALS -->
+<div id="view-signals" class="view">
+  <div class="signals-wrap">
+    <div class="sig-header">
+      <h2>📈 Segnali di Trading</h2>
+      <div class="sig-meta">
+        <span id="sig-status">RSI(14) · MACD(12/26/9) · Bollinger(20/2σ) · SMA50 · Pivot Points</span>
+        <button class="refresh-btn" onclick="refreshSignals(true)">↺ Aggiorna</button>
+      </div>
+    </div>
+    <div class="sig-load-bar" id="sig-load-bar"></div>
+    <div style="overflow-x:auto" title="Scorri ← → per vedere tutti i livelli">
+      <table class="signals-table">
+        <thead>
+          <tr>
+            <th class="sortable" data-sort="ticker" onclick="sortBy('ticker')">Ticker <span class="th-sort-icon">⇅</span></th>
+            <th class="sortable" data-sort="name" onclick="sortBy('name')">ETF <span class="th-sort-icon">⇅</span></th>
+            <th class="c sortable" data-sort="driver" onclick="sortBy('driver')">Driver <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="price" onclick="sortBy('price')">Prezzo <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="pct" onclick="sortBy('pct')">Var% <span class="th-sort-icon">⇅</span></th>
+            <th class="c sortable" data-sort="signal" onclick="sortBy('signal')">SEGNALE <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="e1" onclick="sortBy('e1')">E1 30% <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="e2" onclick="sortBy('e2')">E2 30% <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="e3" onclick="sortBy('e3')">E3 40% <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="sell" onclick="sortBy('sell')">VENDI ≥ <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="target" onclick="sortBy('target')">Target <span class="th-sort-icon">⇅</span></th>
+            <th class="c sortable" data-sort="rsi" onclick="sortBy('rsi')">RSI <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="sma" onclick="sortBy('sma')">vs SMA50 <span class="th-sort-icon">⇅</span></th>
+            <th class="c sortable" data-sort="macd" onclick="sortBy('macd')">MACD <span class="th-sort-icon">⇅</span></th>
+          </tr>
+        </thead>
+        <tbody id="sig-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <!-- Legend -->
+  <div class="legend">
+    <span><span class="legend-title">Segnali:</span></span>
+    <span class="legend-item"><span class="sig-badge sig-buy-strong">★ COMPRA</span> ≥3/4 bull</span>
+    <span class="legend-item"><span class="sig-badge sig-buy">↑ ACCUM.</span> 2/4 bull</span>
+    <span class="legend-item"><span class="sig-badge sig-hold">◆ HOLD</span> neutro</span>
+    <span class="legend-item"><span class="sig-badge sig-sell">↓ RIDUCI</span> 2/4 bear</span>
+    <span class="legend-item"><span class="sig-badge sig-sell-strong">✖ VENDI</span> ≥3/4 bear</span>
+    <span class="sep">|</span>
+    <span><span class="legend-title">Livelli:</span> S1=buy S2=stop R1=vendi R2=target (Pivot Points sessione precedente)</span>
+    <span class="sep">|</span>
+    <span><span class="legend-title">RSI:</span> &lt;30 ipervenduto · &gt;70 ipercomprato</span>
+  </div>
+</div>
+
+<!-- COMPACT -->
+<div id="view-compact" class="view">
+  <div class="compact-wrap">
+    <table class="compact-table">
+      <thead>
+        <tr>
+          <th>ETF</th><th>Ticker YF</th>
+          <th class="r">Prezzo</th><th class="r">Apertura</th>
+          <th class="r">Max</th><th class="r">Min</th>
+          <th class="r">Variazione</th><th class="r">Vol.</th>
+          <th class="c">Stato</th>
+        </tr>
+      </thead>
+      <tbody id="compact-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════ HELP MODAL ════════════════════ -->
+<div class="help-overlay hidden" id="help-overlay" onclick="closeHelpIfBg(event)">
+  <div class="help-modal">
+    <div class="help-modal-head">
+      <h2>📖 Guida <span>FinancePalmirioBot</span></h2>
+      <button class="help-close" onclick="closeHelp()">✕ Chiudi</button>
+    </div>
+    <div class="help-body">
+      <!-- ── NAV ── -->
+      <nav class="help-nav" id="help-nav">
+        <a onclick="showSection('overview')" class="active">🏠 Panoramica</a>
+        <a onclick="showSection('macro')">📡 Barra Macro</a>
+        <a onclick="showSection('regime')">🎚️ Regime</a>
+        <a onclick="showSection('scenarios')">🎭 Scenari</a>
+        <div class="nav-sep"></div>
+        <a onclick="showSection('rsi')">📊 RSI(14)</a>
+        <a onclick="showSection('macd')">〰️ MACD</a>
+        <a onclick="showSection('boll')">〽️ Bollinger</a>
+        <a onclick="showSection('sma')">📉 SMA50</a>
+        <a onclick="showSection('pivot')">📍 Pivot Points</a>
+        <div class="nav-sep"></div>
+        <a onclick="showSection('signal')">🎯 Segnale</a>
+        <a onclick="showSection('levels')">🪜 E1/E2/E3</a>
+        <a onclick="showSection('etf')">📋 ETF lista</a>
+        <a onclick="showSection('workflow')">✅ Workflow</a>
+      </nav>
+
+      <!-- ── CONTENT ── -->
+      <div class="help-content">
+
+        <!-- PANORAMICA -->
+        <div class="help-section active" id="sec-overview">
+          <h3>🏠 Panoramica</h3>
+          <p><strong>FinancePalmirioBot</strong> è una dashboard web per monitorare ETF tematici legati ai macro-trend geopolitici (Iran-USA, Russia-Ucraina, ecc.). Aggrega prezzi live da Yahoo Finance, calcola indicatori tecnici su dati storici a 3 mesi, e combina tutto in un <strong>segnale di trading</strong> che si adatta allo scenario geopolitico corrente.</p>
+          <h4>Le tre viste principali</h4>
+          <table class="help-tbl">
+            <tr><th>Tab</th><th>Cosa mostra</th></tr>
+            <tr><td>📊 Live</td><td>Card per ogni ETF con prezzo in tempo reale, variazione giornaliera, range di seduta e mini-segnale</td></tr>
+            <tr><td>📈 Segnali</td><td>Tabella completa con tutti gli indicatori tecnici, livelli di entrata/uscita e segnale composito — <strong>ordinabile cliccando le intestazioni</strong></td></tr>
+            <tr><td>☰ Tabella</td><td>Vista compatta: prezzo, apertura, max/min, volume, stato mercato</td></tr>
+          </table>
+          <h4>Aggiornamento automatico</h4>
+          <p>I <strong>prezzi live</strong> si aggiornano ogni <strong>60 secondi</strong> (il cerchio in alto a destra mostra il conto alla rovescia). Gli <strong>indicatori tecnici</strong> vengono caricati all'apertura della tab Segnali e si possono aggiornare manualmente con <strong>↺ Aggiorna</strong>.</p>
+          <div class="help-callout"><strong>Nota valuta:</strong> Gli ETF su London Stock Exchange vengono quotati in pence (GBp). La dashboard normalizza automaticamente in sterline (GBP) dividendo per 100.</div>
+        </div>
+
+        <!-- MACRO BAR -->
+        <div class="help-section" id="sec-macro">
+          <h3>📡 Barra Macro</h3>
+          <p>Sempre visibile in fondo alla pagina. Mostra in tempo reale quattro benchmark globali per leggere il contesto di mercato.</p>
+          <table class="help-tbl">
+            <tr><th>Simbolo</th><th>Cosa misura</th><th>Perché conta</th></tr>
+            <tr><td>🛢️ Brent</td><td>Prezzo petrolio greggio</td><td>Proxy tensioni geopolitiche. Sale forte se si teme blocco Stretto di Hormuz (Iran) o Ucraina</td></tr>
+            <tr><td>🥇 Gold</td><td>Prezzo oro spot</td><td>Rifugio in fasi risk-off: sale quando c'è paura, scende in risk-on</td></tr>
+            <tr><td>📊 S&P500</td><td>Indice azionario USA</td><td>Termometro del risk appetite globale</td></tr>
+            <tr><td>😰 VIX</td><td>Volatilità implicita S&P500</td><td>"Fear index": sopra 25 il mercato è nervoso e incerto</td></tr>
+          </table>
+          <div class="help-callout">La barra si aggiorna ogni 60 secondi insieme ai prezzi live. Cliccando <strong>↺</strong> in header si forza l'aggiornamento immediato.</div>
+        </div>
+
+        <!-- REGIME -->
+        <div class="help-section" id="sec-regime">
+          <h3>🎚️ Regime di Mercato (auto-rilevato)</h3>
+          <p>Il sistema classifica automaticamente il contesto di mercato ogni minuto combinando i dati di Gold, S&P500 e VIX. Il badge appare nella barra macro.</p>
+          <table class="help-tbl">
+            <tr><th>Badge</th><th>Condizione</th><th>Significato</th></tr>
+            <tr><td><span class="help-pill green">📈 Risk-On</span></td><td>Gold↓ e S&P500 &gt; +0,5%</td><td>Investitori comprano rischio. Favorisce ETF equity, tech, ciclo</td></tr>
+            <tr><td><span class="help-pill red">🛡️ Risk-Off</span></td><td>Gold &gt; +0,5% e S&P500↓</td><td>Fuga verso sicurezza. Favorisce oro, argento, volatilità</td></tr>
+            <tr><td><span class="help-pill orange">😵 Volatile</span></td><td>VIX &gt; 25 oppure |S&P500| &gt; 1,5%</td><td>Alta incertezza, movimenti bruschi in entrambe le direzioni</td></tr>
+          </table>
+          <div class="help-callout"><strong>Differenza chiave:</strong> il regime viene <em>rilevato automaticamente</em> dai dati di mercato. È diverso dallo scenario geopolitico che selezioni manualmente. Entrambi influenzano i segnali ma in modo indipendente.<br><br>Il regime corrente viene confrontato con il "regime ideale" di ogni ETF: se coincidono il segnale riceve un boost di <strong>+0,20</strong>, se sono opposti subisce una penalità di <strong>−0,20</strong>.</div>
+        </div>
+
+        <!-- SCENARI -->
+        <div class="help-section" id="sec-scenarios">
+          <h3>🎭 Scenari Geopolitici (manuali)</h3>
+          <p>Permettono di "colorare" i segnali tecnici con la tua visione macro. Si selezionano manualmente nella barra macro. Cambiare scenario aggiorna istantaneamente tutti i segnali senza ricaricare i dati.</p>
+          <p><strong>Toggle:</strong> clicca uno scenario attivo per tornare a Neutro. La selezione viene salvata automaticamente.</p>
+          <table class="help-tbl">
+            <tr><th>Scenario</th><th>Contesto</th><th>Favorisce</th><th>Penalizza</th></tr>
+            <tr><td>⚖️ Neutro</td><td>Nessun bias geopolitico, segnali puramente tecnici</td><td>—</td><td>—</td></tr>
+            <tr><td>😵 Volatile</td><td>Incertezza elevata, nessuna direzione chiara</td><td>PAURA, ENERGIA (leggero)</td><td>EQUITY, TECH (lieve)</td></tr>
+            <tr><td>🔥 Escalation</td><td>Tensione in aumento, attacchi, rischio blocco Hormuz</td><td>ENERGIA ★, PAURA, METALLI</td><td>EQUITY, TECH, CICLO</td></tr>
+            <tr><td>🕊️ De-escalation</td><td>Trattative, accordi, distensione</td><td>EQUITY, TECH, CICLO, INFRA</td><td>PAURA, ENERGIA, METALLI</td></tr>
+          </table>
+          <h4>Pesi scenari (calibrati Iran-USA)</h4>
+          <div class="help-code">
+Escalation:    ENERGIA +0.50  PAURA +0.45  METALLI +0.25  GEO +0.20<br>
+               FOOD +0.10     INFRA −0.10  CICLO −0.25   EQUITY −0.40  TECH −0.40<br><br>
+De-escalation: EQUITY +0.40  CICLO +0.30  TECH +0.30    INFRA +0.15  GEO +0.15<br>
+               FOOD −0.10    METALLI −0.15 PAURA −0.35  ENERGIA −0.30<br><br>
+Volatile:      ENERGIA +0.20 PAURA +0.15  METALLI +0.10<br>
+               CICLO −0.15   EQUITY −0.15 TECH −0.20
+          </div>
+          <div class="help-callout"><strong>Iran-USA vs Russia-Ucraina:</strong> In questo contesto il driver primario è <strong>ENERGIA</strong> (rischio blocco Stretto di Hormuz → shock petrolifero), non FOOD come nel conflitto ucraino dove il grano era il fattore chiave.</div>
+        </div>
+
+        <!-- RSI -->
+        <div class="help-section" id="sec-rsi">
+          <h3>📊 RSI(14) — Relative Strength Index</h3>
+          <p>Misura la forza del trend recente su <strong>14 giorni</strong>. Va da 0 a 100. Calcolato su dati storici giornalieri degli ultimi 3 mesi.</p>
+          <table class="help-tbl">
+            <tr><th>Valore</th><th>Zona</th><th>Segnale</th></tr>
+            <tr><td><span class="help-pill green">&lt; 30</span></td><td>🟢 Ipervenduto forte</td><td>L'ETF è stato venduto troppo aggressivamente → possibile rimbalzo, zona acquisto</td></tr>
+            <tr><td><span class="help-pill green">30–45</span></td><td>🟢 Debolezza</td><td>Leggero bias bullish, recupero probabile</td></tr>
+            <tr><td><span class="help-pill muted">45–55</span></td><td>⚪ Neutro</td><td>Nessun segnale direzionale chiaro</td></tr>
+            <tr><td><span class="help-pill red">55–70</span></td><td>🔴 Forza</td><td>Leggero bias bearish, attenzione all'ingresso</td></tr>
+            <tr><td><span class="help-pill red">&gt; 70</span></td><td>🔴 Ipercomprato</td><td>L'ETF ha salito troppo velocemente → possibile correzione, zona vendita</td></tr>
+          </table>
+          <div class="help-callout"><strong>Attenzione:</strong> RSI &lt; 30 non significa automaticamente "vendi" — significa che il mercato ha venduto aggressivamente e il prezzo è anomalmente basso. È una <em>zona di opportunità</em>, non un segnale di panico.<br><br>Nella tab Segnali puoi <strong>ordinare per RSI crescente</strong> per trovare rapidamente gli ETF ipervenduti.</div>
+        </div>
+
+        <!-- MACD -->
+        <div class="help-section" id="sec-macd">
+          <h3>〰️ MACD(12/26/9) — Moving Average Convergence/Divergence</h3>
+          <p>Confronta due medie mobili esponenziali per misurare il <strong>momentum</strong> del trend.</p>
+          <table class="help-tbl">
+            <tr><th>Componente</th><th>Formula</th></tr>
+            <tr><td>MACD Line</td><td>EMA(12 giorni) − EMA(26 giorni)</td></tr>
+            <tr><td>Signal Line</td><td>EMA(9 giorni) della MACD Line</td></tr>
+            <tr><td>Istogramma ★</td><td>MACD Line − Signal Line → <em>questo è il valore che conta</em></td></tr>
+          </table>
+          <h4>Interpretazione istogramma</h4>
+          <div class="help-badge-row">
+            <span class="help-pill green">▲ Positivo</span><span style="font-size:.8rem;color:var(--muted)">EMA veloce sopra EMA lenta → momentum al rialzo</span>
+          </div>
+          <div class="help-badge-row">
+            <span class="help-pill red">▼ Negativo</span><span style="font-size:.8rem;color:var(--muted)">EMA veloce sotto EMA lenta → momentum al ribasso</span>
+          </div>
+          <div class="help-callout">Il MACD è un <strong>indicatore lagging</strong>: conferma trend già in atto, non li anticipa. Va usato insieme a RSI e Bollinger per filtrare i falsi segnali.<br><br><strong>Nota:</strong> Alcuni ETF su LSE con poca liquidità possono non avere dati storici sufficienti → il MACD potrebbe non essere disponibile (—).</div>
+        </div>
+
+        <!-- BOLLINGER -->
+        <div class="help-section" id="sec-boll">
+          <h3>〽️ Bollinger Bands (20/2σ)</h3>
+          <p>Tre bande calcolate intorno alla media mobile a 20 giorni. La larghezza delle bande si espande in periodi di alta volatilità e si restringe in periodi tranquilli.</p>
+          <div class="help-code">
+Banda superiore = SMA(20) + 2 × deviazione standard<br>
+Banda centrale  = SMA(20)  ← "mid"<br>
+Banda inferiore = SMA(20) − 2 × deviazione standard
+          </div>
+          <table class="help-tbl">
+            <tr><th>Posizione prezzo</th><th>Segnale</th></tr>
+            <tr><td>Sotto la banda inferiore</td><td><span class="help-pill green">++ Bullish</span> Prezzo anomalmente basso rispetto alla volatilità recente</td></tr>
+            <tr><td>Tra banda inf. e mid</td><td><span class="help-pill green">+ Lievemente bullish</span></td></tr>
+            <tr><td>Intorno alla mid</td><td><span class="help-pill muted">Neutro</span></td></tr>
+            <tr><td>Tra mid e banda sup.</td><td><span class="help-pill red">− Lievemente bearish</span></td></tr>
+            <tr><td>Sopra la banda superiore</td><td><span class="help-pill red">−− Bearish</span> Prezzo anomalmente alto, probabile ritorno verso la media</td></tr>
+          </table>
+        </div>
+
+        <!-- SMA50 -->
+        <div class="help-section" id="sec-sma">
+          <h3>📉 SMA50 — Media Mobile Semplice 50 giorni</h3>
+          <p>La media dei prezzi di chiusura degli ultimi <strong>50 giorni di trading</strong>. Rappresenta il "giusto prezzo" di medio termine e definisce la direzione del trend.</p>
+          <table class="help-tbl">
+            <tr><th>Colonna "vs SMA50"</th><th>Significato</th></tr>
+            <tr><td><span class="help-pill green">+X.XX%</span></td><td>Prezzo sopra la media → trend rialzista di medio termine</td></tr>
+            <tr><td><span class="help-pill red">−X.XX%</span></td><td>Prezzo sotto la media → trend ribassista di medio termine</td></tr>
+          </table>
+          <div class="help-callout"><strong>Esempio:</strong> vs SMA50 = <span class="help-pill green">+3,2%</span> significa che il prezzo corrente è 3,2% sopra la sua media degli ultimi 50 giorni. Sopra la SMA50 il mercato è in <em>uptrend</em> strutturale.</div>
+        </div>
+
+        <!-- PIVOT -->
+        <div class="help-section" id="sec-pivot">
+          <h3>📍 Pivot Points</h3>
+          <p>Livelli di supporto e resistenza calcolati automaticamente dai dati della <strong>sessione precedente</strong> (High, Low, Close). Aggiornati ogni giorno con i dati del giorno prima.</p>
+          <div class="help-code">
+PP = (High + Low + Close) / 3      ← Pivot centrale<br>
+R1 = 2 × PP − Low                  ← Resistenza 1 (primo ostacolo al rialzo)<br>
+R2 = PP + (High − Low)             ← Resistenza 2 (target di prezzo)<br>
+S1 = 2 × PP − High                 ← Supporto 1   (primo livello di acquisto)<br>
+S2 = PP − (High − Low)             ← Supporto 2   (supporto più profondo)
+          </div>
+          <table class="help-tbl">
+            <tr><th>Livello</th><th>Uso pratico</th></tr>
+            <tr><td>S1</td><td>Primo ingresso (E1) — il prezzo tende a rimbalzare qui</td></tr>
+            <tr><td>S2</td><td>Supporto forte (E3) — zona di acquisto aggressivo</td></tr>
+            <tr><td>R1 (VENDI ≥)</td><td>Prima resistenza — zona di vendita parziale / take profit</td></tr>
+            <tr><td>R2 (Target)</td><td>Obiettivo di prezzo realistico a breve termine</td></tr>
+          </table>
+          <div class="help-callout"><strong>Nota weekend:</strong> La domenica e il lunedì mattina i Pivot Points riflettono i dati di venerdì, che è il dato più recente disponibile. È normale e corretto.</div>
+        </div>
+
+        <!-- SEGNALE -->
+        <div class="help-section" id="sec-signal">
+          <h3>🎯 Segnale Composito</h3>
+          <p>Il sistema combina tutti gli indicatori in un <strong>punteggio unico</strong> e lo traduce in un badge colorato. Passando il mouse sul badge vedi lo score esatto (es. "Score 0.82").</p>
+          <h4>Formula di calcolo</h4>
+          <div class="help-code">
+Score finale = Score tecnico + Aggiustamento scenario + Aggiustamento regime<br><br>
+Score tecnico     = media dei voti RSI + MACD + Bollinger + SMA50 + Pivot<br>
+                    (ogni indicatore vota da −2 a +2)<br>
+Agg. scenario     = dal driver dell'ETF × i pesi dello scenario attivo<br>
+Agg. regime       = +0,20 se regime corrente = regime ideale ETF<br>
+                    −0,20 se regime corrente è opposto al regime ideale
+          </div>
+          <h4>Tabella segnali</h4>
+          <table class="help-tbl">
+            <tr><th>Badge</th><th>Score</th><th>Significato</th></tr>
+            <tr><td><span class="sig-badge sig-buy-strong">★ COMPRA</span></td><td>≥ +0,70</td><td>Forte segnale rialzista: 3+ indicatori bullish allineati</td></tr>
+            <tr><td><span class="sig-badge sig-buy">↑ ACCUM.</span></td><td>≥ +0,25</td><td>Accumulo progressivo consigliato, trend favorevole</td></tr>
+            <tr><td><span class="sig-badge sig-hold">◆ HOLD</span></td><td>−0,25 / +0,25</td><td>Nessuna direzione chiara, mantieni posizione</td></tr>
+            <tr><td><span class="sig-badge sig-sell">↓ RIDUCI</span></td><td>≤ −0,25</td><td>Segnale ribassista, considera riduzione dell'esposizione</td></tr>
+            <tr><td><span class="sig-badge sig-sell-strong">✖ VENDI</span></td><td>≤ −0,70</td><td>Forte segnale ribassista: 3+ indicatori bearish, uscita consigliata</td></tr>
+          </table>
+          <h4>Ordinamento colonne</h4>
+          <p>Cliccando l'intestazione <strong>SEGNALE</strong> nella tabella ordini tutti gli ETF per score decrescente (i migliori in cima). Funziona per tutte le 14 colonne: 1° click crescente, 2° click decrescente, 3° click torna crescente.</p>
+        </div>
+
+        <!-- LIVELLI E1/E2/E3 -->
+        <div class="help-section" id="sec-levels">
+          <h3>🪜 Ladder di Entrata E1 / E2 / E3</h3>
+          <p>Strategia di acquisto <strong>scaglionato</strong> (ladder entry) per ridurre il rischio di timing sbagliato. Invece di comprare tutto in un colpo solo, distribuisci gli acquisti su tre livelli di supporto.</p>
+          <table class="help-tbl">
+            <tr><th>Livello</th><th>Prezzo</th><th>Peso</th><th>Logica</th></tr>
+            <tr><td><span class="help-pill green">E1 🟢</span></td><td>S1 (Supporto 1)</td><td>30% del capitale</td><td>Primo ingresso se il prezzo tocca il primo supporto</td></tr>
+            <tr><td><span class="help-pill orange">E2 🟡</span></td><td>Midpoint S1–S2</td><td>30% del capitale</td><td>Ingresso intermedio se scende ancora</td></tr>
+            <tr><td><span class="help-pill red">E3 🟠</span></td><td>S2 (Supporto 2)</td><td>40% del capitale</td><td>Ingresso finale al supporto più profondo — peso maggiore perché il prezzo è più conveniente</td></tr>
+          </table>
+          <h4>Esempio pratico con €1.000 su SWDA</h4>
+          <div class="help-code">
+E1 = 93,40 → compri €300 quando il prezzo scende a 93,40<br>
+E2 = 92,10 → compri €300 se scende ancora a 92,10<br>
+E3 = 90,80 → compri €400 al supporto massimo<br><br>
+Prezzo medio = (300×93,40 + 300×92,10 + 400×90,80) / 1000 = 91,94<br>
+Se non usavi la ladder e compravi tutto a 95 → avresti pagato 3% in più
+          </div>
+          <h4>Livelli di uscita</h4>
+          <table class="help-tbl">
+            <tr><th>Colonna</th><th>Livello</th><th>Uso</th></tr>
+            <tr><td>VENDI ≥</td><td>R1 (Resistenza 1)</td><td>Zona di take profit parziale o uscita prudente</td></tr>
+            <tr><td>Target</td><td>R2 (Resistenza 2)</td><td>Obiettivo di prezzo massimo realistico a breve</td></tr>
+          </table>
+          <div class="help-callout"><strong>Strategia completa:</strong> compra in 3 tranche (E1→E2→E3) quando il segnale è ★ COMPRA o ↑ ACCUM., poi vendi al raggiungimento di R1 o R2 in base alla tua tolleranza al rischio.</div>
+        </div>
+
+        <!-- ETF LISTA -->
+        <div class="help-section" id="sec-etf">
+          <h3>📋 ETF in Watchlist</h3>
+          <p>19 ETF tematici selezionati per la loro sensibilità ai macro-trend geopolitici. Ogni ETF ha un <strong>driver</strong> (la tematica che guida il prezzo) e un <strong>regime ideale</strong> (contesto di mercato in cui performa meglio).</p>
+          <table class="help-tbl">
+            <tr><th>Driver</th><th>Tema</th><th>ETF</th></tr>
+            <tr><td>😰 PAURA</td><td>Safe haven, oro</td><td>SGLE (oro EUR-hedged)</td></tr>
+            <tr><td>🥈 METALLI</td><td>Metalli preziosi/industriali</td><td>PHAG (argento)</td></tr>
+            <tr><td>🏭 CICLO</td><td>Industriali ciclici, materie prime</td><td>COPA (rame), GDIG (mining), REMX (terre rare), BATT (batterie), COPM (copper miners)</td></tr>
+            <tr><td>⚡ ENERGIA</td><td>Nucleare, rinnovabili</td><td>NUCL (nucleare), RENW (clean energy)</td></tr>
+            <tr><td>💻 TECH</td><td>Tecnologia, semiconduttori</td><td>QNTM (quantum computing), SEME (semiconduttori)</td></tr>
+            <tr><td>📈 EQUITY</td><td>Azionario globale/qualità</td><td>SWDA (MSCI World), EXUS (World ex USA), XMME (Emerging Markets), IWQU (Quality Factor)</td></tr>
+            <tr><td>🏗️ INFRA</td><td>Infrastrutture</td><td>GLUG (acqua), GRIDG (smart grid)</td></tr>
+            <tr><td>🌍 GEO</td><td>Geopolitico diretto</td><td>UKRN (ricostruzione Ucraina)</td></tr>
+            <tr><td>🌾 FOOD</td><td>Agricoltura/grano</td><td>WEAT (grano)</td></tr>
+          </table>
+          <div class="help-callout"><strong>Nota UKRN:</strong> L'Ukraine Reconstruction ETF ha bassissima liquidità e pochi scambi giornalieri. I dati tecnici (MACD, Bollinger) sono spesso assenti o non affidabili. Interpretare con cautela.</div>
+        </div>
+
+        <!-- WORKFLOW -->
+        <div class="help-section" id="sec-workflow">
+          <h3>✅ Workflow Quotidiano</h3>
+          <p>Come usare la dashboard in modo efficace in pochi minuti ogni giorno:</p>
+          <div class="help-step">
+            <div class="help-step-num">1</div>
+            <p><strong>Guarda la Barra Macro</strong> — qual è il regime? <span class="help-pill green">Risk-On</span> <span class="help-pill red">Risk-Off</span> <span class="help-pill orange">Volatile</span>? Questo ti dice subito il contesto di mercato.</p>
+          </div>
+          <div class="help-step">
+            <div class="help-step-num">2</div>
+            <p><strong>Imposta lo Scenario</strong> — come leggi il contesto geopolitico oggi? Se ci sono notizie di escalation Iran-USA attiva 🔥. Se sembra calmarsi attiva 🕊️. Se incerto, usa ⚖️ Neutro o 😵 Volatile.</p>
+          </div>
+          <div class="help-step">
+            <div class="help-step-num">3</div>
+            <p><strong>Apri la tab Segnali</strong> → clicca l'intestazione <strong>SEGNALE</strong> per ordinare decrescente. I migliori ETF per il contesto corrente salgono in cima.</p>
+          </div>
+          <div class="help-step">
+            <div class="help-step-num">4</div>
+            <p><strong>Filtra per RSI</strong> — tra i migliori, cerca quelli con RSI sotto 45. RSI basso + segnale positivo = migliore combinazione rischio/rendimento.</p>
+          </div>
+          <div class="help-step">
+            <div class="help-step-num">5</div>
+            <p><strong>Pianifica gli ingressi</strong> con E1/E2/E3. Non comprare tutto subito: usa 30% a E1, 30% a E2, 40% a E3 se il prezzo scende ulteriormente.</p>
+          </div>
+          <div class="help-step">
+            <div class="help-step-num">6</div>
+            <p><strong>Imposta i livelli di uscita</strong>: usa la colonna VENDI ≥ (R1) per il take profit parziale e Target (R2) per l'obiettivo massimo.</p>
+          </div>
+          <div class="help-callout" style="margin-top:16px">
+            <strong>Esempio Escalation Iran-USA:</strong><br>
+            Notizie di attacchi → attiva 🔥 Escalation → NUCL, RENW, SGLE ricevono boost → ordina per Segnale → controlla RSI → pianifica ingresso con E1/E2/E3.<br><br>
+            <strong>Esempio De-escalation:</strong><br>
+            Accordo diplomatico → attiva 🕊️ De-escalation → SWDA, EXUS, QNTM salgono in classifica → SGLE/PHAG scendono → ribilancia di conseguenza.
+          </div>
+          <h4>⚠️ Avvertenze</h4>
+          <p>I dati vengono da <strong>Yahoo Finance</strong> tramite proxy pubblico — possibili ritardi fino a 15 minuti e occasionali dati mancanti. I segnali sono <strong>puramente indicativi</strong> e non costituiscono consulenza finanziaria. Verifica sempre i dati prima di operare.</p>
+        </div>
+
+      </div><!-- /help-content -->
+    </div><!-- /help-body -->
+  </div><!-- /help-modal -->
+</div><!-- /help-overlay -->
+
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════════════════ */
+const PROXY    = 'https://corsproxy.io/?';
+const YF_CHART = 'https://query1.finance.yahoo.com/v8/finance/chart/';
+const YF_SRCH  = 'https://query2.finance.yahoo.com/v1/finance/search?quotesCount=8&newsCount=0&q=';
+const REFRESH  = 60;
+
+/* ═══════════════════════════════════════════════════════════
+   WATCHLIST  (19 ETF pre-caricati)
+═══════════════════════════════════════════════════════════ */
+// driver: macro engine  |  regime: contesto favorevole  |  yf2: ticker fallback
+const WATCHLIST = [
+  { id:'EXUS',  name:'Xtrackers MSCI World ex USA',        yf:'EXUS.L',  yf2:'EXUS.DE',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
+  { id:'XMME',  name:'Xtrackers MSCI Emerging Markets',    yf:'XMME.L',  yf2:'XMME.DE',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
+  { id:'WEAT',  name:'WisdomTree Wheat',                   yf:'WEAT.L',  yf2:'WEAT.L',    driver:'FOOD',    dEmoji:'🌾', regime:'conflict' },
+  { id:'PHAG',  name:'WisdomTree Physical Silver',         yf:'PHAG.L',  yf2:'PHAG.L',    driver:'METALLI', dEmoji:'🥈', regime:'risk-off' },
+  { id:'COPA',  name:'WisdomTree Copper',                  yf:'COPA.L',  yf2:'COPA.L',    driver:'CICLO',   dEmoji:'🏭', regime:'risk-on'  },
+  { id:'NUCL',  name:'VanEck Uranium & Nuclear',           yf:'NUCL.L',  yf2:'NUCL.L',    driver:'ENERGIA', dEmoji:'⚡', regime:'neutro'   },
+  { id:'GDIG',  name:'VanEck S&P Global Mining',           yf:'GDIG.L',  yf2:'GDIG.L',    driver:'CICLO',   dEmoji:'🏭', regime:'risk-on'  },
+  { id:'REMX',  name:'VanEck Rare Earth & Metals',         yf:'REMX.MI', yf2:'REMX.L',    driver:'CICLO',   dEmoji:'🏭', regime:'risk-on'  },
+  { id:'QNTM',  name:'VanEck Quantum Computing',           yf:'QNTM.L',  yf2:'QNTM.L',    driver:'TECH',    dEmoji:'💻', regime:'risk-on'  },
+  { id:'GLUG',  name:'L&G Clean Water',                    yf:'GLUG.L',  yf2:'GLUG.L',    driver:'INFRA',   dEmoji:'🏗️', regime:'neutro'   },
+  { id:'RENW',  name:'L&G Clean Energy',                   yf:'RENW.L',  yf2:'RENW.L',    driver:'ENERGIA', dEmoji:'⚡', regime:'risk-on'  },
+  { id:'BATT',  name:'L&G Battery Value-Chain',            yf:'BATT.L',  yf2:'BATT.L',    driver:'CICLO',   dEmoji:'🏭', regime:'risk-on'  },
+  { id:'SEME',  name:'iShares MSCI Global Semiconductors', yf:'SEME.MI', yf2:'SEME.L',    driver:'TECH',    dEmoji:'💻', regime:'risk-on'  },
+  { id:'IWQU',  name:'iShares MSCI World Quality Factor',  yf:'IWQU.L',  yf2:'IWQU.DE',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
+  { id:'SWDA',  name:'iShares Core MSCI World',            yf:'SWDA.L',  yf2:'SWDA.DE',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
+  { id:'COPM',  name:'iShares Copper Miners',              yf:'COPM.L',  yf2:'COPM.MI',   driver:'CICLO',   dEmoji:'🏭', regime:'risk-on'  },
+  { id:'SGLE',  name:'Invesco Gold ETC EUR Hedged',        yf:'SGLE.MI', yf2:'SGLE.MI',   driver:'PAURA',   dEmoji:'😰', regime:'risk-off' },
+  { id:'UKRN',  name:'Ukraine Reconstruction',             yf:'UKRN.L',  yf2:'UKRN.L',    driver:'GEO',     dEmoji:'🌍', regime:'neutro'   },
+  { id:'GRIDG', name:'First Trust Smart Grid Infra',       yf:'GRIDG.L', yf2:'GRID.L',    driver:'INFRA',   dEmoji:'🏗️', regime:'neutro'   },
+];
+
+/* Extra simboli aggiunti dall'utente (localStorage) */
+let extraItems = JSON.parse(localStorage.getItem('fpb_extra') || '[]');
+
+function allItems() { return [...WATCHLIST, ...extraItems]; }
+
+/* ═══════════════════════════════════════════════════════════
+   MACRO BENCHMARK TICKERS
+═══════════════════════════════════════════════════════════ */
+const MACRO_TICKERS = [
+  { id:'brent', yf:'BZ=F',  label:'Brent',  emoji:'🛢️' },
+  { id:'gold',  yf:'GC=F',  label:'Gold',   emoji:'🥇' },
+  { id:'spy',   yf:'^GSPC', label:'S&P500', emoji:'📊' },
+  { id:'vix',   yf:'^VIX',  label:'VIX',    emoji:'😰' },
+];
+
+/* ═══════════════════════════════════════════════════════════
+   SCENARIO WEIGHTS  driver → score adjustment per scenario
+   Range: -0.5 (bearish) to +0.5 (bullish)
+═══════════════════════════════════════════════════════════ */
+// Calibrato sul contesto Iran-USA: il driver chiave è ENERGIA (Stretto di Hormuz)
+const SCENARIO_WEIGHTS = {
+  // Attacco militare, chiusura Hormuz, escalation Iran-USA
+  escalation: { PAURA:+0.45, METALLI:+0.25, FOOD:+0.10, ENERGIA:+0.50,
+                GEO:+0.20,   CICLO:-0.25,   EQUITY:-0.40, TECH:-0.40, INFRA:-0.10 },
+  // Diplomazia, accordo nucleare, de-tensione
+  tregua:     { PAURA:-0.35, METALLI:-0.15, FOOD:-0.10,  ENERGIA:-0.30,
+                GEO:+0.15,   CICLO:+0.30,   EQUITY:+0.40, TECH:+0.30, INFRA:+0.15 },
+  // Tensione latente, notizie contraddittorie, mercato nervoso
+  volatile:   { PAURA:+0.15, METALLI:+0.10, FOOD:+0.05,  ENERGIA:+0.20,
+                GEO:+0.05,   CICLO:-0.15,   EQUITY:-0.15, TECH:-0.20, INFRA:0 },
+  // Nessun aggiustamento: segnale puramente tecnico
+  neutro:     { PAURA:0, METALLI:0, FOOD:0, ENERGIA:0,
+                GEO:0,   CICLO:0,   EQUITY:0,  TECH:0,  INFRA:0 },
+};
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════ */
+let quotes     = {};   // id → quote obj
+let signalCache= {};   // id → { pv, rsiV, macdH, bb, sma50 }  (raw, no sig)
+let macroData  = {};   // macro id → { price, pct, label, emoji }
+let macroRegime= null; // 'risk-on' | 'risk-off' | 'volatile' | null
+let scenario   = (['escalation','tregua','neutro','volatile'].includes(localStorage.getItem('fpb_scenario'))
+                   ? localStorage.getItem('fpb_scenario') : 'neutro');
+let fxRates    = { USD:1.0 };
+let targetCcy  = 'native';
+let currentTab = 'cards';
+let countdown  = REFRESH;
+let cdTimer    = null;
+let sigFetching= false;
+let sigLoaded  = false;
+let sortCol    = null;   // active sort column key
+let sortDir    = 1;      // 1 = asc, -1 = desc
+
+/* ═══════════════════════════════════════════════════════════
+   TECHNICAL INDICATORS
+═══════════════════════════════════════════════════════════ */
+
+function calcRSI(closes, period=14) {
+  if (closes.length < period+1) return null;
+  let gains=0, losses=0;
+  for (let i=1; i<=period; i++) {
+    const d = closes[i] - closes[i-1];
+    if (d>0) gains+=d; else losses-=d;
+  }
+  let avgG = gains/period, avgL = losses/period;
+  for (let i=period+1; i<closes.length; i++) {
+    const d = closes[i]-closes[i-1];
+    avgG = (avgG*(period-1) + Math.max(d,0)) / period;
+    avgL = (avgL*(period-1) + Math.max(-d,0)) / period;
+  }
+  if (avgL===0) return 100;
+  return 100 - 100/(1 + avgG/avgL);
+}
+
+function calcEMA(arr, span) {
+  const k = 2/(span+1);
+  return arr.reduce((acc, v, i) => {
+    if (i===0) return [v];
+    acc.push(v*k + acc[acc.length-1]*(1-k));
+    return acc;
+  }, []);
+}
+
+function calcMACD(closes) {
+  if (closes.length < 35) return null;
+  const ema12 = calcEMA(closes, 12);
+  const ema26 = calcEMA(closes, 26);
+  const macdLine = ema12.map((v,i)=>v-ema26[i]);
+  const signal   = calcEMA(macdLine.slice(25), 9);
+  return macdLine[macdLine.length-1] - signal[signal.length-1];
+}
+
+function calcSMA(closes, period) {
+  if (closes.length < period) return null;
+  return closes.slice(-period).reduce((a,b)=>a+b,0)/period;
+}
+
+function calcBollinger(closes, period=20) {
+  if (closes.length < period) return null;
+  const slice = closes.slice(-period);
+  const mid   = slice.reduce((a,b)=>a+b,0)/period;
+  const std   = Math.sqrt(slice.reduce((a,b)=>a+(b-mid)**2,0)/period);
+  return { upper: mid+2*std, mid, lower: mid-2*std };
+}
+
+function pivotPoints(H, L, C) {
+  const PP = (H+L+C)/3;
+  return { PP, R1:2*PP-L, R2:PP+(H-L), R3:H+2*(PP-L), S1:2*PP-H, S2:PP-(H-L), S3:L-2*(H-PP) };
+}
+
+/* driver regime: how much boost/penalty based on macro regime vs ETF's ideal regime */
+function calcRegimeBoost(itemRegime) {
+  if (!macroRegime || !itemRegime) return 0;
+  const aligns = {
+    'risk-on':  { 'risk-on': +0.20, 'risk-off': -0.20, 'neutro': 0, 'conflict': -0.10 },
+    'risk-off': { 'risk-off':+0.20, 'risk-on':  -0.20, 'neutro': 0, 'conflict': +0.10 },
+    'volatile': { 'neutro':  +0.05, 'risk-off': +0.10, 'risk-on':-0.10, 'conflict': +0.05 },
+  };
+  return aligns[macroRegime]?.[itemRegime] ?? 0;
+}
+
+function compositeSignal(rsiV, macdH, price, bb, sma50, PP, driver, itemRegime) {
+  const votes = [];
+  if (rsiV!==null) {
+    if      (rsiV<30)  votes.push(2);
+    else if (rsiV<45)  votes.push(1);
+    else if (rsiV>70)  votes.push(-2);
+    else if (rsiV>55)  votes.push(-1);
+    else                votes.push(0);
+  }
+  if (macdH!==null) votes.push(macdH>0?1:-1);
+  if (bb!==null) {
+    if      (price<=bb.lower) votes.push(2);
+    else if (price>=bb.upper) votes.push(-2);
+    else if (price<bb.mid)    votes.push(1);
+    else                       votes.push(-1);
+  }
+  if (sma50!==null) votes.push(price>sma50?1:-1);
+  if (PP!==null)    votes.push(price<PP?1:-1);
+
+  if (!votes.length) return null;
+  const techScore  = votes.reduce((a,b)=>a+b,0) / votes.length;
+  const scenAdj    = (SCENARIO_WEIGHTS[scenario]?.[driver]) ?? 0;
+  const regimeAdj  = calcRegimeBoost(itemRegime);
+  const finalScore = techScore + scenAdj + regimeAdj;
+
+  if (finalScore>=0.7)  return { label:'★ COMPRA', cls:'sig-buy-strong', score:finalScore };
+  if (finalScore>=0.25) return { label:'↑ ACCUM.', cls:'sig-buy',        score:finalScore };
+  if (finalScore<=-0.7) return { label:'✖ VENDI',  cls:'sig-sell-strong',score:finalScore };
+  if (finalScore<=-0.25)return { label:'↓ RIDUCI', cls:'sig-sell',       score:finalScore };
+  return { label:'◆ HOLD', cls:'sig-hold', score:finalScore };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DATA FETCHING
+═══════════════════════════════════════════════════════════ */
+
+async function fetchChart(ticker, range='1d', interval='1m') {
+  const url = `${YF_CHART}${encodeURIComponent(ticker)}?interval=${interval}&range=${range}`;
+  const r   = await fetch(PROXY + url);
+  const j   = await r.json();
+  return j?.chart?.result?.[0] ?? null;
+}
+
+function marketState(result) {
+  if (!result?.meta) return 'CLOSED';
+  const now = Math.floor(Date.now()/1000);
+  const tp  = result.meta.currentTradingPeriod;
+  if (!tp) return 'CLOSED';
+  if (tp.regular && now>=tp.regular.start && now<=tp.regular.end) return 'REGULAR';
+  if (tp.pre     && now>=tp.pre.start     && now<=tp.pre.end)     return 'PRE';
+  if (tp.post    && now>=tp.post.start    && now<=tp.post.end)    return 'POST';
+  return 'CLOSED';
+}
+
+/* GBp (pence) → GBP normaliser: Yahoo Finance returns some LSE ETFs in pence */
+function normalise(value, currency) {
+  return currency === 'GBp' ? value * 0.01 : value;
+}
+function displayCcy(currency) {
+  return currency === 'GBp' ? 'GBP' : (currency || '—');
+}
+
+async function fetchLive(item) {
+  try {
+    const res  = await fetchChart(item.yf, '1d', '1m');
+    if (!res) return null;
+    const m    = res.meta;
+    const ccy  = m.currency || '—';
+    const sc   = (v) => v != null ? normalise(v, ccy) : null;
+    const price= sc(m.regularMarketPrice);
+    const prev = sc(m.previousClose ?? m.chartPreviousClose);
+    const chg  = price!=null && prev!=null ? price-prev : null;
+    const pct  = prev ? chg/prev : null;
+    return {
+      id: item.id, yf: item.yf, name: item.name,
+      price, prev, change:chg, pct,
+      currency: displayCcy(ccy), mktState: marketState(res),
+      high: sc(m.regularMarketDayHigh), low: sc(m.regularMarketDayLow),
+      open: sc(m.regularMarketOpen),
+      vol: m.regularMarketVolume,
+      w52h: sc(m.fiftyTwoWeekHigh), w52l: sc(m.fiftyTwoWeekLow),
+    };
+  } catch { return null; }
+}
+
+async function fetchHistoricalRaw(ticker, range) {
+  try {
+    const res = await fetchChart(ticker, range, '1d');
+    if (!res) return null;
+    const ccy    = res.meta?.currency || '—';
+    const q      = res.indicators?.quote?.[0];
+    const closes = (q?.close||[]).filter(v=>v!=null).map(v=>normalise(v,ccy));
+    const highs  = (q?.high||[]).map(v=>v!=null?normalise(v,ccy):null);
+    const lows   = (q?.low||[]).map(v=>v!=null?normalise(v,ccy):null);
+    if (closes.length < 10) return null;
+    return { closes, highs, lows };
+  } catch { return null; }
+}
+
+async function fetchHistorical(item) {
+  // Try primary ticker then fallback, each with 3mo → 6mo → 1mo
+  const tickers = [...new Set([item.yf, item.yf2].filter(Boolean))];
+  const ranges  = ['3mo', '6mo', '1mo'];
+  let raw = null;
+  outer: for (const ticker of tickers) {
+    for (const range of ranges) {
+      raw = await fetchHistoricalRaw(ticker, range);
+      if (raw) break outer;
+    }
+  }
+  if (!raw) return null;
+
+  const { closes, highs, lows } = raw;
+  const price  = closes[closes.length-1];
+  const prevH  = highs[highs.length-2];
+  const prevL  = lows[lows.length-2];
+  const prevC  = closes[closes.length-2];
+
+  let pv = null;
+  if (prevH && prevL && prevC) pv = pivotPoints(prevH, prevL, prevC);
+
+  const rsiV  = calcRSI(closes);
+  const macdH = calcMACD(closes);
+  const bb    = calcBollinger(closes);
+  const sma50 = calcSMA(closes, 50);
+  // Note: sig is NOT stored here — recalculated live in renderSignalsTable
+  // so scenario changes update signals instantly
+  return { pv, rsiV, macdH, bb, sma50 };
+}
+
+async function fetchFX() {
+  const pairs = ['EURUSD=X','GBPUSD=X'];
+  await Promise.all(pairs.map(async p => {
+    try {
+      const res = await fetchChart(p,'1d','1m');
+      if (res?.meta?.regularMarketPrice) {
+        fxRates[p.replace('USD=X','')] = res.meta.regularMarketPrice;
+      }
+    } catch {}
+  }));
+}
+
+async function fetchMacro() {
+  await Promise.all(MACRO_TICKERS.map(async m => {
+    try {
+      const res = await fetchChart(m.yf,'1d','1m');
+      if (!res?.meta) return;
+      const price = res.meta.regularMarketPrice;
+      const prev  = res.meta.previousClose ?? res.meta.chartPreviousClose;
+      const pct   = prev ? (price-prev)/prev : null;
+      macroData[m.id] = { price, pct, label:m.label, emoji:m.emoji };
+    } catch {}
+  }));
+  // Detect regime from macro data
+  const goldPct = macroData.gold?.pct  ?? 0;
+  const spyPct  = macroData.spy?.pct   ?? 0;
+  const vix     = macroData.vix?.price ?? 20;
+  if (vix > 25 || Math.abs(spyPct)*100 > 1.5) macroRegime = 'volatile';
+  else if (goldPct > 0.005 && spyPct < 0)      macroRegime = 'risk-off';
+  else if (goldPct < 0 && spyPct > 0.005)      macroRegime = 'risk-on';
+  else                                           macroRegime = 'volatile';
+  renderMacroBar();
+}
+
+/* ─── renderMacroBar ─────────────────────────────────────── */
+function renderMacroBar() {
+  const container = document.getElementById('macro-items');
+  if (!container) return;
+  container.innerHTML = MACRO_TICKERS.map(m => {
+    const d = macroData[m.id];
+    if (!d) return `<span class="macro-item"><span class="mi-label">${m.emoji} ${m.label}</span> <span class="mi-price mi-pct" style="color:var(--muted)">…</span></span>`;
+    const pctStr = d.pct != null
+      ? ` <span class="mi-pct ${d.pct>=0?'up':'down'}">${d.pct>=0?'+':''}${(d.pct*100).toFixed(2)}%</span>`
+      : '';
+    const priceStr = m.id==='vix'
+      ? d.price.toFixed(2)
+      : d.price.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+    return `<span class="macro-item"><span class="mi-label">${m.emoji} ${m.label}</span> <span class="mi-price">${priceStr}</span>${pctStr}</span>`;
+  }).join('');
+  const badge = document.getElementById('regime-badge');
+  if (badge) {
+    const MAP = {
+      'risk-on':  ['regime-risk-on',  '📈 Risk-On'],
+      'risk-off': ['regime-risk-off', '🛡️ Risk-Off'],
+      'volatile': ['regime-volatile', '😵 Volatile'],
+    };
+    const [cls, label] = MAP[macroRegime] || ['regime-unknown','Regime —'];
+    badge.className = `regime-badge ${cls}`;
+    badge.textContent = label;
+  }
+}
+
+/* ─── setScenario ────────────────────────────────────────── */
+function setScenario(s) {
+  // Toggle: cliccando lo scenario attivo si torna a Neutro
+  scenario = (scenario === s && s !== 'neutro') ? 'neutro' : s;
+  localStorage.setItem('fpb_scenario', scenario);
+  document.querySelectorAll('.scen-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById(`scen-${scenario}`);
+  if (btn) btn.classList.add('active');
+  if (sigLoaded) renderSignalsTable();
+}
+
+/* ─── sortBy / getSortVal ────────────────────────────────── */
+function sortBy(col) {
+  if (sortCol === col) sortDir = -sortDir;
+  else { sortCol = col; sortDir = 1; }
+  renderSignalsTable();
+}
+
+function getSortVal(item, col) {
+  const q = quotes[item.id];
+  const s = signalCache[item.id];
+  switch (col) {
+    case 'ticker':  return item.id || '';
+    case 'name':    return item.name || '';
+    case 'driver':  return item.driver || '';
+    case 'price':   return q?.price   ?? -Infinity;
+    case 'pct':     return q?.pct     ?? -Infinity;
+    case 'signal': {
+      if (!s) return -Infinity;
+      const live = compositeSignal(s.rsiV, s.macdH, q?.price??0, s.bb, s.sma50,
+        s.pv?.PP, item.driver, item.regime);
+      return live?.score ?? -Infinity;
+    }
+    case 'e1':     return s?.pv?.S1              ?? -Infinity;
+    case 'e2':     return s?.pv ? (s.pv.S1+s.pv.S2)/2 : -Infinity;
+    case 'e3':     return s?.pv?.S2              ?? -Infinity;
+    case 'sell':   return s?.pv?.R1              ?? -Infinity;
+    case 'target': return s?.pv?.R2              ?? -Infinity;
+    case 'rsi':    return s?.rsiV                ?? -Infinity;
+    case 'sma': {
+      const p = q?.price, sma = s?.sma50;
+      return (p != null && sma != null) ? (p/sma - 1) : -Infinity;
+    }
+    case 'macd':   return s?.macdH               ?? -Infinity;
+    default: return '';
+  }
+}
+
+async function refreshAll() {
+  await Promise.all([fetchFX(), fetchMacro()]);
+  const results = await Promise.all(allItems().map(fetchLive));
+  results.forEach(q => { if (q) quotes[q.id] = q; });
+  document.getElementById('last-upd').textContent =
+    'Agg. ' + new Date().toLocaleTimeString('it-IT');
+  render();
+}
+
+async function refreshSignals(force=false) {
+  if (sigFetching) return;
+  if (sigLoaded && !force) return;
+  sigFetching = true;
+  const bar = document.getElementById('sig-load-bar');
+  bar.classList.add('active');
+  document.getElementById('sig-status').textContent = 'Recupero dati storici (3 mesi)…';
+  renderSignalsTable(); // show spinners
+
+  const items = allItems();
+  let done = 0;
+  await Promise.all(items.map(async item => {
+    const h = await fetchHistorical(item);
+    // Always write to cache — even if null — so the row exits loading state
+    signalCache[item.id] = h || { pv:null, rsiV:null, macdH:null, bb:null, sma50:null };
+    done++;
+    document.getElementById('sig-status').textContent =
+      `Caricamento ${done}/${items.length}…`;
+    renderSignalsTable();
+  }));
+
+  sigLoaded  = true;
+  sigFetching= false;
+  bar.classList.remove('active');
+  document.getElementById('sig-status').textContent =
+    `RSI(14) · MACD(12/26/9) · Bollinger(20/2σ) · SMA50 · Pivot Points — ${new Date().toLocaleTimeString('it-IT')}`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CURRENCY
+═══════════════════════════════════════════════════════════ */
+
+function convertPrice(price, ccy) {
+  if (price==null) return [null,'—'];
+  if (targetCcy==='native') return [price, ccy||'—'];
+  const usd  = price*(fxRates[ccy]??1);
+  const val  = targetCcy==='USD' ? usd : usd/(fxRates[targetCcy]??1);
+  return [val, targetCcy];
+}
+
+function setCurrency(c) {
+  targetCcy = c;
+  document.querySelectorAll('#cur-sw button').forEach((b,i)=>{
+    b.classList.toggle('active', ['native','EUR','USD'][i]===c);
+  });
+  render();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════════ */
+
+const fmt  = (v,d=2) => v==null ? '—' : v.toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtN = (v,d=3) => v==null ? '—' : v.toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d});
+function fmtVol(v) {
+  if (v==null) return '—';
+  if (v>=1e9) return (v/1e9).toFixed(1)+'B';
+  if (v>=1e6) return (v/1e6).toFixed(1)+'M';
+  if (v>=1e3) return (v/1e3).toFixed(1)+'K';
+  return String(v);
+}
+function mktCls(s)  { return s==='REGULAR'?'mkt-open':s==='PRE'||s==='POST'?'mkt-pre':'mkt-closed'; }
+function mktLbl(s)  { return s==='REGULAR'?'Aperto':s==='PRE'?'Pre-Mkt':s==='POST'?'Post-Mkt':'Chiuso'; }
+function dirCls(chg){ return chg==null?'flat':chg>0?'up':chg<0?'down':'flat'; }
+function arrow(chg) { return chg>0?'▲':chg<0?'▼':'—'; }
+
+let toastTmr=null;
+function toast(msg,err=false){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='show'+(err?' err':'');
+  clearTimeout(toastTmr);
+  toastTmr=setTimeout(()=>el.className='',3000);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER — CARDS
+═══════════════════════════════════════════════════════════ */
+
+function renderCards() {
+  const grid  = document.getElementById('cards-grid');
+  const empty = document.getElementById('cards-empty');
+  const items = allItems();
+  if (!items.length) { grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+
+  grid.innerHTML = items.map(item => {
+    const q = quotes[item.id];
+    const [cPrice, dispCcy] = q ? convertPrice(q.price, q.currency) : [null,'—'];
+    const chg   = q?.change;
+    const pct   = q?.pct;
+    const dir   = dirCls(chg);
+    const pctStr= pct!=null ? (pct>=0?'+':'')+(pct*100).toFixed(2)+'%' : '—';
+    const chgStr= chg!=null ? (chg>=0?'+':'')+fmtN(chg) : '—';
+    const lo=q?.low, hi=q?.high, cur=q?.price;
+    const pos = (lo!=null&&hi!=null&&hi>lo) ? ((cur-lo)/(hi-lo)*100).toFixed(1) : '50';
+    const mState = q?.mktState||'CLOSED';
+    const priceDisp = cPrice!=null ? cPrice.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:4}) : (q?'—':'···');
+
+    // Signal badge (live, scenario-aware)
+    const sig = signalCache[item.id];
+    const _liveSig = sig && q ? compositeSignal(
+      sig.rsiV, sig.macdH, q.price??0, sig.bb, sig.sma50,
+      sig.pv ? sig.pv.PP : null,
+      item.driver, item.regime
+    ) : null;
+    const sigBadge = _liveSig ? `<span class="sig-badge ${_liveSig.cls}" style="font-size:.6rem;padding:1px 6px">${_liveSig.label}</span>` : '';
+
+    return `<div class="card${!q?' loading':''}">
+      <div class="card-top">
+        <div class="card-id">
+          <div class="card-short">${item.id}</div>
+          <div class="card-name" title="${item.name}">${item.name}</div>
+          <div class="card-yf">${item.yf}</div>
+        </div>
+        <div class="card-actions">
+          ${sigBadge}
+          <span class="mkt-badge ${mktCls(mState)}">${mktLbl(mState)}</span>
+          ${WATCHLIST.find(w=>w.id===item.id)?'':`<button class="del-btn" onclick="removeExtra('${item.id}')" title="Rimuovi">✕</button>`}
+        </div>
+      </div>
+      <div class="card-price-row">
+        <span class="card-price">${priceDisp}</span>
+        <span class="badge-ccy">${dispCcy}</span>
+      </div>
+      <span class="card-chg ${dir}">${arrow(chg)} ${chgStr} ${pctStr}</span>
+      <div class="card-stats">
+        ${lo!=null?`<div class="range-row">
+          <div class="range-labels"><span>${fmt(lo,3)}</span><span>${fmt(hi,3)}</span></div>
+          <div class="range-bar">
+            <div class="range-fill" style="width:100%"></div>
+            <div class="range-dot" style="left:${pos}%"></div>
+          </div>
+        </div>`:''}
+        ${q?.open !=null?`<div class="stat"><span class="stat-label">Apertura</span><span class="stat-value">${fmtN(q.open)}</span></div>`:''}
+        ${q?.prev !=null?`<div class="stat"><span class="stat-label">Chius. prev.</span><span class="stat-value">${fmtN(q.prev)}</span></div>`:''}
+        ${q?.w52h !=null?`<div class="stat"><span class="stat-label">52W Max</span><span class="stat-value">${fmt(q.w52h)}</span></div>`:''}
+        ${q?.w52l !=null?`<div class="stat"><span class="stat-label">52W Min</span><span class="stat-value">${fmt(q.w52l)}</span></div>`:''}
+        ${q?.vol  !=null?`<div class="stat"><span class="stat-label">Volume</span><span class="stat-value">${fmtVol(q.vol)}</span></div>`:''}
+        ${sig?.rsiV!=null?`<div class="stat"><span class="stat-label">RSI(14)</span><span class="stat-value">${sig.rsiV.toFixed(0)}</span></div>`:''}
+        ${sig?.pv  !=null?`<div class="stat"><span class="stat-label">Buy S1</span><span class="stat-value" style="color:var(--green)">${fmtN(sig.pv.S1)}</span></div>`:''}
+        ${sig?.pv  !=null?`<div class="stat"><span class="stat-label">Sell R1</span><span class="stat-value" style="color:var(--red)">${fmtN(sig.pv.R1)}</span></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER — SIGNALS TABLE
+═══════════════════════════════════════════════════════════ */
+
+function rsiCls(v) {
+  if (v<30) return 'rsi-os2';
+  if (v<45) return 'rsi-os1';
+  if (v>70) return 'rsi-ob2';
+  if (v>55) return 'rsi-ob1';
+  return 'rsi-neu';
+}
+
+function renderSignalsTable() {
+  const tbody = document.getElementById('sig-tbody');
+  const spin  = '<span class="cell-loading"></span>';
+
+  // ── Sort ──────────────────────────────────────────────────
+  let items = allItems();
+  if (sortCol) {
+    items = [...items].sort((a, b) => {
+      const va = getSortVal(a, sortCol);
+      const vb = getSortVal(b, sortCol);
+      if (va === vb) return 0;
+      if (typeof va === 'string') return va.localeCompare(vb) * sortDir;
+      return (va - vb) * sortDir;
+    });
+  }
+
+  // ── Update header sort indicators ────────────────────────
+  const COLS = ['ticker','name','driver','price','pct','signal','e1','e2','e3','sell','target','rsi','sma','macd'];
+  document.querySelectorAll('.signals-table thead th.sortable').forEach(th => {
+    const col = th.dataset.sort;
+    th.classList.remove('sort-asc','sort-desc');
+    const icon = th.querySelector('.th-sort-icon');
+    if (col === sortCol) {
+      th.classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
+      if (icon) icon.textContent = sortDir === 1 ? '▲' : '▼';
+    } else {
+      if (icon) icon.textContent = '⇅';
+    }
+  });
+
+  tbody.innerHTML = items.map(item => {
+    const q       = quotes[item.id];
+    const s       = signalCache[item.id];
+    const loading = !s;
+
+    const price = q?.price;
+    const pct   = q?.pct;
+    const [cP, dispCcy] = q ? convertPrice(price, q.currency) : [null,'—'];
+    const pctStr = pct!=null
+      ? `<span class="${dirCls(pct)}">${arrow(pct)} ${(Math.abs(pct*100)).toFixed(2)}%</span>`
+      : '—';
+
+    // ── Driver badge ─────────────────────────────────────────
+    const drvCell = `<span class="drv-badge drv-${item.driver||''}">${item.dEmoji||''} ${item.driver||'—'}</span>`;
+
+    // ── Signal (computed live — scenario/regime aware) ────────
+    let sigCell;
+    if (loading) {
+      sigCell = `<span class="sig-badge sig-loading">${spin}</span>`;
+    } else {
+      const pv    = s.pv;
+      const live  = compositeSignal(
+        s.rsiV, s.macdH, price??0, s.bb, s.sma50,
+        pv ? pv.PP : null,
+        item.driver, item.regime
+      );
+      sigCell = live
+        ? `<span class="sig-badge ${live.cls}" title="Score ${live.score.toFixed(2)}">${live.label}</span>`
+        : '<span class="sig-badge sig-hold">—</span>';
+    }
+
+    // ── Entry ladder E1/E2/E3 (S1, mid(S1,S2), S2) ───────────
+    const pv = s?.pv;
+    const e1Cell = loading ? spin : (pv ? `<span class="e1">${fmtN(pv.S1)}</span>` : '—');
+    const e2Cell = loading ? spin : (pv ? `<span class="e2">${fmtN((pv.S1+pv.S2)/2)}</span>` : '—');
+    const e3Cell = loading ? spin : (pv ? `<span class="e3">${fmtN(pv.S2)}</span>` : '—');
+
+    // ── Sell / Target ─────────────────────────────────────────
+    const sellCell   = loading ? spin : (pv ? `<span class="lvl-sell">${fmtN(pv.R1)}</span>` : '—');
+    const targetCell = loading ? spin : (pv ? `<span class="lvl-target">${fmtN(pv.R2)}</span>` : '—');
+
+    // ── RSI ───────────────────────────────────────────────────
+    const rsiCell = loading ? spin : (s.rsiV!=null
+      ? `<span class="rsi-val ${rsiCls(s.rsiV)}">${s.rsiV.toFixed(0)}</span>`
+      : '—');
+
+    // ── vs SMA50 ──────────────────────────────────────────────
+    const vsCell = loading ? spin : (s.sma50!=null && price!=null
+      ? (() => { const p=(price/s.sma50-1)*100; return `<span class="${p>=0?'vs-pos':'vs-neg'}">${p>=0?'+':''}${p.toFixed(1)}%</span>`; })()
+      : '<span class="vs-neu">—</span>');
+
+    // ── MACD ──────────────────────────────────────────────────
+    const macdCell = loading ? spin : (s.macdH!=null
+      ? (s.macdH>0
+          ? `<span class="macd-up" title="Hist ${s.macdH.toFixed(4)}">▲</span>`
+          : `<span class="macd-dn" title="Hist ${s.macdH.toFixed(4)}">▼</span>`)
+      : '—');
+
+    const priceDisp = cP!=null
+      ? `${cP.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:3})} <span style="font-size:.65rem;color:var(--muted)">${dispCcy}</span>`
+      : '—';
+
+    return `<tr>
+      <td><span class="td-ticker">${item.id}</span></td>
+      <td><span class="td-name" title="${item.name}">${item.name}</span></td>
+      <td class="c">${drvCell}</td>
+      <td class="r td-price">${priceDisp}</td>
+      <td class="r">${pctStr}</td>
+      <td class="c">${sigCell}</td>
+      <td class="r">${e1Cell}</td>
+      <td class="r">${e2Cell}</td>
+      <td class="r">${e3Cell}</td>
+      <td class="r">${sellCell}</td>
+      <td class="r">${targetCell}</td>
+      <td class="c">${rsiCell}</td>
+      <td class="r">${vsCell}</td>
+      <td class="c">${macdCell}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER — COMPACT TABLE
+═══════════════════════════════════════════════════════════ */
+
+function renderCompact() {
+  const tbody = document.getElementById('compact-body');
+  const items = allItems();
+  tbody.innerHTML = items.map(item => {
+    const q = quotes[item.id];
+    const [cP, dispCcy] = q ? convertPrice(q.price, q.currency) : [null,'—'];
+    const chg = q?.change, pct = q?.pct;
+    const dir = dirCls(chg);
+    const chgStr = chg!=null ? `${arrow(chg)} ${(chg>=0?'+':'')+fmtN(chg)} (${(pct>=0?'+':'')+(pct*100).toFixed(2)}%)` : '—';
+    const priceDisp = cP!=null ? cP.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:4}) : '—';
+    const isWL = !!WATCHLIST.find(w=>w.id===item.id);
+    return `<tr>
+      <td><span class="ct-name" title="${item.name}">${item.name}</span></td>
+      <td><span class="ct-sym">${item.yf}</span></td>
+      <td class="r"><span class="ct-price">${priceDisp}</span> <span style="font-size:.65rem;color:var(--muted)">${dispCcy}</span></td>
+      <td class="r">${q?.open!=null?fmtN(q.open):'—'}</td>
+      <td class="r">${q?.high!=null?`<span style="color:var(--green)">${fmtN(q.high)}</span>`:'—'}</td>
+      <td class="r">${q?.low!=null?`<span style="color:var(--red)">${fmtN(q.low)}</span>`:'—'}</td>
+      <td class="r"><span class="ct-chg ${dir}">${chgStr}</span></td>
+      <td class="r">${fmtVol(q?.vol)}</td>
+      <td class="c"><span class="mkt-badge ${mktCls(q?.mktState||'CLOSED')}">${mktLbl(q?.mktState||'CLOSED')}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER DISPATCHER
+═══════════════════════════════════════════════════════════ */
+
+function render() {
+  if      (currentTab==='cards')   renderCards();
+  else if (currentTab==='signals') renderSignalsTable();
+  else if (currentTab==='compact') renderCompact();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════════════════════ */
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active', ['cards','signals','compact'][i]===tab);
+  });
+  ['cards','signals','compact'].forEach(t=>{
+    document.getElementById(`view-${t}`).classList.toggle('active', t===tab);
+  });
+  if (tab==='signals' && !sigLoaded && !sigFetching) refreshSignals();
+  else render();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COUNTDOWN
+═══════════════════════════════════════════════════════════ */
+
+const CIRC = 47.1;
+function setRing(sec) {
+  const offset = CIRC*(1-sec/REFRESH);
+  document.getElementById('ring-prog').style.strokeDashoffset = offset;
+  document.getElementById('cd-lbl').textContent = sec+'s';
+}
+
+function resetCountdown() {
+  clearInterval(cdTimer);
+  countdown = REFRESH;
+  setRing(countdown);
+  cdTimer = setInterval(()=>{
+    countdown--;
+    setRing(countdown);
+    if (countdown<=0) { refreshAll(); countdown=REFRESH; }
+  }, 1000);
+}
+
+async function manualRefresh() {
+  clearInterval(cdTimer);
+  countdown=REFRESH; setRing(countdown);
+  toast('Aggiornamento…');
+  await refreshAll();
+  if (currentTab==='signals' && sigLoaded) refreshSignals(true);
+  resetCountdown();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SYMBOL MANAGEMENT
+═══════════════════════════════════════════════════════════ */
+
+async function addCustom(sym) {
+  const s = sym.trim().toUpperCase();
+  if (!s) return;
+  if (allItems().find(i=>i.id===s||i.yf===s)) { toast(`${s} già presente`); return; }
+  const item = { id:s, name:s, yf:s };
+  extraItems.push(item);
+  localStorage.setItem('fpb_extra', JSON.stringify(extraItems));
+  toast(`${s} aggiunto, caricamento…`);
+  document.getElementById('add-btn').disabled=true;
+  const q = await fetchLive(item);
+  if (q) quotes[item.id]=q;
+  document.getElementById('add-btn').disabled=false;
+  render();
+  resetCountdown();
+}
+
+function removeExtra(id) {
+  extraItems = extraItems.filter(i=>i.id!==id);
+  localStorage.setItem('fpb_extra', JSON.stringify(extraItems));
+  delete quotes[id]; delete signalCache[id];
+  render();
+  toast(`${id} rimosso`);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AUTOCOMPLETE
+═══════════════════════════════════════════════════════════ */
+
+const inp    = document.getElementById('sym-input');
+const acDrop = document.getElementById('ac-drop');
+let acResults=[], acIdx=-1, acDebounce=null;
+
+function closeAC() { acDrop.classList.remove('open'); acDrop.innerHTML=''; acResults=[]; acIdx=-1; }
+
+function renderAC(items) {
+  acResults=items; acIdx=-1;
+  if (!items.length) { closeAC(); return; }
+  acDrop.innerHTML = items.map((r,i)=>`
+    <div class="ac-item" data-i="${i}" onmousedown="pickAC(${i})">
+      <div class="ac-left">
+        <span class="ac-sym">${r.symbol}</span>
+        <span class="ac-name">${r.name||'—'}</span>
+      </div>
+      <div class="ac-tags">
+        ${r.type?`<span class="ac-tag">${r.type}</span>`:''}
+        ${r.exchange?`<span class="ac-tag ex">${r.exchange}</span>`:''}
+      </div>
+    </div>`).join('');
+  acDrop.classList.add('open');
+}
+
+function focusAC(idx) {
+  acDrop.querySelectorAll('.ac-item').forEach((el,i)=>el.classList.toggle('focused',i===idx));
+  acIdx=idx;
+  if (idx>=0) inp.value=acResults[idx].symbol;
+}
+
+function pickAC(i) {
+  const s=acResults[i]?.symbol;
+  if (!s) return;
+  inp.value=''; closeAC(); addCustom(s);
+}
+
+inp.addEventListener('input', ()=>{
+  clearTimeout(acDebounce);
+  const q=inp.value.trim();
+  if (!q) { closeAC(); return; }
+  acDebounce=setTimeout(async()=>{
+    try {
+      const url=YF_SRCH+encodeURIComponent(q);
+      const r=await fetch(PROXY+encodeURIComponent(url));
+      const j=await r.json();
+      renderAC((j.quotes||[]).map(x=>({
+        symbol:x.symbol, name:x.longname||x.shortname||'', type:x.quoteType||'', exchange:x.exchDisp||x.exchange||''
+      })));
+    } catch { closeAC(); }
+  }, 260);
+});
+
+inp.addEventListener('keydown', e=>{
+  if (!acDrop.classList.contains('open')) return;
+  if (e.key==='ArrowDown') { e.preventDefault(); focusAC(Math.min(acIdx+1,acResults.length-1)); }
+  else if (e.key==='ArrowUp') { e.preventDefault(); focusAC(Math.max(acIdx-1,-1)); if(acIdx<0) inp.value=''; }
+  else if (e.key==='Escape') closeAC();
+});
+inp.addEventListener('blur',()=>setTimeout(closeAC,120));
+
+document.getElementById('add-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  const v=inp.value.trim().toUpperCase();
+  if (!v) return;
+  inp.value=''; closeAC(); addCustom(v);
+});
+
+/* ═══════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════ */
+
+(async ()=>{
+  // Restore scenario button active state from localStorage
+  document.querySelectorAll('.scen-btn').forEach(b => b.classList.remove('active'));
+  const initBtn = document.getElementById(`scen-${scenario}`);
+  if (initBtn) initBtn.classList.add('active');
+  // show skeletons
+  renderCards();
+  // fetch live data + macro (renders macro bar and detects regime)
+  await refreshAll();
+  // start auto-refresh
+  resetCountdown();
+})();
+
+/* ═══════════════════════════════════════════════════════════
+   HELP MODAL
+═══════════════════════════════════════════════════════════ */
+function openHelp() {
+  document.getElementById('help-overlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function closeHelp() {
+  document.getElementById('help-overlay').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+function closeHelpIfBg(e) {
+  if (e.target === document.getElementById('help-overlay')) closeHelp();
+}
+function showSection(id) {
+  document.querySelectorAll('.help-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.help-nav a').forEach(a => a.classList.remove('active'));
+  const sec = document.getElementById('sec-' + id);
+  if (sec) sec.classList.add('active');
+  const nav = document.querySelector(`.help-nav a[onclick="showSection('${id}')"]`);
+  if (nav) nav.classList.add('active');
+  document.querySelector('.help-content').scrollTop = 0;
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeHelp();
+});
+</script>
+</body>
+</html>

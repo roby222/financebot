@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FinancePalmirioBot</title>
+<style>
+  :root {
+    --bg:       #0d1117;
+    --surface:  #161b22;
+    --surface2: #1c2128;
+    --border:   #21262d;
+    --text:     #e6edf3;
+    --muted:    #8b949e;
+    --accent:   #58a6ff;
+    --green:    #3fb950;
+    --red:      #f85149;
+    --orange:   #d29922;
+    --green-bg: rgba(63,185,80,.12);
+    --red-bg:   rgba(248,81,73,.12);
+    --orange-bg:rgba(210,153,34,.12);
+    --radius:   12px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: 100vh; padding: 24px 16px 60px;
+  }
+
+  /* header */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    max-width: 1100px; margin: 0 auto 24px;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo svg { width: 26px; height: 26px; }
+  .logo h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: -.5px; }
+  .logo span { color: var(--accent); }
+  .status-bar { display: flex; align-items: center; gap: 12px; font-size: .8rem; color: var(--muted); flex-wrap: wrap; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* switchers */
+  .switcher {
+    display: flex; gap: 3px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 3px;
+  }
+  .switcher button {
+    background: none; border: none; color: var(--muted);
+    border-radius: 5px; padding: 3px 10px;
+    font-size: .78rem; font-weight: 600; cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .switcher button.active { background: var(--accent); color: #0d1117; }
+  .switcher button:not(.active):hover { color: var(--text); background: var(--border); }
+  .view-toggle button { padding: 4px 8px; }
+  .view-toggle svg { width: 15px; height: 15px; pointer-events: none; }
+
+  .countdown { display: flex; align-items: center; gap: 6px; }
+  .countdown-ring { width: 22px; height: 22px; transform: rotate(-90deg); }
+  .countdown-ring circle { fill: none; stroke: var(--border); stroke-width: 3; cx: 11; cy: 11; r: 8; }
+  .countdown-ring .progress { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 50.3; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear; }
+
+  /* add form */
+  .add-form-wrap { max-width: 1100px; margin: 0 auto 24px; position: relative; }
+  .add-form { display: flex; gap: 10px; }
+  .add-form input {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); border-radius: var(--radius); padding: 10px 16px;
+    font-size: .95rem; outline: none; transition: border-color .2s;
+  }
+  .add-form input::placeholder { color: var(--muted); }
+  .add-form input:focus { border-color: var(--accent); }
+  .add-form button {
+    background: var(--accent); color: #0d1117; border: none;
+    border-radius: var(--radius); padding: 10px 20px;
+    font-size: .95rem; font-weight: 600; cursor: pointer;
+    transition: opacity .2s; white-space: nowrap;
+  }
+  .add-form button:hover { opacity: .85; }
+  .add-form button:disabled { opacity: .4; cursor: default; }
+
+  /* autocomplete */
+  .ac-dropdown {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; z-index: 50;
+    box-shadow: 0 8px 24px rgba(0,0,0,.4); display: none;
+  }
+  .ac-dropdown.open { display: block; }
+  .ac-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 16px; cursor: pointer; gap: 12px; transition: background .1s;
+  }
+  .ac-item:hover, .ac-item.focused { background: var(--border); }
+  .ac-item-left { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .ac-sym  { font-size: .9rem; font-weight: 700; }
+  .ac-name { font-size: .75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500px; }
+  .ac-right { display: flex; gap: 6px; flex-shrink: 0; }
+  .ac-tag { font-size: .65rem; font-weight: 600; padding: 1px 6px; border-radius: 4px; background: rgba(88,166,255,.12); color: var(--accent); text-transform: uppercase; }
+  .ac-tag.exch { background: rgba(139,148,158,.1); color: var(--muted); }
+
+  /* grid */
+  .grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+
+  /* card */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+    position: relative; transition: border-color .2s, transform .15s;
+    animation: fadeIn .3s ease;
+  }
+  .card:hover { border-color: #30363d; transform: translateY(-1px); }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .card-identity { flex: 1; min-width: 0; }
+  .card-symbol { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 2px; }
+  .card-name { font-size: .95rem; font-weight: 700; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-ticker { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+  .card-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .mkt-badge { font-size: .65rem; font-weight: 700; padding: 2px 7px; border-radius: 20px; letter-spacing: .3px; text-transform: uppercase; }
+  .mkt-open   { background: var(--green-bg);  color: var(--green); }
+  .mkt-pre    { background: var(--orange-bg); color: var(--orange); }
+  .mkt-post   { background: var(--orange-bg); color: var(--orange); }
+  .mkt-closed { background: rgba(139,148,158,.12); color: var(--muted); }
+  .delete-btn {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    padding: 2px 4px; border-radius: 6px; line-height: 1;
+    transition: color .2s, background .2s;
+  }
+  .delete-btn:hover { color: var(--red); background: var(--red-bg); }
+  .card-price-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+  .card-price { font-size: 1.7rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+  .badge-currency { background: rgba(88,166,255,.12); color: var(--accent); border-radius: 6px; padding: 1px 7px; font-size: .7rem; font-weight: 600; }
+  .card-change { display: inline-flex; align-items: center; gap: 5px; font-size: .82rem; font-weight: 600; padding: 3px 9px; border-radius: 20px; margin-bottom: 14px; }
+  .up   { color: var(--green); background: var(--green-bg); }
+  .down { color: var(--red);   background: var(--red-bg); }
+  .flat { color: var(--muted); background: rgba(139,148,158,.1); }
+  .card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .stat { display: flex; flex-direction: column; gap: 1px; }
+  .stat-label { font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+  .stat-value { font-size: .8rem; font-variant-numeric: tabular-nums; }
+  .range-row { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 4px; }
+  .range-labels { display: flex; justify-content: space-between; font-size: .72rem; color: var(--muted); }
+  .range-bar { height: 4px; background: var(--border); border-radius: 2px; position: relative; }
+  .range-fill { position: absolute; height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--red), var(--green)); }
+  .range-dot { position: absolute; top: 50%; width: 8px; height: 8px; background: white; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 0 2px var(--surface); }
+  .card.error .card-price { font-size: 1rem; color: var(--red); }
+
+  /* skeleton */
+  .skeleton .card-price, .skeleton .card-change, .skeleton .card-stats {
+    background: var(--border) !important; border-radius: 6px; color: transparent !important;
+    animation: shimmer 1.5s infinite linear; background-size: 200% 100% !important;
+    background-image: linear-gradient(90deg, var(--border) 25%, #2d333b 50%, var(--border) 75%) !important;
+  }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  /* compact table */
+  .compact-wrap {
+    max-width: 1100px; margin: 0 auto;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .compact-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  .compact-table thead tr { background: var(--surface2); border-bottom: 1px solid var(--border); }
+  .compact-table th { padding: 9px 14px; text-align: left; font-size: .68rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; white-space: nowrap; }
+  .compact-table th.r, .compact-table td.r { text-align: right; }
+  .compact-table th.c, .compact-table td.c { text-align: center; }
+  .compact-table tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; animation: fadeIn .25s ease; }
+  .compact-table tbody tr:last-child { border-bottom: none; }
+  .compact-table tbody tr:hover { background: var(--surface2); }
+  .compact-table td { padding: 10px 14px; vertical-align: middle; }
+  .ct-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+  .ct-ticker { font-size: .78rem; color: var(--muted); font-family: monospace; }
+  .ct-isin   { font-size: .73rem; color: var(--muted); font-family: monospace; letter-spacing: .3px; }
+  .ct-price  { font-variant-numeric: tabular-nums; font-weight: 700; font-size: .95rem; white-space: nowrap; }
+  .ct-change { display: inline-flex; align-items: center; gap: 4px; font-size: .78rem; font-weight: 600; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+  .ct-del { background: none; border: none; color: var(--muted); cursor: pointer; padding: 3px 6px; border-radius: 6px; line-height: 1; transition: color .2s, background .2s; }
+  .ct-del:hover { color: var(--red); background: var(--red-bg); }
+
+  /* empty */
+  .empty { max-width: 1100px; margin: 60px auto; text-align: center; color: var(--muted); }
+  .empty svg { width: 48px; height: 48px; margin-bottom: 16px; opacity: .4; }
+  .empty h2 { font-size: 1.1rem; margin-bottom: 8px; }
+  .empty p  { font-size: .9rem; }
+
+  /* proxy notice */
+  .proxy-notice {
+    max-width: 1100px; margin: 0 auto 16px;
+    background: rgba(210,153,34,.08); border: 1px solid rgba(210,153,34,.25);
+    border-radius: 8px; padding: 8px 14px;
+    font-size: .78rem; color: var(--orange); display: flex; align-items: center; gap: 8px;
+  }
+
+  /* toast */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 20px; border-radius: 30px;
+    font-size: .85rem; transition: transform .3s ease;
+    pointer-events: none; z-index: 100; white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.err  { border-color: var(--red); color: var(--red); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+      <polyline points="16 7 22 7 22 13"></polyline>
+    </svg>
+    <h1>FinancePalmirio<span>Bot</span></h1>
+  </div>
+  <div class="status-bar">
+    <div class="switcher" id="cur-switcher">
+      <button id="cur-native" onclick="setCurrency('native')" class="active">Nativa</button>
+      <button id="cur-EUR"    onclick="setCurrency('EUR')">EUR</button>
+      <button id="cur-USD"    onclick="setCurrency('USD')">USD</button>
+    </div>
+    <div class="switcher view-toggle">
+      <button id="btn-grid"    onclick="setView('grid')"    class="active" title="Vista a schede">
+        <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      </button>
+      <button id="btn-compact" onclick="setView('compact')" title="Vista compatta">
+        <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="1" y="7" width="14" height="2" rx="1"/><rect x="1" y="12" width="14" height="2" rx="1"/></svg>
+      </button>
+    </div>
+    <div class="dot"></div>
+    <span id="last-update">—</span>
+    <div class="countdown" title="Prossimo aggiornamento">
+      <svg class="countdown-ring" viewBox="0 0 22 22">
+        <circle></circle>
+        <circle class="progress" id="ring-progress"></circle>
+      </svg>
+      <span id="countdown-label">60s</span>
+    </div>
+  </div>
+</header>
+
+<div class="proxy-notice">
+  ⚠ Versione standalone — dati via proxy pubblico (corsproxy.io). Per uso personale. Nessun backend richiesto.
+</div>
+
+<div class="add-form-wrap">
+  <form class="add-form" id="add-form">
+    <input id="sym-input" type="text"
+      placeholder="Cerca per ISIN, ticker o nome (es. Apple, ENI, IE00063FT9K6) …"
+      autocomplete="off" spellcheck="false" />
+    <button type="submit" id="add-btn">+ Aggiungi</button>
+  </form>
+  <div class="ac-dropdown" id="ac-dropdown"></div>
+</div>
+
+<div class="grid" id="grid"></div>
+<div class="compact-wrap" id="compact-wrap" style="display:none">
+  <table class="compact-table">
+    <thead>
+      <tr>
+        <th>Nome</th><th>Ticker</th><th>ISIN</th>
+        <th class="r">Prezzo</th><th class="r">Variazione</th>
+        <th class="c">Stato</th><th></th>
+      </tr>
+    </thead>
+    <tbody id="compact-body"></tbody>
+  </table>
+</div>
+
+<div id="empty" class="empty" style="display:none">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <rect x="2" y="7" width="20" height="14" rx="2"></rect>
+    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
+    <line x1="12" y1="12" x2="12" y2="16"></line><line x1="10" y1="14" x2="14" y2="14"></line>
+  </svg>
+  <h2>Nessun titolo aggiunto</h2>
+  <p>Inserisci un ISIN o un ticker nel campo sopra per iniziare.</p>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const REFRESH  = 60;
+const PROXY    = 'https://corsproxy.io/?';
+const YF_CHART = 'https://query1.finance.yahoo.com/v8/finance/chart/';
+const YF_SRCH  = 'https://query2.finance.yahoo.com/v1/finance/search?quotesCount=8&newsCount=0&q=';
+
+let symbols        = JSON.parse(localStorage.getItem('fpb_symbols') || '[]');
+let quotes         = [];
+let fxRates        = { USD: 1.0 };
+let targetCurrency = 'native';
+let viewMode       = 'grid';
+let countdown      = REFRESH;
+let timer          = null;
+
+// ── storage ───────────────────────────────────────────────────────────────────
+function saveSymbols() { localStorage.setItem('fpb_symbols', JSON.stringify(symbols)); }
+
+function isISIN(s) { return /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(s.trim().toUpperCase()); }
+
+// ── utils ─────────────────────────────────────────────────────────────────────
+function fmt(v, d = 4) {
+  if (v == null) return '—';
+  return v.toLocaleString('it-IT', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+
+function fmtVol(v) {
+  if (v == null) return '—';
+  if (v >= 1e9) return (v / 1e9).toFixed(1) + 'B';
+  if (v >= 1e6) return (v / 1e6).toFixed(1) + 'M';
+  if (v >= 1e3) return (v / 1e3).toFixed(1) + 'K';
+  return v.toString();
+}
+
+let _toastTimer = null;
+function toast(msg, err = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show' + (err ? ' err' : '');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.className = ''; }, 3000);
+}
+
+// ── FX ───────────────────────────────────────────────────────────────────────
+async function fetchChart(ticker) {
+  const url = YF_CHART + encodeURIComponent(ticker) + '?interval=1m&range=1d';
+  const r   = await fetch(PROXY + url);
+  const j   = await r.json();
+  return j?.chart?.result?.[0]?.meta || null;
+}
+
+async function fetchRates() {
+  try {
+    const pairs = ['EURUSD=X', 'GBPUSD=X', 'CHFUSD=X', 'JPYUSD=X'];
+    const results = await Promise.all(pairs.map(p => fetchChart(p).catch(() => null)));
+    const map = { USD: 1.0 };
+    pairs.forEach((p, i) => {
+      const meta = results[i];
+      const price = meta?.regularMarketPrice;
+      if (!price) return;
+      // EURUSD=X = 1.08 → 1 EUR = 1.08 USD
+      const ccy = p.replace('USD=X', '');
+      map[ccy] = price;
+    });
+    fxRates = map;
+  } catch(e) { /* keep previous */ }
+}
+
+function convertPrice(price, ccy) {
+  if (price == null) return [null, ccy || '—'];
+  if (targetCurrency === 'native') return [price, ccy || '—'];
+  const tgt = targetCurrency;
+  if (!ccy || ccy === tgt) return [price, tgt];
+  const priceUSD = price * (fxRates[ccy] || 1.0);
+  const converted = tgt === 'USD' ? priceUSD : priceUSD / (fxRates[tgt] || 1.0);
+  return [converted, tgt];
+}
+
+// ── ISIN resolution ───────────────────────────────────────────────────────────
+const _isinCache = {};
+async function resolveISIN(isin) {
+  if (_isinCache[isin]) return _isinCache[isin];
+  try {
+    const url = `${YF_SRCH}${encodeURIComponent(isin)}&quotesCount=1`;
+    const r = await fetch(PROXY + encodeURIComponent(url));
+    const j = await r.json();
+    const ticker = j?.quotes?.[0]?.symbol;
+    if (ticker) { _isinCache[isin] = ticker; return ticker; }
+  } catch(e) {}
+  return null;
+}
+
+// ── quote fetching ─────────────────────────────────────────────────────────────
+function marketStateFromMeta(meta) {
+  const now = Math.floor(Date.now() / 1000);
+  const tp  = meta?.currentTradingPeriod;
+  if (!tp) return 'CLOSED';
+  if (tp.regular && now >= tp.regular.start && now <= tp.regular.end) return 'REGULAR';
+  if (tp.pre     && now >= tp.pre.start     && now <= tp.pre.end)     return 'PRE';
+  if (tp.post    && now >= tp.post.start    && now <= tp.post.end)    return 'POST';
+  return 'CLOSED';
+}
+
+async function fetchQuote(symbol) {
+  const upper = symbol.trim().toUpperCase();
+  let ticker = upper;
+  let isin   = null;
+
+  if (isISIN(upper)) {
+    isin   = upper;
+    const resolved = await resolveISIN(upper);
+    if (resolved) ticker = resolved;
+  }
+
+  try {
+    const meta = await fetchChart(ticker);
+    if (!meta) return { symbol, ticker, isin, error: 'Nessun dato' };
+
+    const price    = meta.regularMarketPrice;
+    const prev     = meta.previousClose ?? meta.chartPreviousClose;
+    const change   = price != null && prev != null ? price - prev : null;
+    const changePct = prev ? change / prev : null;
+
+    return {
+      symbol,
+      ticker:       meta.symbol || ticker,
+      isin,
+      name:         meta.longName || meta.shortName || ticker,
+      price,
+      prev_close:   prev,
+      change,
+      change_pct:   changePct,
+      currency:     meta.currency || '—',
+      market_state: marketStateFromMeta(meta),
+      day_high:     meta.regularMarketDayHigh,
+      day_low:      meta.regularMarketDayLow,
+      week52_high:  meta.fiftyTwoWeekHigh,
+      week52_low:   meta.fiftyTwoWeekLow,
+      volume:       meta.regularMarketVolume,
+      error:        null,
+    };
+  } catch(e) {
+    return { symbol, ticker, isin, error: e.message };
+  }
+}
+
+async function fetchAllQuotes() {
+  await fetchRates();
+  const results = await Promise.all(symbols.map(fetchQuote));
+  quotes = results;
+  render();
+  document.getElementById('last-update').textContent =
+    'Agg. ' + new Date().toLocaleTimeString('it-IT');
+}
+
+// ── currency & view ────────────────────────────────────────────────────────────
+function setCurrency(cur) {
+  targetCurrency = cur;
+  ['native','EUR','USD'].forEach(c =>
+    document.getElementById('cur-' + c)?.classList.toggle('active', c === cur));
+  render();
+}
+
+function setView(mode) {
+  viewMode = mode;
+  document.getElementById('btn-grid').classList.toggle('active',    mode === 'grid');
+  document.getElementById('btn-compact').classList.toggle('active', mode === 'compact');
+  render();
+}
+
+// ── render ─────────────────────────────────────────────────────────────────────
+function render() {
+  viewMode === 'compact' ? renderCompact() : renderGrid();
+}
+
+function mktClass(s) {
+  return s === 'REGULAR' ? 'mkt-open' : s === 'PRE' ? 'mkt-pre' : s === 'POST' ? 'mkt-post' : 'mkt-closed';
+}
+function mktLabel(s) {
+  return s === 'REGULAR' ? 'Aperto' : s === 'PRE' ? 'Pre-Mkt' : s === 'POST' ? 'Post-Mkt' : 'Chiuso';
+}
+
+function renderGrid() {
+  const grid  = document.getElementById('grid');
+  const wrap  = document.getElementById('compact-wrap');
+  const empty = document.getElementById('empty');
+  grid.style.display = '';
+  wrap.style.display = 'none';
+  if (!quotes.length) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  grid.innerHTML = quotes.map(q => {
+    if (q.error) return `
+      <div class="card error">
+        <div class="card-top">
+          <div class="card-identity">
+            <div class="card-symbol">${q.isin || q.symbol}</div>
+            <div class="card-name">${q.ticker || q.symbol}</div>
+          </div>
+          <div class="card-actions">
+            <button class="delete-btn" onclick="removeSymbol('${q.symbol}')" title="Rimuovi">✕</button>
+          </div>
+        </div>
+        <div class="card-price">${q.error}</div>
+      </div>`;
+
+    const [cPrice, dispCcy] = convertPrice(q.price, q.currency);
+    const isConverted = dispCcy !== q.currency;
+    const chg    = q.change;
+    const chgPct = q.change_pct;
+    const dir    = chg == null ? 'flat' : chg > 0 ? 'up' : chg < 0 ? 'down' : 'flat';
+    const arrow  = dir === 'up' ? '▲' : dir === 'down' ? '▼' : '—';
+    const chgStr = chg != null ? (chg >= 0 ? '+' : '') + fmt(chg, 4) : '—';
+    const pctStr = chgPct != null ? ' ' + (chgPct >= 0 ? '+' : '') + (chgPct * 100).toFixed(2) + '%' : '';
+
+    const low  = q.day_low,  high = q.day_high, cur = q.price;
+    const pct  = (low != null && high != null && high > low) ? ((cur - low) / (high - low) * 100) : 50;
+
+    return `
+      <div class="card">
+        <div class="card-top">
+          <div class="card-identity">
+            <div class="card-symbol">${q.isin || q.symbol}</div>
+            <div class="card-name" title="${q.name || ''}">${q.name || q.ticker}</div>
+            ${q.ticker !== q.symbol ? `<div class="card-ticker">${q.ticker}</div>` : ''}
+          </div>
+          <div class="card-actions">
+            <span class="mkt-badge ${mktClass(q.market_state)}">${mktLabel(q.market_state)}</span>
+            <button class="delete-btn" onclick="removeSymbol('${q.symbol}')" title="Rimuovi">✕</button>
+          </div>
+        </div>
+        <div class="card-price-row">
+          <span class="card-price">${cPrice != null ? cPrice.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:4}) : '—'}</span>
+          <span class="badge-currency">${dispCcy}${isConverted ? ' <span style="opacity:.6;font-size:.6rem">conv.</span>' : ''}</span>
+        </div>
+        <span class="card-change ${dir}">${arrow} ${chgStr}${pctStr}</span>
+        <div class="card-stats">
+          ${low != null ? `<div class="range-row">
+            <div class="range-labels"><span>${fmt(low,2)}</span><span>${fmt(high,2)}</span></div>
+            <div class="range-bar">
+              <div class="range-fill" style="width:100%"></div>
+              <div class="range-dot" style="left:${pct.toFixed(1)}%"></div>
+            </div>
+          </div>` : ''}
+          ${q.open     != null ? `<div class="stat"><span class="stat-label">Apertura</span><span class="stat-value">${fmt(q.open,4)}</span></div>` : ''}
+          ${q.prev_close != null ? `<div class="stat"><span class="stat-label">Chius. Prev.</span><span class="stat-value">${fmt(q.prev_close,4)}</span></div>` : ''}
+          ${q.week52_high != null ? `<div class="stat"><span class="stat-label">52W Max</span><span class="stat-value">${fmt(q.week52_high,2)}</span></div>` : ''}
+          ${q.week52_low  != null ? `<div class="stat"><span class="stat-label">52W Min</span><span class="stat-value">${fmt(q.week52_low,2)}</span></div>` : ''}
+          ${q.volume     != null ? `<div class="stat"><span class="stat-label">Volume</span><span class="stat-value">${fmtVol(q.volume)}</span></div>` : ''}
+          ${q.avg_volume != null ? `<div class="stat"><span class="stat-label">Vol. Medio</span><span class="stat-value">${fmtVol(q.avg_volume)}</span></div>` : ''}
+          ${q.market_cap != null ? `<div class="stat"><span class="stat-label">Mkt Cap</span><span class="stat-value">${fmtVol(q.market_cap)}</span></div>` : ''}
+          ${q.pe_ratio   != null ? `<div class="stat"><span class="stat-label">P/E</span><span class="stat-value">${fmt(q.pe_ratio,2)}</span></div>` : ''}
+          ${q.div_yield  != null ? `<div class="stat"><span class="stat-label">Dividendo</span><span class="stat-value">${(q.div_yield*100).toFixed(2)}%</span></div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderCompact() {
+  const grid  = document.getElementById('grid');
+  const wrap  = document.getElementById('compact-wrap');
+  const tbody = document.getElementById('compact-body');
+  const empty = document.getElementById('empty');
+  grid.style.display = 'none';
+  wrap.style.display = 'block';
+  if (!quotes.length) { wrap.style.display = 'none'; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = quotes.map(q => {
+    const [cPrice, dispCcy] = convertPrice(q.price, q.currency);
+    const isConverted = dispCcy !== q.currency;
+    const chg    = q.change;
+    const chgPct = q.change_pct;
+    const dir    = chg == null ? 'flat' : chg > 0 ? 'up' : chg < 0 ? 'down' : 'flat';
+    const arrow  = dir === 'up' ? '▲' : dir === 'down' ? '▼' : '—';
+    const chgStr = chg != null ? (chg >= 0 ? '+' : '') + fmt(chg, 4) : '—';
+    const pctStr = chgPct != null ? '  ' + (chgPct >= 0 ? '+' : '') + (chgPct * 100).toFixed(2) + '%' : '';
+    const priceStr = cPrice != null ? cPrice.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:4}) : '—';
+
+    if (q.error) return `
+      <tr>
+        <td class="ct-name">${q.name || q.ticker || q.symbol}</td>
+        <td><span class="ct-ticker">${q.ticker || q.symbol}</span></td>
+        <td><span class="ct-isin">${q.isin || '—'}</span></td>
+        <td class="r" colspan="3" style="color:var(--red);font-size:.78rem">${q.error}</td>
+        <td class="c"><button class="ct-del" onclick="removeSymbol('${q.symbol}')">✕</button></td>
+      </tr>`;
+
+    return `
+      <tr>
+        <td class="ct-name" title="${q.name || ''}">${q.name || q.ticker}</td>
+        <td><span class="ct-ticker">${q.ticker}</span></td>
+        <td><span class="ct-isin">${q.isin || '—'}</span></td>
+        <td class="r ct-price">${priceStr} <span class="badge-currency" style="font-size:.6rem">${dispCcy}${isConverted ? ' <span style="opacity:.6">conv.</span>' : ''}</span></td>
+        <td class="r"><span class="ct-change ${dir}">${arrow} ${chgStr}${pctStr}</span></td>
+        <td class="c"><span class="mkt-badge ${mktClass(q.market_state)}">${mktLabel(q.market_state)}</span></td>
+        <td class="c"><button class="ct-del" onclick="removeSymbol('${q.symbol}')">✕</button></td>
+      </tr>`;
+  }).join('');
+}
+
+function showSkeletons() {
+  const grid  = document.getElementById('grid');
+  const empty = document.getElementById('empty');
+  if (!symbols.length) return;
+  empty.style.display = 'none';
+  grid.innerHTML = symbols.map(s => `
+    <div class="card skeleton">
+      <div class="card-top"><div class="card-identity">
+        <div class="card-symbol">${s}</div>
+        <div class="card-name">&nbsp;</div>
+      </div></div>
+      <div class="card-price">——</div>
+      <span class="card-change flat">—</span>
+      <div class="card-stats" style="height:80px"></div>
+    </div>`).join('');
+}
+
+// ── symbol management ──────────────────────────────────────────────────────────
+async function addSymbol(sym) {
+  const s = sym.trim().toUpperCase();
+  if (!s) return;
+  if (symbols.includes(s)) { toast(`${s} già presente`); return; }
+  symbols.push(s);
+  saveSymbols();
+  toast(`${s} aggiunto, caricamento…`);
+  document.getElementById('add-btn').disabled = true;
+  await fetchAllQuotes();
+  document.getElementById('add-btn').disabled = false;
+  resetCountdown();
+}
+
+function removeSymbol(sym) {
+  symbols = symbols.filter(s => s !== sym);
+  quotes  = quotes.filter(q => q.symbol !== sym);
+  saveSymbols();
+  render();
+  toast(`${sym} rimosso`);
+}
+
+// ── countdown ──────────────────────────────────────────────────────────────────
+function setRing(sec) {
+  const offset = 50.3 * (1 - sec / REFRESH);
+  document.getElementById('ring-progress').style.strokeDashoffset = offset;
+  document.getElementById('countdown-label').textContent = sec + 's';
+}
+
+function resetCountdown() {
+  clearInterval(timer);
+  countdown = REFRESH;
+  setRing(countdown);
+  timer = setInterval(() => {
+    countdown--;
+    setRing(countdown);
+    if (countdown <= 0) { fetchAllQuotes(); countdown = REFRESH; }
+  }, 1000);
+}
+
+// ── form ───────────────────────────────────────────────────────────────────────
+document.getElementById('add-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const input = document.getElementById('sym-input');
+  const val   = input.value.trim().toUpperCase();
+  if (!val) return;
+  input.value = '';
+  closeDropdown();
+  await addSymbol(val);
+});
+
+// ── autocomplete ───────────────────────────────────────────────────────────────
+const acInput    = document.getElementById('sym-input');
+const acDropdown = document.getElementById('ac-dropdown');
+let acResults = [], acFocused = -1, acDebounce = null;
+
+function closeDropdown() { acDropdown.classList.remove('open'); acDropdown.innerHTML = ''; acResults = []; acFocused = -1; }
+
+function renderDropdown(results) {
+  acResults = results; acFocused = -1;
+  if (!results.length) { closeDropdown(); return; }
+  acDropdown.innerHTML = results.map((r, i) => `
+    <div class="ac-item" data-i="${i}" onmousedown="pickSuggestion(${i})">
+      <div class="ac-item-left">
+        <span class="ac-sym">${r.symbol}</span>
+        <span class="ac-name">${r.name || '—'}</span>
+      </div>
+      <div class="ac-right">
+        ${r.type     ? `<span class="ac-tag">${r.type}</span>` : ''}
+        ${r.exchange ? `<span class="ac-tag exch">${r.exchange}</span>` : ''}
+      </div>
+    </div>`).join('');
+  acDropdown.classList.add('open');
+}
+
+function updateFocus(idx) {
+  acDropdown.querySelectorAll('.ac-item').forEach((el, i) => el.classList.toggle('focused', i === idx));
+  acFocused = idx;
+  if (idx >= 0) acInput.value = acResults[idx].symbol;
+}
+
+function pickSuggestion(i) {
+  const sym = acResults[i]?.symbol;
+  if (!sym) return;
+  acInput.value = '';
+  closeDropdown();
+  addSymbol(sym);
+}
+
+acInput.addEventListener('input', () => {
+  clearTimeout(acDebounce);
+  const q = acInput.value.trim();
+  if (!q) { closeDropdown(); return; }
+  acDebounce = setTimeout(async () => {
+    try {
+      const url = YF_SRCH + encodeURIComponent(q);
+      const r   = await fetch(PROXY + encodeURIComponent(url));
+      const j   = await r.json();
+      renderDropdown((j.quotes || []).map(item => ({
+        symbol:   item.symbol,
+        name:     item.longname || item.shortname || '',
+        type:     item.quoteType || '',
+        exchange: item.exchDisp || item.exchange || '',
+      })));
+    } catch { closeDropdown(); }
+  }, 280);
+});
+
+acInput.addEventListener('keydown', e => {
+  if (!acDropdown.classList.contains('open')) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); updateFocus(Math.min(acFocused + 1, acResults.length - 1)); }
+  else if (e.key === 'ArrowUp')  { e.preventDefault(); updateFocus(Math.max(acFocused - 1, -1)); if (acFocused < 0) acInput.value = ''; }
+  else if (e.key === 'Escape')   { closeDropdown(); }
+});
+
+acInput.addEventListener('blur', () => setTimeout(closeDropdown, 150));
+
+// ── init ───────────────────────────────────────────────────────────────────────
+if (symbols.length) { showSkeletons(); fetchAllQuotes(); }
+else { document.getElementById('empty').style.display = 'block'; }
+resetCountdown();
+</script>
+</body>
+</html>
