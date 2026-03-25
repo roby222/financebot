@@ -1133,9 +1133,12 @@ function getSortVal(item, col) {
 async function refreshAll() {
   await Promise.all([fetchFX(), fetchMacro()]);
   const results = await Promise.all(allItems().map(fetchLive));
+  const anyOk = results.some(q => q != null);
   results.forEach(q => { if (q) quotes[q.id] = q; });
-  document.getElementById('last-upd').textContent =
-    'Agg. ' + new Date().toLocaleTimeString('it-IT');
+  if (anyOk) {
+    document.getElementById('last-upd').textContent =
+      'Agg. ' + new Date().toLocaleTimeString('it-IT');
+  }
   render();
 }
 
