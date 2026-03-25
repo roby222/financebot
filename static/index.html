@@ -737,7 +737,7 @@ Se non usavi la ladder e compravi tutto a 95 → avresti pagato 3% in più
 /* ═══════════════════════════════════════════════════════════
    CONFIG
 ═══════════════════════════════════════════════════════════ */
-const PROXY    = 'https://api.allorigins.win/get?url=';
+const PROXY    = 'https://corsproxy.io/?';
 const YF_CHART = 'https://query1.finance.yahoo.com/v8/finance/chart/';
 const YF_SRCH  = 'https://query2.finance.yahoo.com/v1/finance/search?quotesCount=8&newsCount=0&q=';
 const REFRESH  = 60;
@@ -933,7 +933,7 @@ function compositeSignal(rsiV, macdH, price, bb, sma50, PP, driver, itemRegime) 
 async function fetchChart(ticker, range='1d', interval='1m') {
   const url = `${YF_CHART}${encodeURIComponent(ticker)}?interval=${interval}&range=${range}`;
   const r   = await fetch(PROXY + encodeURIComponent(url));
-  const j   = JSON.parse((await r.json()).contents);
+  const j   = await r.json();
   return j?.chart?.result?.[0] ?? null;
 }
 
@@ -1617,7 +1617,7 @@ inp.addEventListener('input', ()=>{
     try {
       const url=YF_SRCH+encodeURIComponent(q);
       const r=await fetch(PROXY+encodeURIComponent(url));
-      const j=JSON.parse((await r.json()).contents);
+      const j=await r.json();
       renderAC((j.quotes||[]).map(x=>({
         symbol:x.symbol, name:x.longname||x.shortname||'', type:x.quoteType||'', exchange:x.exchDisp||x.exchange||''
       })));
