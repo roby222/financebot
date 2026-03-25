@@ -931,8 +931,8 @@ function compositeSignal(rsiV, macdH, price, bb, sma50, PP, driver, itemRegime) 
 ═══════════════════════════════════════════════════════════ */
 
 async function fetchChart(ticker, range='1d', interval='1m') {
-  const url = `${YF_CHART}${encodeURIComponent(ticker)}?interval=${interval}&range=${range}`;
-  const r   = await fetch(PROXY + encodeURIComponent(url));
+  const url = `${YF_CHART}${encodeURIComponent(ticker)}?interval=${interval}&range=${range}&_=${Date.now()}`;
+  const r   = await fetch(PROXY + encodeURIComponent(url), { cache: 'no-store' });
   const j   = await r.json();
   return j?.chart?.result?.[0] ?? null;
 }
