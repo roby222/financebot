@@ -127,7 +127,8 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 .signals-table tbody tr:last-child{border-bottom:none}
 .signals-table tbody tr:hover{background:var(--surface2)}
 .signals-table td{padding:7px 8px;vertical-align:middle;white-space:nowrap}
-.td-ticker{font-size:.75rem;font-weight:700;font-family:monospace;color:var(--accent);letter-spacing:.3px}
+.td-ticker{font-size:.75rem;font-weight:700;font-family:monospace;color:var(--accent);letter-spacing:.3px;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+.td-ticker:hover{color:#fff}
 .td-name{color:var(--text);font-size:.78rem;max-width:150px;overflow:hidden;text-overflow:ellipsis}
 .td-price{font-variant-numeric:tabular-nums;font-weight:700}
 
@@ -1296,6 +1297,47 @@ function rsiCls(v) {
   return 'rsi-neu';
 }
 
+function copyRow(id) {
+  const item = [...WATCHLIST, ...extraItems].find(i => i.id === id);
+  if (!item) return;
+  const q = quotes[id];
+  const s = signalCache[id];
+  const price = q?.price;
+  const pct   = q?.pct;
+  const [cP, dispCcy] = q ? convertPrice(price, q.currency) : [null,'—'];
+  const priceStr = cP != null
+    ? `${cP.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:3})} ${dispCcy}`
+    : '—';
+  const pctStr = pct != null ? `${pct >= 0 ? '+' : ''}${(pct*100).toFixed(2)}%` : '—';
+  const pv   = s?.pv;
+  const live = (s && q) ? compositeSignal(s.rsiV, s.macdH, price??0, s.bb, s.sma50, pv?.PP ?? null, item.driver, item.regime) : null;
+  const vsSma = (s?.sma50 != null && price != null)
+    ? `${((price/s.sma50-1)*100) >= 0 ? '+' : ''}${((price/s.sma50-1)*100).toFixed(1)}%`
+    : '—';
+  const macdStr = s?.macdH != null
+    ? `${s.macdH > 0 ? '▲' : '▼'} ${s.macdH.toFixed(4)}`
+    : '—';
+  const lines = [
+    `Ticker:   ${item.id}`,
+    `ETF:      ${item.name}`,
+    `Driver:   ${item.driver}`,
+    `Prezzo:   ${priceStr}`,
+    `Var%:     ${pctStr}`,
+    `Segnale:  ${live?.label ?? '—'}`,
+    `E1 (S1 30%):    ${pv ? fmtN(pv.S1) : '—'}`,
+    `E2 (mid 30%):   ${pv ? fmtN((pv.S1+pv.S2)/2) : '—'}`,
+    `E3 (S2 40%):    ${pv ? fmtN(pv.S2) : '—'}`,
+    `R1 (vendi ≥):   ${pv ? fmtN(pv.R1) : '—'}`,
+    `R2 (target):    ${pv ? fmtN(pv.R2) : '—'}`,
+    `RSI(14):  ${s?.rsiV != null ? s.rsiV.toFixed(0) : '—'}`,
+    `vs SMA50: ${vsSma}`,
+    `MACD:     ${macdStr}`,
+  ];
+  navigator.clipboard.writeText(lines.join('\n'))
+    .then(() => toast(`📋 ${item.id} copiato`))
+    .catch(() => toast('❌ Copia non riuscita'));
+}
+
 function renderSignalsTable() {
   const tbody = document.getElementById('sig-tbody');
   const spin  = '<span class="cell-loading"></span>';
@@ -1389,7 +1431,7 @@ function renderSignalsTable() {
       : '—';
 
     return `<tr>
-      <td><span class="td-ticker">${item.id}</span></td>
+      <td><span class="td-ticker" onclick="copyRow('${item.id}')" title="Copia riga negli appunti">${item.id}</span></td>
       <td><span class="td-name" title="${item.name}">${item.name}</span></td>
       <td class="c">${drvCell}</td>
       <td class="r td-price">${priceDisp}</td>
