@@ -958,18 +958,25 @@ function compositeSignal(rsiV, macdH, price, bb, sma50, PP, driver, itemRegime, 
     return                   { label:'◆ HOLD',   cls:'sig-hold'       };
   }
 
-  const newSig = labelFrom(finalScore);
-
-  // Fix 1: hysteresis — non cambiare etichetta se variazione < soglia
-  if (itemId !== undefined) {
-    const prev = prevScores[itemId];
-    if (prev && prev.label !== newSig.label && Math.abs(finalScore - prev.score) < HYSTERESIS) {
-      return { ...labelFrom(prev.score), score: prev.score };
-    }
-    prevScores[itemId] = { score: finalScore, label: newSig.label };
+  // Downtrend estremo: se prezzo è >12% sotto SMA50, cap a HOLD
+  // (RSI oversold + BB inferiore non bastano a giustificare ACCUM in crollo strutturale)
+  let cappedScore = finalScore;
+  if (sma50 !== null && price < sma50 * 0.88) {
+    cappedScore = Math.min(finalScore, tLow - 0.001); // forza al più HOLD
   }
 
-  return { ...newSig, score: finalScore };
+  const newSig = labelFrom(cappedScore);
+
+  // Hysteresis — non cambiare etichetta se variazione < soglia
+  if (itemId !== undefined) {
+    const prev = prevScores[itemId];
+    if (prev && prev.label !== newSig.label && Math.abs(cappedScore - prev.score) < HYSTERESIS) {
+      return { ...labelFrom(prev.score), score: prev.score };
+    }
+    prevScores[itemId] = { score: cappedScore, label: newSig.label };
+  }
+
+  return { ...newSig, score: cappedScore };
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1029,11 +1036,19 @@ async function fetchHistoricalRaw(ticker, range) {
   try {
     const res = await fetchChart(ticker, range, '1d');
     if (!res) return null;
-    const ccy    = res.meta?.currency || '—';
-    const q      = res.indicators?.quote?.[0];
-    const closes = (q?.close||[]).filter(v=>v!=null).map(v=>normalise(v,ccy));
-    const highs  = (q?.high||[]).map(v=>v!=null?normalise(v,ccy):null);
-    const lows   = (q?.low||[]).map(v=>v!=null?normalise(v,ccy):null);
+    const ccy = res.meta?.currency || '—';
+    const q   = res.indicators?.quote?.[0];
+    // Allinea closes/highs/lows per indice: filtra solo le barre dove TUTTI e tre sono presenti
+    // (closes filtrato e highs/lows non filtrati causano offset → pivot sbagliati)
+    const rawC = q?.close||[], rawH = q?.high||[], rawL = q?.low||[];
+    const closes = [], highs = [], lows = [];
+    for (let i = 0; i < rawC.length; i++) {
+      if (rawC[i]!=null && rawH[i]!=null && rawL[i]!=null) {
+        closes.push(normalise(rawC[i], ccy));
+        highs.push(normalise(rawH[i], ccy));
+        lows.push(normalise(rawL[i], ccy));
+      }
+    }
     if (closes.length < 10) return null;
     return { closes, highs, lows };
   } catch { return null; }
@@ -1376,8 +1391,8 @@ function copyRow(id) {
     `E1 (S1 30%):    ${pv ? fmtN(pv.S1) : '—'}`,
     `E2 (mid 30%):   ${pv ? fmtN((pv.S1+pv.S2)/2) : '—'}`,
     `E3 (S2 40%):    ${pv ? fmtN(pv.S2) : '—'}`,
-    `R1 (vendi ≥):   ${pv ? fmtN(pv.R1) : '—'}`,
-    `R2 (target):    ${pv ? fmtN(pv.R2) : '—'}`,
+    `R1 (vendi ≥):   ${pv ? fmtN(Math.min(pv.R1,pv.R2)) : '—'}`,
+    `R2 (target):    ${pv ? fmtN(Math.max(pv.R1,pv.R2)) : '—'}`,
     `RSI(14):  ${s?.rsiV != null ? s.rsiV.toFixed(0) : '—'}`,
     `vs SMA50: ${vsSma}`,
     `MACD:     ${macdStr}`,
@@ -1450,13 +1465,19 @@ function renderSignalsTable() {
 
     // ── Entry ladder E1/E2/E3 (S1, mid(S1,S2), S2) ───────────
     const pv = s?.pv;
-    const e1Cell = loading ? spin : (pv ? `<span class="e1">${fmtN(pv.S1)}</span>` : '—');
-    const e2Cell = loading ? spin : (pv ? `<span class="e2">${fmtN((pv.S1+pv.S2)/2)}</span>` : '—');
-    const e3Cell = loading ? spin : (pv ? `<span class="e3">${fmtN(pv.S2)}</span>` : '—');
+    const curPrice = quotes[item.id]?.price ?? null;
+    // Se prezzo < S2 (tutti i supporti rotti), mostra warning invece di valori
+    const belowAll = pv && curPrice !== null && curPrice < pv.S2;
+    const warnSpan = `<span title="Prezzo sotto tutti i supporti — livelli ora fungono da resistenza" style="color:var(--orange);font-size:.75rem">⚠️</span>`;
+    const e1Cell = loading ? spin : (pv ? `<span class="e1" ${belowAll?'style="opacity:.45"':''}>${fmtN(pv.S1)}</span>${belowAll?warnSpan:''}` : '—');
+    const e2Cell = loading ? spin : (pv ? `<span class="e2" ${belowAll?'style="opacity:.45"':''}>${fmtN((pv.S1+pv.S2)/2)}</span>` : '—');
+    const e3Cell = loading ? spin : (pv ? `<span class="e3" ${belowAll?'style="opacity:.45"':''}>${fmtN(pv.S2)}</span>` : '—');
 
-    // ── Sell / Target ─────────────────────────────────────────
-    const sellCell   = loading ? spin : (pv ? `<span class="lvl-sell">${fmtN(pv.R1)}</span>` : '—');
-    const targetCell = loading ? spin : (pv ? `<span class="lvl-target">${fmtN(pv.R2)}</span>` : '—');
+    // ── Sell / Target — garantisce R1 < R2 in display ─────────
+    const pvR1 = pv ? Math.min(pv.R1, pv.R2) : null;
+    const pvR2 = pv ? Math.max(pv.R1, pv.R2) : null;
+    const sellCell   = loading ? spin : (pv ? `<span class="lvl-sell">${fmtN(pvR1)}</span>` : '—');
+    const targetCell = loading ? spin : (pv ? `<span class="lvl-target">${fmtN(pvR2)}</span>` : '—');
 
     // ── RSI ───────────────────────────────────────────────────
     const rsiCell = loading ? spin : (s.rsiV!=null
