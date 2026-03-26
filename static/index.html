@@ -164,6 +164,12 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 .macd-up{color:var(--green);font-size:.9rem}
 .macd-dn{color:var(--red);font-size:.9rem}
 
+/* volume vs avg-20 */
+.vol-hi-up{color:var(--green);font-size:.78rem;font-weight:600}
+.vol-hi-dn{color:var(--red);font-size:.78rem;font-weight:600}
+.vol-lo{color:var(--muted);font-size:.78rem}
+.vol-norm{color:var(--text);font-size:.78rem;opacity:.7}
+
 /* loading spinner in cell */
 .cell-loading{display:inline-block;width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -393,6 +399,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
             <th class="c sortable" data-sort="rsi" onclick="sortBy('rsi')" title="RSI(14) — &lt;30 ipervenduto · &gt;70 ipercomprato">RSI <span class="th-sort-icon">⇅</span></th>
             <th class="r sortable" data-sort="sma" onclick="sortBy('sma')" title="Distanza % dalla SMA50">SMA50 <span class="th-sort-icon">⇅</span></th>
             <th class="c sortable" data-sort="macd" onclick="sortBy('macd')" title="MACD(12/26/9) — istogramma">MACD <span class="th-sort-icon">⇅</span></th>
+            <th class="c sortable" data-sort="vol" onclick="sortBy('vol')" title="Volume odierno ÷ media 20 sessioni">Vol <span class="th-sort-icon">⇅</span></th>
           </tr>
         </thead>
         <tbody id="sig-tbody"></tbody>
@@ -1040,17 +1047,18 @@ async function fetchHistoricalRaw(ticker, range) {
     const q   = res.indicators?.quote?.[0];
     // Allinea closes/highs/lows per indice: filtra solo le barre dove TUTTI e tre sono presenti
     // (closes filtrato e highs/lows non filtrati causano offset → pivot sbagliati)
-    const rawC = q?.close||[], rawH = q?.high||[], rawL = q?.low||[];
-    const closes = [], highs = [], lows = [];
+    const rawC = q?.close||[], rawH = q?.high||[], rawL = q?.low||[], rawV = q?.volume||[];
+    const closes = [], highs = [], lows = [], volumes = [];
     for (let i = 0; i < rawC.length; i++) {
       if (rawC[i]!=null && rawH[i]!=null && rawL[i]!=null) {
         closes.push(normalise(rawC[i], ccy));
         highs.push(normalise(rawH[i], ccy));
         lows.push(normalise(rawL[i], ccy));
+        volumes.push(rawV[i] ?? 0);
       }
     }
     if (closes.length < 10) return null;
-    return { closes, highs, lows };
+    return { closes, highs, lows, volumes };
   } catch { return null; }
 }
 
@@ -1063,7 +1071,7 @@ async function fetchHistorical(item) {
   }
   if (!raw) return null;
 
-  const { closes, highs, lows } = raw;
+  const { closes, highs, lows, volumes } = raw;
   const price  = closes[closes.length-1];
   const prevH  = highs[highs.length-2];
   const prevL  = lows[lows.length-2];
@@ -1076,9 +1084,16 @@ async function fetchHistorical(item) {
   const macdH = calcMACD(closes);
   const bb    = calcBollinger(closes);
   const sma50 = calcSMA(closes, 50);
+
+  // avg volume — ultimi 20 giorni con volume > 0 (esclusa sessione corrente)
+  const recentVols = (volumes||[]).filter(v=>v>0).slice(-21, -1);
+  const avgVol = recentVols.length > 0
+    ? recentVols.reduce((a,b)=>a+b,0) / recentVols.length
+    : null;
+
   // Note: sig is NOT stored here — recalculated live in renderSignalsTable
   // so scenario changes update signals instantly
-  return { pv, rsiV, macdH, bb, sma50 };
+  return { pv, rsiV, macdH, bb, sma50, avgVol };
 }
 
 async function fetchFX() {
@@ -1187,6 +1202,10 @@ function getSortVal(item, col) {
       return (p != null && sma != null) ? (p/sma - 1) : -Infinity;
     }
     case 'macd':   return s?.macdH               ?? -Infinity;
+    case 'vol': {
+      const vol = q?.vol, avg = s?.avgVol;
+      return (vol && avg) ? vol/avg : -Infinity;
+    }
     default: return '';
   }
 }
@@ -1496,6 +1515,28 @@ function renderSignalsTable() {
           : `<span class="macd-dn" title="Hist ${s.macdH.toFixed(4)}">▼</span>`)
       : '—');
 
+    // ── Vol vs AvgVol-20 ──────────────────────────────────────
+    const volCell = (() => {
+      if (loading) return spin;
+      const vol = q?.vol;
+      const avg = s?.avgVol;
+      if (!vol || !avg) return '<span class="vol-norm">—</span>';
+      const ratio = vol / avg;
+      const up    = (q?.pct ?? 0) >= 0;
+      let cls, tip;
+      if (ratio >= 1.5) {
+        cls = up ? 'vol-hi-up' : 'vol-hi-dn';
+        tip = up ? `Vol ${ratio.toFixed(1)}× media — rialzo confermato` : `Vol ${ratio.toFixed(1)}× media — pressione ribassista forte`;
+      } else if (ratio < 0.7) {
+        cls = 'vol-lo';
+        tip = `Vol ${ratio.toFixed(1)}× media — segnale poco convinto`;
+      } else {
+        cls = 'vol-norm';
+        tip = `Vol ${ratio.toFixed(1)}× media`;
+      }
+      return `<span class="${cls}" title="${tip}">${ratio.toFixed(1)}×</span>`;
+    })();
+
     const priceDisp = cP!=null
       ? `${cP.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:3})} <span style="font-size:.65rem;color:var(--muted)">${dispCcy}</span>`
       : '—';
@@ -1515,6 +1556,7 @@ function renderSignalsTable() {
       <td class="c">${rsiCell}</td>
       <td class="r">${vsCell}</td>
       <td class="c">${macdCell}</td>
+      <td class="c">${volCell}</td>
     </tr>`;
   }).join('');
 }
