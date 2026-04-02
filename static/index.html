@@ -301,6 +301,47 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 
 /* misc */
 .sep{color:var(--border)}
+
+/* ── RESPONSIVE ────────────────────────────────────────────── */
+@media(max-width:700px){
+  body{padding:10px 10px 60px}
+
+  /* header: logo + controlli su righe separate */
+  header{flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:10px}
+  .header-right{width:100%;justify-content:space-between}
+  .logo h1{font-size:1rem}
+  #last-upd{display:none} /* timestamp nascosto — recupera spazio */
+
+  /* macro bar: scroll orizzontale senza wrap */
+  .macro-bar{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:8px 12px;gap:8px;scrollbar-width:none}
+  .macro-bar::-webkit-scrollbar{display:none}
+  .macro-section{flex-wrap:nowrap;flex-shrink:0}
+  .macro-lbl,.sep{display:none}
+
+  /* cards: colonna singola */
+  .cards-grid{grid-template-columns:1fr}
+
+  /* tabella segnali: già scrollabile, riduco padding celle */
+  .signals-table td,.signals-table th{padding:6px 5px}
+  .signals-table{font-size:.75rem}
+
+  /* add form */
+  .add-wrap{margin-bottom:10px}
+  .add-form input{font-size:.82rem;padding:8px 10px}
+  .add-form button{padding:8px 12px;font-size:.82rem}
+
+  /* export/import */
+  .list-io{flex-wrap:wrap}
+
+  /* help modal: full screen, nav orizzontale in alto */
+  .help-overlay{padding:0}
+  .help-modal{max-width:100%;max-height:100vh;border-radius:0;height:100vh}
+  .help-body{flex-direction:column}
+  .help-nav{width:100%;border-right:none;border-bottom:1px solid var(--border);flex-direction:row;flex-wrap:wrap;padding:6px 8px;gap:3px;max-height:110px;overflow-y:auto}
+  .help-nav .nav-sep{display:none}
+  .help-nav a{padding:4px 8px;font-size:.7rem}
+  .help-content{padding:14px 14px}
+}
 </style>
 </head>
 <body>
