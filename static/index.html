@@ -55,6 +55,11 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 .add-form button{background:var(--accent);color:#0d1117;border:none;border-radius:var(--radius);padding:9px 16px;font-size:.88rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:.2s}
 .add-form button:hover{opacity:.85}
 .add-form button:disabled{opacity:.4;cursor:default}
+
+/* export / import */
+.list-io{display:flex;gap:6px;margin-top:6px}
+.io-btn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:var(--radius);padding:5px 12px;font-size:.78rem;cursor:pointer;transition:.2s}
+.io-btn:hover{border-color:var(--accent);color:var(--text)}
 .ac-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.4);display:none}
 .ac-drop.open{display:block}
 .ac-item{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;cursor:pointer;gap:10px;transition:.1s}
@@ -341,6 +346,11 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
     <button type="submit" id="add-btn">+ Aggiungi</button>
   </form>
   <div class="ac-drop" id="ac-drop"></div>
+  <div class="list-io">
+    <button class="io-btn" onclick="exportList()" title="Scarica la tua lista personalizzata">⬇ Esporta lista</button>
+    <button class="io-btn" onclick="document.getElementById('import-input').click()" title="Ripristina lista da file">⬆ Importa lista</button>
+    <input type="file" id="import-input" accept=".json" style="display:none" onchange="importList(event)">
+  </div>
 </div>
 
 <!-- CARDS -->
@@ -1680,6 +1690,46 @@ function removeItem(id) {
   delete quotes[id]; delete signalCache[id];
   render();
   toast(`${id} rimosso`);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EXPORT / IMPORT LISTA
+═══════════════════════════════════════════════════════════ */
+
+function exportList() {
+  const data = {
+    version: 1,
+    extra:  extraItems,
+    hidden: [...hiddenIds],
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `financebot-lista-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Lista esportata');
+}
+
+function importList(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (data.version !== 1) throw new Error('Formato non riconosciuto');
+      if (Array.isArray(data.extra))  { extraItems = data.extra;  localStorage.setItem('fpb_extra',  JSON.stringify(extraItems)); }
+      if (Array.isArray(data.hidden)) { hiddenIds  = new Set(data.hidden); localStorage.setItem('fpb_hidden', JSON.stringify(data.hidden)); }
+      Object.keys(quotes).forEach(id => { delete quotes[id]; delete signalCache[id]; });
+      render();
+      refreshAll();
+      toast(`Lista importata — ${extraItems.length} extra, ${hiddenIds.size} nascosti`);
+    } catch { toast('File non valido', true); }
+    e.target.value = ''; // reset input per permettere reimport dello stesso file
+  };
+  reader.readAsText(file);
 }
 
 /* ═══════════════════════════════════════════════════════════
