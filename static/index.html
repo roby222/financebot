@@ -315,9 +315,8 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
   </div>
   <div class="header-right">
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('cards')">📊 Live</button>
-      <button class="tab-btn" onclick="switchTab('signals')">📈 Segnali</button>
-      <button class="tab-btn" onclick="switchTab('compact')">☰ Tabella</button>
+      <button class="tab-btn" onclick="switchTab('cards')">📊 Live</button>
+      <button class="tab-btn active" onclick="switchTab('signals')">📈 Segnali</button>
     </div>
     <div class="switcher" id="cur-sw">
       <button class="active" onclick="setCurrency('native')">Nativa</button>
@@ -354,7 +353,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 </div>
 
 <!-- CARDS -->
-<div id="view-cards" class="view active">
+<div id="view-cards" class="view">
   <div id="cards-grid" class="cards-grid"></div>
   <div id="cards-empty" class="empty" style="display:none">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
@@ -381,7 +380,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 </div>
 
 <!-- SIGNALS -->
-<div id="view-signals" class="view">
+<div id="view-signals" class="view active">
   <div class="signals-wrap">
     <div class="sig-header">
       <h2>📈 Segnali di Trading</h2>
@@ -835,7 +834,7 @@ let scenario   = (['escalation','tregua','neutro','volatile'].includes(localStor
                    ? localStorage.getItem('fpb_scenario') : 'neutro');
 let fxRates    = { USD:1.0 };
 let targetCcy  = 'native';
-let currentTab = 'cards';
+let currentTab = 'signals';
 let countdown  = REFRESH;
 let cdTimer    = null;
 let sigFetching= false;
@@ -1605,9 +1604,8 @@ function renderCompact() {
 ═══════════════════════════════════════════════════════════ */
 
 function render() {
-  if      (currentTab==='cards')   renderCards();
+  if   (currentTab==='cards')   renderCards();
   else if (currentTab==='signals') renderSignalsTable();
-  else if (currentTab==='compact') renderCompact();
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1617,9 +1615,9 @@ function render() {
 function switchTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.tab-btn').forEach((b,i)=>{
-    b.classList.toggle('active', ['cards','signals','compact'][i]===tab);
+    b.classList.toggle('active', ['cards','signals'][i]===tab);
   });
-  ['cards','signals','compact'].forEach(t=>{
+  ['cards','signals'].forEach(t=>{
     document.getElementById(`view-${t}`).classList.toggle('active', t===tab);
   });
   if (tab==='signals' && !sigLoaded && !sigFetching) refreshSignals();
@@ -1823,8 +1821,8 @@ document.getElementById('add-form').addEventListener('submit', e=>{
   document.querySelectorAll('.scen-btn').forEach(b => b.classList.remove('active'));
   const initBtn = document.getElementById(`scen-${scenario}`);
   if (initBtn) initBtn.classList.add('active');
-  // show skeletons
-  renderCards();
+  // start on signals tab
+  refreshSignals();
   // fetch live data + macro (renders macro bar and detects regime)
   await refreshAll();
   // start auto-refresh
