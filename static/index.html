@@ -767,7 +767,6 @@ const WATCHLIST_DEFAULT = [
   { id:'XMME',  name:'Xtrackers MSCI Emerging Markets',    yf:'XMME.MI',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
   { id:'WEAT',  name:'WisdomTree Wheat',                   yf:'WEAT.MI',   driver:'FOOD',    dEmoji:'🌾', regime:'conflict' },
   { id:'PHAG',  name:'WisdomTree Physical Silver',         yf:'PHAG.MI',   driver:'METALLI', dEmoji:'🥈', regime:'risk-off' },
-  { id:'COPA',  name:'WisdomTree Copper',                  yf:'COPA.MI',   driver:'CICLO',   dEmoji:'🏭', regime:'risk-on'  },
   { id:'NUCL',  name:'VanEck Uranium & Nuclear',           yf:'NUCL.MI',   driver:'ENERGIA', dEmoji:'⚡', regime:'neutro'   },
   { id:'GDIG',  name:'VanEck S&P Global Mining',           yf:'GDIG.MI',   driver:'METALLI', dEmoji:'🥈', regime:'neutro'   },
   { id:'REMX',  name:'VanEck Rare Earth & Metals',         yf:'REMX.MI',   driver:'GEO',     dEmoji:'🌍', regime:'neutro'   },
@@ -832,6 +831,7 @@ let macroData  = {};   // macro id → { price, pct, label, emoji }
 let macroRegime= null; // 'risk-on' | 'risk-off' | 'volatile' | null
 let scenario   = (['escalation','tregua','neutro','volatile'].includes(localStorage.getItem('fpb_scenario'))
                    ? localStorage.getItem('fpb_scenario') : 'neutro');
+let scenarioManualOverride = false; // true dopo click manuale dell'utente → blocca auto-sync
 let fxRates    = { USD:1.0 };
 let targetCcy  = 'native';
 let currentTab = 'signals';
@@ -1165,11 +1165,27 @@ function renderMacroBar() {
     badge.className = `regime-badge ${cls}`;
     badge.textContent = label;
   }
+  // Auto-sync scenario al regime rilevato (solo se utente non ha fatto override manuale)
+  if (!scenarioManualOverride && macroRegime && REGIME_TO_SCENARIO[macroRegime]) {
+    applyScenario(REGIME_TO_SCENARIO[macroRegime]);
+  }
 }
 
 /* ─── setScenario ────────────────────────────────────────── */
+const REGIME_TO_SCENARIO = { 'risk-on': 'neutro', 'risk-off': 'escalation', 'volatile': 'volatile' };
+
+function applyScenario(s) {
+  // applica senza settare l'override manuale (usato dall'auto-sync)
+  scenario = s;
+  document.querySelectorAll('.scen-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById(`scen-${scenario}`);
+  if (btn) btn.classList.add('active');
+  if (sigLoaded) renderSignalsTable();
+}
+
 function setScenario(s) {
   // Toggle: cliccando lo scenario attivo si torna a Neutro
+  scenarioManualOverride = true;
   scenario = (scenario === s && s !== 'neutro') ? 'neutro' : s;
   localStorage.setItem('fpb_scenario', scenario);
   document.querySelectorAll('.scen-btn').forEach(b => b.classList.remove('active'));

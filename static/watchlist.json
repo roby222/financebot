@@ -3,7 +3,6 @@
   { "id": "XMME",  "name": "Xtrackers MSCI Emerging Markets",    "yf": "XMME.MI",   "driver": "EQUITY",  "dEmoji": "📈", "regime": "risk-on"  },
   { "id": "WEAT",  "name": "WisdomTree Wheat",                   "yf": "WEAT.MI",   "driver": "FOOD",    "dEmoji": "🌾", "regime": "conflict" },
   { "id": "PHAG",  "name": "WisdomTree Physical Silver",         "yf": "PHAG.MI",   "driver": "METALLI", "dEmoji": "🥈", "regime": "risk-off" },
-  { "id": "COPA",  "name": "WisdomTree Copper",                  "yf": "COPA.MI",   "driver": "CICLO",   "dEmoji": "🏭", "regime": "risk-on"  },
   { "id": "NUCL",  "name": "VanEck Uranium & Nuclear",           "yf": "NUCL.MI",   "driver": "ENERGIA", "dEmoji": "⚡", "regime": "neutro"   },
   { "id": "GDIG",  "name": "VanEck S&P Global Mining",           "yf": "GDIG.MI",   "driver": "METALLI", "dEmoji": "🥈", "regime": "neutro"   },
   { "id": "REMX",  "name": "VanEck Rare Earth & Metals",         "yf": "REMX.MI",   "driver": "GEO",     "dEmoji": "🌍", "regime": "neutro"   },
