@@ -838,11 +838,19 @@ function allItems() {
    MACRO BENCHMARK TICKERS
 ═══════════════════════════════════════════════════════════ */
 const MACRO_TICKERS = [
-  { id:'brent', yf:'CB=F',  label:'Brent',  emoji:'🛢️' },
+  { id:'brent', yf:'BZ=F',  label:'Brent',  emoji:'🛢️' },
   { id:'gold',  yf:'GC=F',  label:'Gold',   emoji:'🥇' },
   { id:'spy',   yf:'^GSPC', label:'S&P500', emoji:'📊' },
   { id:'vix',   yf:'^VIX',  label:'VIX',    emoji:'😰' },
 ];
+
+// Sanity bounds [min, max] — se il prezzo è fuori range, il dato è spazzatura
+const MACRO_BOUNDS = {
+  brent: [20,   300],   // USD/barile
+  gold:  [500, 8000],   // USD/oz
+  spy:   [500, 20000],  // livello indice S&P500
+  vix:   [5,   150],    // livello VIX
+};
 
 /* ═══════════════════════════════════════════════════════════
    SCENARIO WEIGHTS  driver → score adjustment per scenario
@@ -1167,6 +1175,13 @@ async function fetchMacro() {
       const price = res.meta.regularMarketPrice;
       const prev  = res.meta.previousClose ?? res.meta.chartPreviousClose;
       const pct   = prev ? (price-prev)/prev : null;
+      // Sanity check: se il prezzo è fuori dai bounds realistici, ignora il dato
+      const bounds = MACRO_BOUNDS[m.id];
+      if (bounds && (price < bounds[0] || price > bounds[1])) {
+        console.warn(`[macro] ${m.id} (${m.yf}): prezzo ${price} fuori bounds [${bounds}] — scartato`);
+        macroData[m.id] = { price:null, pct:null, label:m.label, emoji:m.emoji, err:true };
+        return;
+      }
       macroData[m.id] = { price, pct, label:m.label, emoji:m.emoji };
     } catch {}
   }));
@@ -1188,6 +1203,7 @@ function renderMacroBar() {
   container.innerHTML = MACRO_TICKERS.map(m => {
     const d = macroData[m.id];
     if (!d) return `<span class="macro-item"><span class="mi-label">${m.emoji} ${m.label}</span> <span class="mi-price mi-pct" style="color:var(--muted)">…</span></span>`;
+    if (d.err || d.price == null) return `<span class="macro-item" title="Dato non disponibile o fuori range"><span class="mi-label">${m.emoji} ${m.label}</span> <span class="mi-price" style="color:var(--orange)">⚠️ N/D</span></span>`;
     const pctStr = d.pct != null
       ? ` <span class="mi-pct ${d.pct>=0?'up':'down'}">${d.pct>=0?'+':''}${(d.pct*100).toFixed(2)}%</span>`
       : '';
