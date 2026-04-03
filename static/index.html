@@ -837,8 +837,19 @@ function allItems() {
 /* ═══════════════════════════════════════════════════════════
    MACRO BENCHMARK TICKERS
 ═══════════════════════════════════════════════════════════ */
+// Calcola il ticker ICE Brent front-month su Yahoo Finance (es. BZM26.NYM per giugno 2026)
+// Il front-month Brent è solitamente 2 mesi in avanti rispetto al mese corrente
+function brentFrontMonth() {
+  const codes = ['F','G','H','J','K','M','N','Q','U','V','X','Z'];
+  const now = new Date();
+  let m = now.getMonth() + 3; // 0-based +1 per mese reale +2 per front-month
+  let y = now.getFullYear();
+  if (m > 12) { m -= 12; y++; }
+  return `BZ${codes[m-1]}${String(y).slice(2)}.NYM`;
+}
+
 const MACRO_TICKERS = [
-  { id:'brent', yf:'CL=F',  label:'WTI',    emoji:'🛢️' },
+  { id:'brent', yf: brentFrontMonth(), label:'Brent', emoji:'🛢️' },
   { id:'gold',  yf:'GC=F',  label:'Gold',   emoji:'🥇' },
   { id:'spy',   yf:'^GSPC', label:'S&P500', emoji:'📊' },
   { id:'vix',   yf:'^VIX',  label:'VIX',    emoji:'😰' },
