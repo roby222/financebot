@@ -1742,15 +1742,27 @@ async function manualRefresh() {
    SYMBOL MANAGEMENT
 ═══════════════════════════════════════════════════════════ */
 
-async function addCustom(sym) {
+async function addCustom(sym, displayName='') {
   const s = sym.trim().toUpperCase();
   if (!s) return;
   if (allItems().find(i=>i.id===s||i.yf===s)) { toast(`${s} già presente`); return; }
-  const item = { id:s, name:s, yf:s };
+  const item = { id:s, name: displayName || s, yf:s };
   extraItems.push(item);
   localStorage.setItem('fpb_extra', JSON.stringify(extraItems));
   toast(`${s} aggiunto, caricamento…`);
   document.getElementById('add-btn').disabled=true;
+  // Se il nome non è noto (inserimento manuale), prova a risolverlo via search
+  if (!displayName) {
+    try {
+      const r = await fetch(PROXY + encodeURIComponent(YF_SRCH + encodeURIComponent(s)));
+      const j = await r.json();
+      const match = (j.quotes||[]).find(q => q.symbol === s);
+      if (match) {
+        item.name = match.longname || match.shortname || s;
+        localStorage.setItem('fpb_extra', JSON.stringify(extraItems));
+      }
+    } catch {}
+  }
   const q = await fetchLive(item);
   if (q) quotes[item.id]=q;
   document.getElementById('add-btn').disabled=false;
@@ -1847,9 +1859,9 @@ function focusAC(idx) {
 }
 
 function pickAC(i) {
-  const s=acResults[i]?.symbol;
-  if (!s) return;
-  inp.value=''; closeAC(); addCustom(s);
+  const r=acResults[i];
+  if (!r) return;
+  inp.value=''; closeAC(); addCustom(r.symbol, r.name);
 }
 
 inp.addEventListener('input', ()=>{
