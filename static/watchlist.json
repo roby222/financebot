@@ -1,10 +1,8 @@
 [
   { "id": "EXUS",  "name": "Xtrackers MSCI World ex USA",        "yf": "EXUS.MI",   "driver": "EQUITY",  "dEmoji": "📈", "regime": "risk-on"  },
   { "id": "XMME",  "name": "Xtrackers MSCI Emerging Markets",    "yf": "XMME.MI",   "driver": "EQUITY",  "dEmoji": "📈", "regime": "risk-on"  },
-  { "id": "WEAT",  "name": "WisdomTree Wheat",                   "yf": "WEAT.MI",   "driver": "FOOD",    "dEmoji": "🌾", "regime": "conflict" },
   { "id": "PHAG",  "name": "WisdomTree Physical Silver",         "yf": "PHAG.MI",   "driver": "METALLI", "dEmoji": "🥈", "regime": "risk-off" },
   { "id": "NUCL",  "name": "VanEck Uranium & Nuclear",           "yf": "NUCL.MI",   "driver": "ENERGIA", "dEmoji": "⚡", "regime": "neutro"   },
-  { "id": "GDIG",  "name": "VanEck S&P Global Mining",           "yf": "GDIG.MI",   "driver": "METALLI", "dEmoji": "🥈", "regime": "neutro"   },
   { "id": "REMX",  "name": "VanEck Rare Earth & Metals",         "yf": "REMX.MI",   "driver": "GEO",     "dEmoji": "🌍", "regime": "neutro"   },
   { "id": "QNTM",  "name": "VanEck Quantum Computing",           "yf": "QNTM.MI",   "driver": "TECH",    "dEmoji": "💻", "regime": "risk-on"  },
   { "id": "GLUG",  "name": "L&G Clean Water",                    "yf": "GLUG.MI",   "driver": "INFRA",   "dEmoji": "🏗️", "regime": "neutro"   },
