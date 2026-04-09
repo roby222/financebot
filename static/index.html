@@ -393,11 +393,6 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
       <button class="tab-btn" onclick="switchTab('cards')" data-i18n="tab_live">📊 Live</button>
       <button class="tab-btn active" onclick="switchTab('signals')" data-i18n="tab_signals">📈 Segnali</button>
     </div>
-    <div class="switcher" id="cur-sw">
-      <button class="active" onclick="setCurrency('native')" data-i18n="cur_native">Nativa</button>
-      <button onclick="setCurrency('EUR')">EUR</button>
-      <button onclick="setCurrency('USD')">USD</button>
-    </div>
     <div class="status-info">
       <div class="dot"></div>
       <span id="last-upd">—</span>
@@ -860,7 +855,6 @@ let LANG = (() => { try { return localStorage.getItem('fpb_lang') || BROWSER_LAN
 const STRINGS = {
   it: {
     tab_live:'📊 Live', tab_signals:'📈 Segnali',
-    cur_native:'Nativa',
     search_placeholder:'Cerca per ticker, ISIN o nome (es. SWDA, IE00…)',
     add_btn:'+ Aggiungi',
     export_btn:'⬇ Esporta lista', export_title:'Scarica la tua lista personalizzata',
@@ -1317,8 +1311,6 @@ let macroRegime= null; // 'risk-on' | 'risk-off' | 'volatile' | null
 let scenario   = (['escalation','tregua','neutro','volatile'].includes(localStorage.getItem('fpb_scenario'))
                    ? localStorage.getItem('fpb_scenario') : 'neutro');
 let scenarioManualOverride = false; // true dopo click manuale dell'utente → blocca auto-sync
-let fxRates    = { USD:1.0 };
-let targetCcy  = 'native';
 let currentTab = 'signals';
 let countdown  = REFRESH;
 let cdTimer    = null;
@@ -1590,17 +1582,6 @@ async function fetchHistorical(item) {
   return { pv, rsiV, macdH, bb, sma50, avgVol };
 }
 
-async function fetchFX() {
-  const pairs = ['EURUSD=X','GBPUSD=X'];
-  await Promise.all(pairs.map(async p => {
-    try {
-      const res = await fetchChart(p,'1d','1m');
-      if (res?.meta?.regularMarketPrice) {
-        fxRates[p.replace('USD=X','')] = res.meta.regularMarketPrice;
-      }
-    } catch {}
-  }));
-}
 
 async function fetchMacro() {
   await Promise.all(MACRO_TICKERS.map(async m => {
@@ -1729,7 +1710,7 @@ function getSortVal(item, col) {
 }
 
 async function refreshAll() {
-  await Promise.all([fetchFX(), fetchMacro()]);
+  await fetchMacro();
   const results = await Promise.all(allItems().map(fetchLive));
   const anyOk = results.some(q => q != null);
   results.forEach(q => { if (q) quotes[q.id] = q; });
@@ -1774,18 +1755,9 @@ async function refreshSignals(force=false) {
 
 function convertPrice(price, ccy) {
   if (price==null) return [null,'—'];
-  if (targetCcy==='native') return [price, ccy||'—'];
-  const usd  = price*(fxRates[ccy]??1);
-  const val  = targetCcy==='USD' ? usd : usd/(fxRates[targetCcy]??1);
-  return [val, targetCcy];
-}
-
-function setCurrency(c) {
-  targetCcy = c;
-  document.querySelectorAll('#cur-sw button').forEach((b,i)=>{
-    b.classList.toggle('active', ['native','EUR','USD'][i]===c);
-  });
-  render();
+  // GBp → GBP normalisation only
+  if (ccy === 'GBp') return [price * 0.01, 'GBP'];
+  return [price, ccy||'—'];
 }
 
 /* ═══════════════════════════════════════════════════════════
