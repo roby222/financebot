@@ -2158,10 +2158,11 @@ async function loadDetailChart() {
     if (!result) throw new Error('no data');
 
     const timestamps = result.timestamp || [];
-    const closes    = result.indicators?.quote?.[0]?.close || [];
-    const opens     = result.indicators?.quote?.[0]?.open  || [];
+    const closes  = result.indicators?.quote?.[0]?.close  || [];
+    const opens   = result.indicators?.quote?.[0]?.open   || [];
+    const volumes = result.indicators?.quote?.[0]?.volume || [];
 
-    const pts = timestamps.map((t, i) => ({ t, c: closes[i], o: opens[i] }))
+    const pts = timestamps.map((t, i) => ({ t, c: closes[i], o: opens[i], v: volumes[i] ?? null }))
                           .filter(p => p.c != null);
 
     loading.classList.add('hidden');
@@ -2215,7 +2216,9 @@ function drawPriceChart(canvas, pts, range, hoverIdx) {
 
   const W = rect.width;
   const H = rect.height;
-  const PAD = { top:16, right:16, bottom:30, left:52 };
+  const VOL_H = 48;   // height of volume section
+  const VOL_GAP = 10; // gap between price chart and volume bars
+  const PAD = { top:16, right:16, bottom: 30 + VOL_GAP + VOL_H, left:52 };
   const cW = W - PAD.left - PAD.right;
   const cH = H - PAD.top  - PAD.bottom;
 
@@ -2236,6 +2239,12 @@ function drawPriceChart(canvas, pts, range, hoverIdx) {
 
   const toX = i => PAD.left + (i / (pts.length - 1)) * cW;
   const toY = v => PAD.top + cH - (v - yBase) * yScale;
+
+  // volume layout (used in both volume bars and crosshair sections)
+  const volY0 = PAD.top + cH + VOL_GAP;
+  const vols  = pts.map(p => p.v ?? 0);
+  const maxVol = Math.max(...vols, 1);
+  const barW  = Math.max(1, cW / pts.length - 1);
 
   const isDown = closes[closes.length-1] < closes[0];
   const lineColor = isDown ? '#f85149' : '#3fb950';
@@ -2312,20 +2321,44 @@ function drawPriceChart(canvas, pts, range, hoverIdx) {
     ctx.fill();
   }
 
+  // ── volume bars ──
+  pts.forEach((p, i) => {
+    if (!p.v) return;
+    const bh = (p.v / maxVol) * VOL_H;
+    const bx = toX(i) - barW / 2;
+    const up = p.c >= (p.o ?? p.c);
+    ctx.fillStyle = up ? 'rgba(63,185,80,.45)' : 'rgba(248,81,73,.45)';
+    ctx.fillRect(bx, volY0 + VOL_H - bh, barW, bh);
+  });
+  // volume label
+  ctx.fillStyle = '#8b949e';
+  ctx.font = '9px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('VOL', PAD.left, volY0 + 9);
+
   // ── crosshair ──
   if (hoverIdx != null && hoverIdx >= 0 && hoverIdx < pts.length) {
     const hp = pts[hoverIdx];
     const hx = toX(hoverIdx);
     const hy = toY(hp.c);
 
-    // vertical line
+    // vertical line (extends through volume section)
     ctx.beginPath();
     ctx.strokeStyle = 'rgba(139,148,158,.5)';
     ctx.lineWidth = 1;
     ctx.setLineDash([4, 3]);
     ctx.moveTo(hx, PAD.top);
-    ctx.lineTo(hx, PAD.top + cH);
+    ctx.lineTo(hx, volY0 + VOL_H);
     ctx.stroke();
+
+    // highlight hovered volume bar
+    if (hp.v) {
+      const bh = (hp.v / maxVol) * VOL_H;
+      const bx = hx - barW / 2;
+      const up = hp.c >= (hp.o ?? hp.c);
+      ctx.fillStyle = up ? 'rgba(63,185,80,.85)' : 'rgba(248,81,73,.85)';
+      ctx.fillRect(bx, volY0 + VOL_H - bh, barW, bh);
+    }
     // horizontal line
     ctx.beginPath();
     ctx.moveTo(PAD.left, hy);
@@ -2350,8 +2383,9 @@ function drawPriceChart(canvas, pts, range, hoverIdx) {
     else if (range === '5d') dateStr = d.toLocaleDateString('it-IT', {weekday:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
     else dateStr = d.toLocaleDateString('it-IT', {day:'numeric', month:'short', year:'numeric'});
     const priceStr = hp.c.toLocaleString('it-IT', {minimumFractionDigits:2, maximumFractionDigits:3});
+    const volStr = hp.v ? (hp.v >= 1e6 ? `Vol ${(hp.v/1e6).toFixed(1)}M` : hp.v >= 1e3 ? `Vol ${(hp.v/1e3).toFixed(0)}K` : `Vol ${hp.v}`) : '';
     const line1 = priceStr;
-    const line2 = dateStr;
+    const line2 = dateStr + (volStr ? `  ${volStr}` : '');
 
     ctx.font = 'bold 12px sans-serif';
     const w1 = ctx.measureText(line1).width;
