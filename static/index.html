@@ -303,6 +303,32 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 /* misc */
 .sep{color:var(--border)}
 
+/* ── DETAIL MODAL ───────────────────────────────────────────── */
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+.detail-overlay.hidden{display:none}
+.detail-modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:100%;max-width:780px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column}
+.detail-head{display:flex;align-items:flex-start;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap}
+.detail-id-block{display:flex;flex-direction:column;gap:3px}
+.detail-ticker{font-size:1.5rem;font-weight:800;letter-spacing:-.5px;line-height:1}
+.detail-etfname{font-size:.82rem;color:var(--muted)}
+.detail-driver-badge{display:inline-flex;align-items:center;gap:4px;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(88,166,255,.12);color:var(--accent);text-transform:uppercase;width:fit-content;margin-top:2px}
+.detail-price-block{display:flex;align-items:baseline;gap:8px}
+.detail-price{font-size:1.7rem;font-weight:700;font-variant-numeric:tabular-nums}
+.detail-pct{font-size:.9rem;font-weight:600;padding:2px 8px;border-radius:20px}
+.detail-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.3rem;line-height:1;padding:4px 6px;border-radius:6px;transition:.15s;align-self:flex-start}
+.detail-close:hover{color:var(--text);background:var(--border)}
+.detail-periods{display:flex;gap:4px;padding:12px 20px;border-bottom:1px solid var(--border)}
+.detail-period-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 12px;font-size:.76rem;font-weight:600;cursor:pointer;transition:.15s}
+.detail-period-btn.active{background:var(--accent);border-color:var(--accent);color:#0d1117}
+.detail-period-btn:not(.active):hover{color:var(--text);border-color:var(--accent)}
+.detail-chart-wrap{padding:16px 20px 8px;position:relative;min-height:220px}
+.detail-canvas{width:100%;height:220px;border-radius:8px;background:var(--surface2);display:block}
+.detail-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.85rem}
+.detail-stats{display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--border);padding:14px 20px 18px}
+.detail-stat{display:flex;flex-direction:column;gap:3px;min-width:100px;flex:1;padding:4px 8px}
+.detail-stat-label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.detail-stat-val{font-size:.9rem;font-weight:600;font-variant-numeric:tabular-nums}
+
 /* ── RESPONSIVE ────────────────────────────────────────────── */
 @media(max-width:700px){
   body{padding:10px 10px 60px}
@@ -333,6 +359,12 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 
   /* export/import */
   .list-io{flex-wrap:wrap}
+
+  /* detail modal: full screen */
+  .detail-overlay{padding:0}
+  .detail-modal{max-width:100%;max-height:100vh;border-radius:0;height:100vh}
+  .detail-head{flex-wrap:wrap;gap:8px}
+  .detail-price{font-size:1.3rem}
 
   /* help modal: full screen, nav orizzontale in alto */
   .help-overlay{padding:0}
@@ -788,6 +820,30 @@ Se non usavi la ladder e compravi tutto a 95 → avresti pagato 3% in più
     </div><!-- /help-body -->
   </div><!-- /help-modal -->
 </div><!-- /help-overlay -->
+
+<!-- DETAIL MODAL -->
+<div class="detail-overlay hidden" id="detail-overlay" onclick="closeDetailIfBg(event)">
+  <div class="detail-modal" id="detail-modal">
+    <div class="detail-head">
+      <div class="detail-id-block">
+        <div class="detail-ticker" id="detail-ticker">—</div>
+        <div class="detail-etfname" id="detail-etfname"></div>
+        <div class="detail-driver-badge" id="detail-driver-badge"></div>
+      </div>
+      <div class="detail-price-block">
+        <span class="detail-price" id="detail-price">—</span>
+        <span class="detail-pct" id="detail-pct"></span>
+      </div>
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="detail-periods" id="detail-periods"></div>
+    <div class="detail-chart-wrap">
+      <canvas class="detail-canvas" id="detail-canvas"></canvas>
+      <div class="detail-loading hidden" id="detail-loading">Caricamento grafico…</div>
+    </div>
+    <div class="detail-stats" id="detail-stats"></div>
+  </div>
+</div>
 
 <div id="toast"></div>
 
@@ -1634,7 +1690,7 @@ function renderSignalsTable() {
       : '—';
 
     return `<tr>
-      <td><span class="td-ticker" onclick="copyRow('${item.id}')" title="Copia riga negli appunti">${item.id}</span></td>
+      <td><span class="td-ticker" onclick="openDetail('${item.id}')" title="Apri dettaglio ${item.id}">${item.id}</span></td>
       <td><span class="td-name" title="${item.name}">${item.name}</span></td>
       <td class="c">${drvCell}</td>
       <td class="r td-price">${priceDisp}</td>
@@ -1948,8 +2004,270 @@ function showSection(id) {
   document.querySelector('.help-content').scrollTop = 0;
 }
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeHelp();
+  if (e.key === 'Escape') {
+    closeHelp();
+    closeDetail();
+  }
 });
+
+/* ═══════════════════════════════════════════════════════════
+   DETAIL MODAL
+═══════════════════════════════════════════════════════════ */
+const DETAIL_PERIODS = [
+  { label:'1G',  range:'1d',  interval:'5m'  },
+  { label:'1S',  range:'5d',  interval:'30m' },
+  { label:'1M',  range:'1mo', interval:'1d'  },
+  { label:'3M',  range:'3mo', interval:'1d'  },
+  { label:'6M',  range:'6mo', interval:'1d'  },
+  { label:'1A',  range:'1y',  interval:'1wk' },
+];
+let detailCurrentItem = null;
+let detailCurrentPeriod = DETAIL_PERIODS[2]; // default 1M
+
+function openDetail(id) {
+  const item = [...WATCHLIST, ...extraItems].find(i => i.id === id);
+  if (!item) return;
+  detailCurrentItem = item;
+  const q = quotes[id];
+  const s = signalCache[id];
+
+  // header
+  document.getElementById('detail-ticker').textContent = item.id;
+  document.getElementById('detail-etfname').textContent = item.name;
+  document.getElementById('detail-driver-badge').textContent = (item.dEmoji || '') + ' ' + item.driver;
+
+  const [cP, dispCcy] = q ? convertPrice(q.price, q.currency) : [null, ''];
+  const priceEl = document.getElementById('detail-price');
+  const pctEl   = document.getElementById('detail-pct');
+  if (cP != null) {
+    priceEl.textContent = cP.toLocaleString('it-IT', {minimumFractionDigits:2, maximumFractionDigits:3}) + ' ' + dispCcy;
+  } else {
+    priceEl.textContent = '—';
+  }
+  if (q?.pct != null) {
+    const pct = q.pct;
+    const sign = pct >= 0 ? '+' : '';
+    pctEl.textContent = sign + (pct * 100).toFixed(2) + '%';
+    pctEl.className = 'detail-pct ' + (pct >= 0 ? 'up' : 'down');
+  } else {
+    pctEl.textContent = '';
+    pctEl.className = 'detail-pct';
+  }
+
+  // stats
+  renderDetailStats(item, q, s);
+
+  // periods
+  renderDetailPeriods();
+
+  document.getElementById('detail-overlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+
+  // load chart
+  loadDetailChart();
+}
+
+function closeDetail() {
+  document.getElementById('detail-overlay').classList.add('hidden');
+  document.body.style.overflow = '';
+  detailCurrentItem = null;
+}
+
+function closeDetailIfBg(e) {
+  if (e.target === document.getElementById('detail-overlay')) closeDetail();
+}
+
+function renderDetailPeriods() {
+  const el = document.getElementById('detail-periods');
+  el.innerHTML = DETAIL_PERIODS.map(p =>
+    `<button class="detail-period-btn${p === detailCurrentPeriod ? ' active' : ''}"
+       onclick="setDetailPeriod('${p.range}','${p.interval}')">${p.label}</button>`
+  ).join('');
+}
+
+function setDetailPeriod(range, interval) {
+  detailCurrentPeriod = DETAIL_PERIODS.find(p => p.range === range && p.interval === interval) || detailCurrentPeriod;
+  renderDetailPeriods();
+  loadDetailChart();
+}
+
+function renderDetailStats(item, q, s) {
+  const el = document.getElementById('detail-stats');
+  if (!s && !q) { el.innerHTML = ''; return; }
+
+  const pv = s?.pv;
+  const price = q?.price;
+  const [cP] = q ? convertPrice(price, q.currency) : [null];
+
+  const fmt = (v, dec=2) => v != null ? v.toLocaleString('it-IT',{minimumFractionDigits:dec,maximumFractionDigits:dec}) : '—';
+  const fmtPct = v => v != null ? `${v>=0?'+':''}${(v*100).toFixed(2)}%` : '—';
+
+  const vsSma = (s?.sma50 != null && price != null)
+    ? ((price / s.sma50 - 1) * 100)
+    : null;
+
+  const stats = [
+    { label:'RSI 14',   val: s?.rsiV != null ? s.rsiV.toFixed(1) : '—' },
+    { label:'MACD H',   val: s?.macdH != null ? `${s.macdH > 0 ? '▲' : '▼'} ${s.macdH.toFixed(4)}` : '—' },
+    { label:'vs SMA50', val: vsSma != null ? `${vsSma>=0?'+':''}${vsSma.toFixed(1)}%` : '—' },
+    { label:'Vol ×avg', val: (q?.vol && s?.avgVol) ? `${(q.vol/s.avgVol).toFixed(1)}×` : '—' },
+    { label:'Pivot PP', val: pv?.PP != null ? fmt(pv.PP) : '—' },
+    { label:'R1',       val: pv?.R1 != null ? fmt(pv.R1) : '—' },
+    { label:'S1',       val: pv?.S1 != null ? fmt(pv.S1) : '—' },
+  ];
+
+  el.innerHTML = stats.map(s =>
+    `<div class="detail-stat">
+       <span class="detail-stat-label">${s.label}</span>
+       <span class="detail-stat-val">${s.val}</span>
+     </div>`
+  ).join('');
+}
+
+async function loadDetailChart() {
+  if (!detailCurrentItem) return;
+  const canvas = document.getElementById('detail-canvas');
+  const loading = document.getElementById('detail-loading');
+  const ctx = canvas.getContext('2d');
+
+  // show spinner
+  loading.classList.remove('hidden');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const { range, interval } = detailCurrentPeriod;
+  const yf = detailCurrentItem.yf;
+
+  try {
+    const url = `${PROXY}${encodeURIComponent(YF_CHART + yf + `?range=${range}&interval=${interval}&_=${Date.now()}`)}`;
+    const res = await fetch(url, { cache: 'no-store' });
+    const json = await res.json();
+    const result = json?.chart?.result?.[0];
+    if (!result) throw new Error('no data');
+
+    const timestamps = result.timestamp || [];
+    const closes    = result.indicators?.quote?.[0]?.close || [];
+    const opens     = result.indicators?.quote?.[0]?.open  || [];
+
+    // filter nulls
+    const pts = timestamps.map((t, i) => ({ t, c: closes[i], o: opens[i] }))
+                          .filter(p => p.c != null);
+
+    loading.classList.add('hidden');
+    drawPriceChart(canvas, pts, range);
+  } catch(e) {
+    loading.textContent = 'Errore caricamento dati';
+    loading.classList.remove('hidden');
+  }
+}
+
+function drawPriceChart(canvas, pts, range) {
+  // Hi-DPI
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width  = rect.width  * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const W = rect.width;
+  const H = rect.height;
+  const PAD = { top:16, right:16, bottom:30, left:52 };
+  const cW = W - PAD.left - PAD.right;
+  const cH = H - PAD.top  - PAD.bottom;
+
+  if (!pts.length) {
+    ctx.fillStyle = '#8b949e';
+    ctx.font = '13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Nessun dato', W/2, H/2);
+    return;
+  }
+
+  const closes = pts.map(p => p.c);
+  const minV = Math.min(...closes);
+  const maxV = Math.max(...closes);
+  const spread = maxV - minV || maxV * 0.01;
+  const yScale = cH / (spread * 1.1);
+  const yBase  = minV - spread * 0.05;
+
+  const toX = i => PAD.left + (i / (pts.length - 1)) * cW;
+  const toY = v => PAD.top + cH - (v - yBase) * yScale;
+
+  // gradient fill
+  const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + cH);
+  const isDown = closes[closes.length-1] < closes[0];
+  const lineColor = isDown ? '#f85149' : '#3fb950';
+  grad.addColorStop(0, isDown ? 'rgba(248,81,73,.22)' : 'rgba(63,185,80,.22)');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+  // area
+  ctx.beginPath();
+  pts.forEach((p, i) => {
+    const x = toX(i), y = toY(p.c);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.lineTo(toX(pts.length-1), PAD.top + cH);
+  ctx.lineTo(toX(0), PAD.top + cH);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // line
+  ctx.beginPath();
+  pts.forEach((p, i) => {
+    const x = toX(i), y = toY(p.c);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = 1.8;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Y axis labels
+  ctx.fillStyle = '#8b949e';
+  ctx.font = `${11 * (1/dpr) + 10}px sans-serif`;
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'right';
+  const yTicks = 4;
+  for (let i = 0; i <= yTicks; i++) {
+    const v = yBase + (spread * 1.1) * (i / yTicks);
+    const y = toY(v);
+    ctx.fillText(v.toLocaleString('it-IT', {minimumFractionDigits:2, maximumFractionDigits:2}), PAD.left - 4, y + 4);
+    ctx.beginPath();
+    ctx.strokeStyle = '#21262d';
+    ctx.lineWidth = 1;
+    ctx.moveTo(PAD.left, y);
+    ctx.lineTo(PAD.left + cW, y);
+    ctx.stroke();
+  }
+
+  // X axis labels
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#8b949e';
+  const xTicks = Math.min(5, pts.length - 1);
+  for (let i = 0; i <= xTicks; i++) {
+    const idx = Math.round(i / xTicks * (pts.length - 1));
+    const x = toX(idx);
+    const d = new Date(pts[idx].t * 1000);
+    let label;
+    if (range === '1d') {
+      label = d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+    } else if (range === '5d') {
+      label = d.toLocaleDateString('it-IT', {weekday:'short', day:'numeric'});
+    } else {
+      label = d.toLocaleDateString('it-IT', {day:'numeric', month:'short'});
+    }
+    ctx.fillText(label, x, H - 8);
+  }
+
+  // last price dot
+  const lastX = toX(pts.length - 1);
+  const lastY = toY(closes[closes.length - 1]);
+  ctx.beginPath();
+  ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+  ctx.fillStyle = lineColor;
+  ctx.fill();
+}
 </script>
 </body>
 </html>
