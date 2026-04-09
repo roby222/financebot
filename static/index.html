@@ -2296,6 +2296,7 @@ function drawPriceChart(canvas, pts, range, hoverIdx) {
     let label;
     if (range === '1d') label = d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
     else if (range === '5d') label = d.toLocaleDateString('it-IT', {weekday:'short', day:'numeric'});
+    else if (range === '1y' || range === '3y' || range === '5y') label = d.toLocaleDateString('it-IT', {month:'short', year:'numeric'});
     else label = d.toLocaleDateString('it-IT', {day:'numeric', month:'short'});
     ctx.fillText(label, x, H - 8);
   }
