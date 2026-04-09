@@ -330,6 +330,31 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 .detail-stat-label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
 .detail-stat-val{font-size:.9rem;font-weight:600;font-variant-numeric:tabular-nums}
 
+/* ── SIGNAL LOG ─────────────────────────────────────────────── */
+.siglog-wrap{max-width:1440px;margin:10px auto 0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
+.siglog-head{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;cursor:pointer;user-select:none;gap:8px}
+.siglog-head:hover{background:var(--surface2)}
+.siglog-title{font-size:.8rem;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:7px}
+.siglog-count{background:var(--accent);color:#0d1117;border-radius:20px;font-size:.65rem;font-weight:800;padding:1px 6px;display:none}
+.siglog-count.visible{display:inline}
+.siglog-chevron{font-size:.7rem;color:var(--muted);transition:.2s}
+.siglog-actions{display:flex;gap:6px;align-items:center}
+.siglog-clear{background:none;border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:2px 8px;font-size:.72rem;cursor:pointer}
+.siglog-clear:hover{border-color:var(--red);color:var(--red)}
+.siglog-body{display:none;border-top:1px solid var(--border);max-height:260px;overflow-y:auto}
+.siglog-body.open{display:block}
+.siglog-empty{padding:20px;text-align:center;color:var(--muted);font-size:.8rem}
+.siglog-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.siglog-table th{padding:6px 10px;text-align:left;color:var(--muted);font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface)}
+.siglog-table td{padding:6px 10px;border-bottom:1px solid rgba(33,38,45,.5);vertical-align:middle}
+.siglog-table tr:last-child td{border-bottom:none}
+.siglog-table tr:hover td{background:var(--surface2)}
+.siglog-from{color:var(--muted)}
+.siglog-arrow{padding:0 4px;color:var(--muted)}
+.siglog-ts{color:var(--muted);font-size:.7rem;font-variant-numeric:tabular-nums}
+.sig-change-up{color:var(--green);font-size:.65rem;margin-left:3px;vertical-align:middle}
+.sig-change-dn{color:var(--red);font-size:.65rem;margin-left:3px;vertical-align:middle}
+
 /* ── RESPONSIVE ────────────────────────────────────────────── */
 @media(max-width:700px){
   body{padding:10px 10px 60px}
@@ -499,6 +524,35 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
     <span class="sep">|</span>
     <span><span class="legend-title">RSI:</span> <span data-i18n="legend_rsi">&lt;30 ipervenduto · &gt;70 ipercomprato</span></span>
   </div>
+
+  <!-- SIGNAL LOG -->
+  <div class="siglog-wrap" id="siglog-wrap">
+    <div class="siglog-head" onclick="toggleSigLog()">
+      <span class="siglog-title">
+        📋 <span data-i18n="siglog_title">Variazioni Segnale</span>
+        <span class="siglog-count" id="siglog-count"></span>
+      </span>
+      <span class="siglog-actions">
+        <button class="siglog-clear" id="siglog-clear-btn" onclick="clearSigLog(event)" data-i18n="siglog_clear">Cancella</button>
+        <span class="siglog-chevron" id="siglog-chevron">▼</span>
+      </span>
+    </div>
+    <div class="siglog-body" id="siglog-body">
+      <div class="siglog-empty" id="siglog-empty" data-i18n="siglog_empty">Nessuna variazione registrata</div>
+      <table class="siglog-table hidden" id="siglog-table">
+        <thead>
+          <tr>
+            <th data-i18n="siglog_th_time">Ora</th>
+            <th>Ticker</th>
+            <th>ETF</th>
+            <th data-i18n="siglog_th_change">Variazione</th>
+          </tr>
+        </thead>
+        <tbody id="siglog-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
 
 <!-- COMPACT -->
@@ -900,6 +954,8 @@ const STRINGS = {
     stat_rsi:'RSI 14', stat_macd:'MACD H', stat_sma:'vs SMA50',
     stat_vol:'Vol ×avg', stat_pivot:'Pivot PP', stat_r1:'R1', stat_s1:'S1',
     regime_unknown:'Regime —',
+    siglog_title:'Variazioni Segnale', siglog_empty:'Nessuna variazione registrata',
+    siglog_clear:'Cancella', siglog_th_time:'Ora', siglog_th_change:'Variazione',
     // help sections html
     sec_overview: `<h3>🏠 Panoramica</h3>
 <p><strong>FinancePalmirioBot</strong> è una dashboard web per monitorare ETF tematici legati ai macro-trend geopolitici (Iran-USA, Russia-Ucraina, ecc.). Aggrega prezzi live da Yahoo Finance, calcola indicatori tecnici su dati storici a 3 mesi, e combina tutto in un <strong>segnale di trading</strong> che si adatta allo scenario geopolitico corrente.</p>
@@ -1052,6 +1108,8 @@ const STRINGS = {
     stat_rsi:'RSI 14', stat_macd:'MACD H', stat_sma:'vs SMA50',
     stat_vol:'Vol ×avg', stat_pivot:'Pivot PP', stat_r1:'R1', stat_s1:'S1',
     regime_unknown:'Regime —',
+    siglog_title:'Signal Changes', siglog_empty:'No changes recorded yet',
+    siglog_clear:'Clear', siglog_th_time:'Time', siglog_th_change:'Change',
     // help sections html
     sec_overview: `<h3>🏠 Overview</h3>
 <p><strong>FinancePalmirioBot</strong> is a web dashboard for monitoring thematic ETFs tied to geopolitical macro trends (Iran-USA, Russia-Ukraine, etc.). It aggregates live prices from Yahoo Finance, computes technical indicators on 3-month historical data, and combines everything into a <strong>trading signal</strong> that adapts to the current geopolitical scenario.</p>
@@ -1747,6 +1805,7 @@ async function refreshSignals(force=false) {
   bar.classList.remove('active');
   document.getElementById('sig-status').textContent =
     `RSI(14) · MACD(12/26/9) · Bollinger(20/2σ) · SMA50 · Pivot Points — ${new Date().toLocaleTimeString('it-IT')}`;
+  checkSignalChanges();
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1915,6 +1974,14 @@ function renderSignalsTable() {
   const tbody = document.getElementById('sig-tbody');
   const spin  = '<span class="cell-loading"></span>';
 
+  // recent signal changes (last 24h) for ↗/↘ indicator
+  const recentChanges = (() => {
+    const cutoff = Date.now() - 24*60*60*1000;
+    const map = {};
+    loadSigLog().forEach(e => { if (e.ts > cutoff) map[e.id] = e; });
+    return map;
+  })();
+
   // ── Sort ──────────────────────────────────────────────────
   let items = allItems();
   if (sortCol) {
@@ -1967,8 +2034,13 @@ function renderSignalsTable() {
         pv ? pv.PP : null,
         item.driver, item.regime, item.id
       );
+      const rc = recentChanges[item.id];
+      const changeArrow = rc ? (() => {
+        const up = (SIG_LEVEL[rc.toCls]??0) > (SIG_LEVEL[rc.fromCls]??0);
+        return `<span class="${up?'sig-change-up':'sig-change-dn'}" title="${fmtSigLabel(rc.fromCls)} → ${fmtSigLabel(rc.toCls)}">${up?'↗':'↘'}</span>`;
+      })() : '';
       sigCell = live
-        ? `<span class="sig-badge ${live.cls}" title="Score ${live.score.toFixed(2)}">${live.label}</span>`
+        ? `<span class="sig-badge ${live.cls}" title="Score ${live.score.toFixed(2)}">${live.label}</span>${changeArrow}`
         : '<span class="sig-badge sig-hold">—</span>';
     }
 
@@ -2316,6 +2388,8 @@ document.getElementById('add-form').addEventListener('submit', e=>{
   if (initBtn) initBtn.classList.add('active');
   // apply i18n translations
   applyI18n();
+  // render signal log from localStorage (persists across sessions)
+  renderSigLog();
   // start on signals tab
   refreshSignals();
   // fetch live data + macro (renders macro bar and detects regime)
@@ -2323,6 +2397,123 @@ document.getElementById('add-form').addEventListener('submit', e=>{
   // start auto-refresh
   resetCountdown();
 })();
+
+/* ═══════════════════════════════════════════════════════════
+   SIGNAL CHANGE LOG
+═══════════════════════════════════════════════════════════ */
+const SIGLOG_KEY  = 'fpb_siglog';
+const SIGPREV_KEY = 'fpb_sigs_prev';
+const SIGLOG_MAX  = 300;
+const SIG_LEVEL   = { 'sig-sell-strong':-2, 'sig-sell':-1, 'sig-hold':0, 'sig-buy':1, 'sig-buy-strong':2 };
+
+function loadSigLog()  { try { return JSON.parse(localStorage.getItem(SIGLOG_KEY)  || '[]'); } catch { return []; } }
+function loadSigPrev() { try { return JSON.parse(localStorage.getItem(SIGPREV_KEY) || '{}'); } catch { return {}; } }
+function saveSigLog(l)  { try { localStorage.setItem(SIGLOG_KEY,  JSON.stringify(l.slice(-SIGLOG_MAX))); } catch {} }
+function saveSigPrev(p) { try { localStorage.setItem(SIGPREV_KEY, JSON.stringify(p)); } catch {} }
+
+function checkSignalChanges() {
+  const prev = loadSigPrev();
+  const log  = loadSigLog();
+  let anyNew = false;
+
+  allItems().forEach(item => {
+    const q = quotes[item.id];
+    const s = signalCache[item.id];
+    if (!s || q?.price == null) return;
+    const live = compositeSignal(
+      s.rsiV, s.macdH, q.price, s.bb, s.sma50,
+      s.pv?.PP ?? null, item.driver, item.regime, item.id
+    );
+    if (!live) return;
+    const p = prev[item.id];
+    if (p && p.cls !== live.cls) {
+      log.push({ id:item.id, name:item.name, fromCls:p.cls, toCls:live.cls, ts:Date.now() });
+      anyNew = true;
+    }
+    prev[item.id] = { cls:live.cls };
+  });
+
+  saveSigPrev(prev);
+  if (anyNew) { saveSigLog(log); renderSigLog(); }
+}
+
+function fmtSigLabel(cls) {
+  const map = {
+    'sig-buy-strong': t('sig_buy_strong'),
+    'sig-buy':        t('sig_buy'),
+    'sig-hold':       t('sig_hold'),
+    'sig-sell':       t('sig_sell'),
+    'sig-sell-strong':t('sig_sell_strong'),
+  };
+  return map[cls] ?? cls;
+}
+
+function fmtLogTs(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  const yesterday = new Date(now); yesterday.setDate(now.getDate()-1);
+  const isYesterday = d.toDateString() === yesterday.toDateString();
+  const time = d.toLocaleTimeString(LANG==='it'?'it-IT':'en-GB', {hour:'2-digit', minute:'2-digit'});
+  if (isToday)     return time;
+  if (isYesterday) return (LANG==='it'?'ieri ':'yest ')+time;
+  return d.toLocaleDateString(LANG==='it'?'it-IT':'en-GB', {day:'numeric', month:'short'})+' '+time;
+}
+
+function renderSigLog() {
+  const log = loadSigLog();
+  const countEl  = document.getElementById('siglog-count');
+  const emptyEl  = document.getElementById('siglog-empty');
+  const tableEl  = document.getElementById('siglog-table');
+  const tbody    = document.getElementById('siglog-tbody');
+  if (!countEl) return;
+
+  if (!log.length) {
+    countEl.classList.remove('visible');
+    emptyEl.classList.remove('hidden');
+    tableEl.classList.add('hidden');
+    return;
+  }
+
+  countEl.textContent = log.length;
+  countEl.classList.add('visible');
+  emptyEl.classList.add('hidden');
+  tableEl.classList.remove('hidden');
+
+  // show most recent first, max 50
+  const rows = [...log].reverse().slice(0, 50);
+  tbody.innerHTML = rows.map(e => {
+    const fromLbl = fmtSigLabel(e.fromCls);
+    const toLbl   = fmtSigLabel(e.toCls);
+    const dir     = (SIG_LEVEL[e.toCls]??0) > (SIG_LEVEL[e.fromCls]??0);
+    const arrow   = dir ? '↗' : '↘';
+    const col     = dir ? 'var(--green)' : 'var(--red)';
+    return `<tr>
+      <td class="siglog-ts">${fmtLogTs(e.ts)}</td>
+      <td><strong>${e.id}</strong></td>
+      <td class="siglog-from" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.name}">${e.name}</td>
+      <td>
+        <span class="sig-badge ${e.fromCls}" style="font-size:.62rem;padding:1px 5px">${fromLbl}</span>
+        <span class="siglog-arrow" style="color:${col}">${arrow}</span>
+        <span class="sig-badge ${e.toCls}" style="font-size:.62rem;padding:1px 5px">${toLbl}</span>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleSigLog() {
+  const body = document.getElementById('siglog-body');
+  const chev = document.getElementById('siglog-chevron');
+  const open = body.classList.toggle('open');
+  chev.textContent = open ? '▲' : '▼';
+}
+
+function clearSigLog(e) {
+  e.stopPropagation();
+  saveSigLog([]);
+  saveSigPrev({});
+  renderSigLog();
+}
 
 /* ═══════════════════════════════════════════════════════════
    HELP MODAL
