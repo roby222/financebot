@@ -838,6 +838,7 @@ Se non usavi la ladder e compravi tutto a 95 → avresti pagato 3% in più
       <button class="detail-close" onclick="closeDetail()">✕</button>
     </div>
     <div class="detail-periods" id="detail-periods"></div>
+    <div id="detail-period-perf" style="padding:4px 20px 0;font-size:.8rem;min-height:20px"></div>
     <div class="detail-chart-wrap">
       <canvas class="detail-canvas" id="detail-canvas"></canvas>
       <div class="detail-loading hidden" id="detail-loading">Caricamento grafico…</div>
@@ -2021,6 +2022,8 @@ const DETAIL_PERIODS = [
   { label:'3M',  range:'3mo', interval:'1d'  },
   { label:'6M',  range:'6mo', interval:'1d'  },
   { label:'1A',  range:'1y',  interval:'1wk' },
+  { label:'3A',  range:'3y',  interval:'1mo' },
+  { label:'5A',  range:'5y',  interval:'1mo' },
 ];
 let detailCurrentItem = null;
 let detailCurrentPeriod = DETAIL_PERIODS[2]; // default 1M
@@ -2125,15 +2128,23 @@ function renderDetailStats(item, q, s) {
   ).join('');
 }
 
+let detailChartState = null;
+
 async function loadDetailChart() {
   if (!detailCurrentItem) return;
   const canvas = document.getElementById('detail-canvas');
   const loading = document.getElementById('detail-loading');
   const ctx = canvas.getContext('2d');
 
-  // show spinner
   loading.classList.remove('hidden');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  detailChartState = null;
+  document.getElementById('detail-period-perf').innerHTML = '';
+
+  // remove old listeners
+  canvas.onmousemove = null;
+  canvas.onmouseleave = null;
+  canvas.ontouchmove = null;
 
   const { range, interval } = detailCurrentPeriod;
   const yf = detailCurrentItem.yf;
@@ -2149,20 +2160,51 @@ async function loadDetailChart() {
     const closes    = result.indicators?.quote?.[0]?.close || [];
     const opens     = result.indicators?.quote?.[0]?.open  || [];
 
-    // filter nulls
     const pts = timestamps.map((t, i) => ({ t, c: closes[i], o: opens[i] }))
                           .filter(p => p.c != null);
 
     loading.classList.add('hidden');
-    drawPriceChart(canvas, pts, range);
+    drawPriceChart(canvas, pts, range, null);
+
+    // period performance
+    const perfEl = document.getElementById('detail-period-perf');
+    if (pts.length >= 2) {
+      const first = pts[0].c, last = pts[pts.length-1].c;
+      const pct = (last / first - 1) * 100;
+      const sign = pct >= 0 ? '+' : '';
+      const col = pct >= 0 ? 'var(--green)' : 'var(--red)';
+      const arrow = pct >= 0 ? '▲' : '▼';
+      perfEl.innerHTML = `<span style="color:${col};font-weight:700">${arrow} ${sign}${pct.toFixed(2)}% nel periodo</span>`;
+    } else {
+      perfEl.innerHTML = '';
+    }
+
+    // crosshair interaction
+    const getIdx = clientX => {
+      const st = detailChartState;
+      if (!st) return null;
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = clientX - rect.left;
+      const raw = (mouseX - st.PAD.left) / st.cW * (st.pts.length - 1);
+      return Math.max(0, Math.min(st.pts.length - 1, Math.round(raw)));
+    };
+    canvas.onmousemove = e => {
+      const idx = getIdx(e.clientX);
+      if (idx !== null) drawPriceChart(canvas, pts, range, idx);
+    };
+    canvas.onmouseleave = () => drawPriceChart(canvas, pts, range, null);
+    canvas.ontouchmove = e => {
+      e.preventDefault();
+      const idx = getIdx(e.touches[0].clientX);
+      if (idx !== null) drawPriceChart(canvas, pts, range, idx);
+    };
   } catch(e) {
     loading.textContent = 'Errore caricamento dati';
     loading.classList.remove('hidden');
   }
 }
 
-function drawPriceChart(canvas, pts, range) {
-  // Hi-DPI
+function drawPriceChart(canvas, pts, range, hoverIdx) {
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
   canvas.width  = rect.width  * dpr;
@@ -2194,14 +2236,17 @@ function drawPriceChart(canvas, pts, range) {
   const toX = i => PAD.left + (i / (pts.length - 1)) * cW;
   const toY = v => PAD.top + cH - (v - yBase) * yScale;
 
-  // gradient fill
-  const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + cH);
   const isDown = closes[closes.length-1] < closes[0];
   const lineColor = isDown ? '#f85149' : '#3fb950';
+
+  // save state for hover hit-testing
+  detailChartState = { pts, PAD, cW, cH, W, H, range, lineColor, yBase, yScale };
+
+  // gradient fill
+  const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + cH);
   grad.addColorStop(0, isDown ? 'rgba(248,81,73,.22)' : 'rgba(63,185,80,.22)');
   grad.addColorStop(1, 'rgba(0,0,0,0)');
 
-  // area
   ctx.beginPath();
   pts.forEach((p, i) => {
     const x = toX(i), y = toY(p.c);
@@ -2213,7 +2258,6 @@ function drawPriceChart(canvas, pts, range) {
   ctx.fillStyle = grad;
   ctx.fill();
 
-  // line
   ctx.beginPath();
   pts.forEach((p, i) => {
     const x = toX(i), y = toY(p.c);
@@ -2224,9 +2268,8 @@ function drawPriceChart(canvas, pts, range) {
   ctx.lineJoin = 'round';
   ctx.stroke();
 
-  // Y axis labels
+  // Y axis
   ctx.fillStyle = '#8b949e';
-  ctx.font = `${11 * (1/dpr) + 10}px sans-serif`;
   ctx.font = '11px sans-serif';
   ctx.textAlign = 'right';
   const yTicks = 4;
@@ -2242,7 +2285,7 @@ function drawPriceChart(canvas, pts, range) {
     ctx.stroke();
   }
 
-  // X axis labels
+  // X axis
   ctx.textAlign = 'center';
   ctx.fillStyle = '#8b949e';
   const xTicks = Math.min(5, pts.length - 1);
@@ -2251,23 +2294,93 @@ function drawPriceChart(canvas, pts, range) {
     const x = toX(idx);
     const d = new Date(pts[idx].t * 1000);
     let label;
-    if (range === '1d') {
-      label = d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
-    } else if (range === '5d') {
-      label = d.toLocaleDateString('it-IT', {weekday:'short', day:'numeric'});
-    } else {
-      label = d.toLocaleDateString('it-IT', {day:'numeric', month:'short'});
-    }
+    if (range === '1d') label = d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+    else if (range === '5d') label = d.toLocaleDateString('it-IT', {weekday:'short', day:'numeric'});
+    else label = d.toLocaleDateString('it-IT', {day:'numeric', month:'short'});
     ctx.fillText(label, x, H - 8);
   }
 
-  // last price dot
-  const lastX = toX(pts.length - 1);
-  const lastY = toY(closes[closes.length - 1]);
-  ctx.beginPath();
-  ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
-  ctx.fillStyle = lineColor;
-  ctx.fill();
+  // last price dot (only when no hover)
+  if (hoverIdx === null || hoverIdx === undefined) {
+    const lastX = toX(pts.length - 1);
+    const lastY = toY(closes[closes.length - 1]);
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+    ctx.fillStyle = lineColor;
+    ctx.fill();
+  }
+
+  // ── crosshair ──
+  if (hoverIdx != null && hoverIdx >= 0 && hoverIdx < pts.length) {
+    const hp = pts[hoverIdx];
+    const hx = toX(hoverIdx);
+    const hy = toY(hp.c);
+
+    // vertical line
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(139,148,158,.5)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 3]);
+    ctx.moveTo(hx, PAD.top);
+    ctx.lineTo(hx, PAD.top + cH);
+    ctx.stroke();
+    // horizontal line
+    ctx.beginPath();
+    ctx.moveTo(PAD.left, hy);
+    ctx.lineTo(PAD.left + cW, hy);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // dot
+    ctx.beginPath();
+    ctx.arc(hx, hy, 5, 0, Math.PI * 2);
+    ctx.fillStyle = lineColor;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(hx, hy, 3, 0, Math.PI * 2);
+    ctx.fillStyle = '#0d1117';
+    ctx.fill();
+
+    // tooltip pill
+    const d = new Date(hp.t * 1000);
+    let dateStr;
+    if (range === '1d') dateStr = d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+    else if (range === '5d') dateStr = d.toLocaleDateString('it-IT', {weekday:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
+    else dateStr = d.toLocaleDateString('it-IT', {day:'numeric', month:'short', year:'numeric'});
+    const priceStr = hp.c.toLocaleString('it-IT', {minimumFractionDigits:2, maximumFractionDigits:3});
+    const line1 = priceStr;
+    const line2 = dateStr;
+
+    ctx.font = 'bold 12px sans-serif';
+    const w1 = ctx.measureText(line1).width;
+    ctx.font = '10px sans-serif';
+    const w2 = ctx.measureText(line2).width;
+    const bw = Math.max(w1, w2) + 20;
+    const bh = 36;
+    let bx = hx + 10;
+    if (bx + bw > W - 4) bx = hx - bw - 10;
+    let by = hy - bh / 2;
+    if (by < PAD.top) by = PAD.top;
+    if (by + bh > PAD.top + cH) by = PAD.top + cH - bh;
+
+    // box
+    ctx.fillStyle = '#1c2128';
+    ctx.strokeStyle = '#30363d';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, bh, 6);
+    ctx.fill();
+    ctx.stroke();
+
+    // text
+    ctx.fillStyle = '#e6edf3';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(line1, bx + 10, by + 14);
+    ctx.fillStyle = '#8b949e';
+    ctx.font = '10px sans-serif';
+    ctx.fillText(line2, bx + 10, by + 28);
+  }
 }
 </script>
 </body>
