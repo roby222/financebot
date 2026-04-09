@@ -390,11 +390,11 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
   </div>
   <div class="header-right">
     <div class="tabs">
-      <button class="tab-btn" onclick="switchTab('cards')">📊 Live</button>
-      <button class="tab-btn active" onclick="switchTab('signals')">📈 Segnali</button>
+      <button class="tab-btn" onclick="switchTab('cards')" data-i18n="tab_live">📊 Live</button>
+      <button class="tab-btn active" onclick="switchTab('signals')" data-i18n="tab_signals">📈 Segnali</button>
     </div>
     <div class="switcher" id="cur-sw">
-      <button class="active" onclick="setCurrency('native')">Nativa</button>
+      <button class="active" onclick="setCurrency('native')" data-i18n="cur_native">Nativa</button>
       <button onclick="setCurrency('EUR')">EUR</button>
       <button onclick="setCurrency('USD')">USD</button>
     </div>
@@ -409,20 +409,21 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
         <span id="cd-lbl">60s</span>
       </div>
       <button class="refresh-btn" onclick="manualRefresh()">↺</button>
-      <button class="help-btn" onclick="openHelp()" title="Guida completa">?</button>
+      <button class="help-btn" onclick="openHelp()" id="help-btn" title="Guida completa">?</button>
+      <button class="refresh-btn" id="lang-btn" onclick="toggleLang()" title="Switch language" style="font-size:.85rem;padding:3px 7px">🇬🇧</button>
     </div>
   </div>
 </header>
 
 <div class="add-wrap">
   <form class="add-form" id="add-form">
-    <input id="sym-input" type="text" placeholder="Cerca per ticker, ISIN o nome (es. SWDA, IE00…)" autocomplete="off" spellcheck="false"/>
-    <button type="submit" id="add-btn">+ Aggiungi</button>
+    <input id="sym-input" type="text" placeholder="Cerca per ticker, ISIN o nome (es. SWDA, IE00…)" autocomplete="off" spellcheck="false" data-i18n-placeholder="search_placeholder"/>
+    <button type="submit" id="add-btn" data-i18n="add_btn">+ Aggiungi</button>
   </form>
   <div class="ac-drop" id="ac-drop"></div>
   <div class="list-io">
-    <button class="io-btn" onclick="exportList()" title="Scarica la tua lista personalizzata">⬇ Esporta lista</button>
-    <button class="io-btn" onclick="document.getElementById('import-input').click()" title="Ripristina lista da file">⬆ Importa lista</button>
+    <button class="io-btn" onclick="exportList()" data-i18n="export_btn" data-i18n-title="export_title">⬇ Esporta lista</button>
+    <button class="io-btn" onclick="document.getElementById('import-input').click()" data-i18n="import_btn" data-i18n-title="import_title">⬆ Importa lista</button>
     <input type="file" id="import-input" accept=".json" style="display:none" onchange="importList(event)">
   </div>
 </div>
@@ -432,25 +433,25 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
   <div id="cards-grid" class="cards-grid"></div>
   <div id="cards-empty" class="empty" style="display:none">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-    <h2>Nessun titolo</h2>
+    <h2 data-i18n="empty_title">Nessun titolo</h2>
   </div>
 </div>
 
 <!-- MACRO BAR (always visible) -->
 <div class="macro-bar" id="macro-bar">
-  <span class="macro-lbl">Macro</span>
+  <span class="macro-lbl" data-i18n="macro_lbl">Macro</span>
   <div class="macro-section" id="macro-items">
     <span style="color:var(--muted);font-size:.75rem">Caricamento…</span>
   </div>
   <div class="macro-sep"></div>
-  <span class="regime-badge regime-unknown" id="regime-badge">Regime —</span>
+  <span class="regime-badge regime-unknown" id="regime-badge"></span>
   <div class="macro-sep"></div>
   <div class="scen-group">
-    <span class="scen-lbl">Scenario</span>
-    <button class="scen-btn neutro active"   id="scen-neutro"      onclick="setScenario('neutro')">⚖️ Neutro</button>
-    <button class="scen-btn volatile"        id="scen-volatile"    onclick="setScenario('volatile')">😵 Volatile</button>
-    <button class="scen-btn escalation"      id="scen-escalation"  onclick="setScenario('escalation')">🔥 Escalation</button>
-    <button class="scen-btn tregua"          id="scen-tregua"      onclick="setScenario('tregua')">🕊️ De-escalation</button>
+    <span class="scen-lbl" data-i18n="scen_lbl">Scenario</span>
+    <button class="scen-btn neutro active"   id="scen-neutro"      onclick="setScenario('neutro')"     data-i18n="scen_neutro">⚖️ Neutro</button>
+    <button class="scen-btn volatile"        id="scen-volatile"    onclick="setScenario('volatile')"   data-i18n="scen_volatile">😵 Volatile</button>
+    <button class="scen-btn escalation"      id="scen-escalation"  onclick="setScenario('escalation')" data-i18n="scen_escalation">🔥 Escalation</button>
+    <button class="scen-btn tregua"          id="scen-tregua"      onclick="setScenario('tregua')"     data-i18n="scen_tregua">🕊️ De-escalation</button>
   </div>
 </div>
 
@@ -458,10 +459,10 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 <div id="view-signals" class="view active">
   <div class="signals-wrap">
     <div class="sig-header">
-      <h2>📈 Segnali di Trading</h2>
+      <h2 data-i18n="signals_heading">📈 Segnali di Trading</h2>
       <div class="sig-meta">
         <span id="sig-status">RSI(14) · MACD(12/26/9) · Bollinger(20/2σ) · SMA50 · Pivot Points</span>
-        <button class="refresh-btn" onclick="refreshSignals(true)">↺ Aggiorna</button>
+        <button class="refresh-btn" onclick="refreshSignals(true)" data-i18n="signals_refresh">↺ Aggiorna</button>
       </div>
     </div>
     <div class="sig-load-bar" id="sig-load-bar"></div>
@@ -472,18 +473,18 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
             <th class="sortable" data-sort="ticker" onclick="sortBy('ticker')">Ticker <span class="th-sort-icon">⇅</span></th>
             <th class="sortable" data-sort="name" onclick="sortBy('name')">ETF <span class="th-sort-icon">⇅</span></th>
             <th class="c sortable" data-sort="driver" onclick="sortBy('driver')">Driver <span class="th-sort-icon">⇅</span></th>
-            <th class="r sortable" data-sort="price" onclick="sortBy('price')">Prezzo <span class="th-sort-icon">⇅</span></th>
-            <th class="r sortable" data-sort="pct" onclick="sortBy('pct')">Var% <span class="th-sort-icon">⇅</span></th>
-            <th class="c sortable" data-sort="signal" onclick="sortBy('signal')">SEGNALE <span class="th-sort-icon">⇅</span></th>
-            <th class="r sortable" data-sort="e1" onclick="sortBy('e1')" title="E1 — ingresso 30% a S1">E1 <span class="th-sort-icon">⇅</span></th>
-            <th class="r sortable" data-sort="e2" onclick="sortBy('e2')" title="E2 — ingresso 30% a mid S1-S2">E2 <span class="th-sort-icon">⇅</span></th>
-            <th class="r sortable" data-sort="e3" onclick="sortBy('e3')" title="E3 — ingresso 40% a S2">E3 <span class="th-sort-icon">⇅</span></th>
-            <th class="r sortable" data-sort="sell" onclick="sortBy('sell')" title="Vendi ≥ R1 (prima resistenza)">R1 <span class="th-sort-icon">⇅</span></th>
-            <th class="r sortable" data-sort="target" onclick="sortBy('target')" title="Target R2 (seconda resistenza)">R2 <span class="th-sort-icon">⇅</span></th>
-            <th class="c sortable" data-sort="rsi" onclick="sortBy('rsi')" title="RSI(14) — &lt;30 ipervenduto · &gt;70 ipercomprato">RSI <span class="th-sort-icon">⇅</span></th>
-            <th class="r sortable" data-sort="sma" onclick="sortBy('sma')" title="Distanza % dalla SMA50">SMA50 <span class="th-sort-icon">⇅</span></th>
-            <th class="c sortable" data-sort="macd" onclick="sortBy('macd')" title="MACD(12/26/9) — istogramma">MACD <span class="th-sort-icon">⇅</span></th>
-            <th class="c sortable" data-sort="vol" onclick="sortBy('vol')" title="Volume odierno ÷ media 20 sessioni">Vol <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="price" onclick="sortBy('price')" data-i18n-th="th_price">Prezzo <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="pct" onclick="sortBy('pct')" data-i18n-th="th_var">Var% <span class="th-sort-icon">⇅</span></th>
+            <th class="c sortable" data-sort="signal" onclick="sortBy('signal')" data-i18n-th="th_signal">SEGNALE <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="e1" onclick="sortBy('e1')" data-i18n-title="th_e1_title">E1 <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="e2" onclick="sortBy('e2')" data-i18n-title="th_e2_title">E2 <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="e3" onclick="sortBy('e3')" data-i18n-title="th_e3_title">E3 <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="sell" onclick="sortBy('sell')" data-i18n-title="th_r1_title">R1 <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="target" onclick="sortBy('target')" data-i18n-title="th_r2_title">R2 <span class="th-sort-icon">⇅</span></th>
+            <th class="c sortable" data-sort="rsi" onclick="sortBy('rsi')" data-i18n-title="th_rsi_title">RSI <span class="th-sort-icon">⇅</span></th>
+            <th class="r sortable" data-sort="sma" onclick="sortBy('sma')" data-i18n-title="th_sma_title">SMA50 <span class="th-sort-icon">⇅</span></th>
+            <th class="c sortable" data-sort="macd" onclick="sortBy('macd')" data-i18n-title="th_macd_title">MACD <span class="th-sort-icon">⇅</span></th>
+            <th class="c sortable" data-sort="vol" onclick="sortBy('vol')" data-i18n-title="th_vol_title">Vol <span class="th-sort-icon">⇅</span></th>
           </tr>
         </thead>
         <tbody id="sig-tbody"></tbody>
@@ -492,16 +493,16 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
   </div>
   <!-- Legend -->
   <div class="legend">
-    <span><span class="legend-title">Segnali:</span></span>
-    <span class="legend-item"><span class="sig-badge sig-buy-strong">★ COMPRA</span> ≥3/4 bull</span>
-    <span class="legend-item"><span class="sig-badge sig-buy">↑ ACCUM.</span> 2/4 bull</span>
-    <span class="legend-item"><span class="sig-badge sig-hold">◆ HOLD</span> neutro</span>
-    <span class="legend-item"><span class="sig-badge sig-sell">↓ RIDUCI</span> 2/4 bear</span>
-    <span class="legend-item"><span class="sig-badge sig-sell-strong">✖ VENDI</span> ≥3/4 bear</span>
+    <span><span class="legend-title" data-i18n="legend_signals">Segnali:</span></span>
+    <span class="legend-item"><span class="sig-badge sig-buy-strong" data-i18n="sig_buy_strong">★ COMPRA</span> ≥3/4 bull</span>
+    <span class="legend-item"><span class="sig-badge sig-buy" data-i18n="sig_buy">↑ ACCUM.</span> 2/4 bull</span>
+    <span class="legend-item"><span class="sig-badge sig-hold" data-i18n="sig_hold">◆ HOLD</span> <span data-i18n="sig_hold_desc">neutro</span></span>
+    <span class="legend-item"><span class="sig-badge sig-sell" data-i18n="sig_sell">↓ RIDUCI</span> 2/4 bear</span>
+    <span class="legend-item"><span class="sig-badge sig-sell-strong" data-i18n="sig_sell_strong">✖ VENDI</span> ≥3/4 bear</span>
     <span class="sep">|</span>
-    <span><span class="legend-title">Livelli:</span> S1=buy S2=stop R1=vendi R2=target (Pivot Points sessione precedente)</span>
+    <span><span class="legend-title" data-i18n="legend_levels_label">Livelli:</span> <span data-i18n="legend_levels_text">S1=buy S2=stop R1=vendi R2=target (Pivot Points sessione precedente)</span></span>
     <span class="sep">|</span>
-    <span><span class="legend-title">RSI:</span> &lt;30 ipervenduto · &gt;70 ipercomprato</span>
+    <span><span class="legend-title">RSI:</span> <span data-i18n="legend_rsi">&lt;30 ipervenduto · &gt;70 ipercomprato</span></span>
   </div>
 </div>
 
@@ -527,16 +528,16 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 <div class="help-overlay hidden" id="help-overlay" onclick="closeHelpIfBg(event)">
   <div class="help-modal">
     <div class="help-modal-head">
-      <h2>📖 Guida <span>FinancePalmirioBot</span></h2>
-      <button class="help-close" onclick="closeHelp()">✕ Chiudi</button>
+      <h2 data-i18n="help_title">📖 Guida <span>FinancePalmirioBot</span></h2>
+      <button class="help-close" onclick="closeHelp()" data-i18n="help_close">✕ Chiudi</button>
     </div>
     <div class="help-body">
       <!-- ── NAV ── -->
       <nav class="help-nav" id="help-nav">
-        <a onclick="showSection('overview')" class="active">🏠 Panoramica</a>
-        <a onclick="showSection('macro')">📡 Barra Macro</a>
-        <a onclick="showSection('regime')">🎚️ Regime</a>
-        <a onclick="showSection('scenarios')">🎭 Scenari</a>
+        <a onclick="showSection('overview')" class="active" data-i18n="nav_overview">🏠 Panoramica</a>
+        <a onclick="showSection('macro')" data-i18n="nav_macro">📡 Barra Macro</a>
+        <a onclick="showSection('regime')" data-i18n="nav_regime">🎚️ Regime</a>
+        <a onclick="showSection('scenarios')" data-i18n="nav_scenarios">🎭 Scenari</a>
         <div class="nav-sep"></div>
         <a onclick="showSection('rsi')">📊 RSI(14)</a>
         <a onclick="showSection('macd')">〰️ MACD</a>
@@ -544,9 +545,9 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
         <a onclick="showSection('sma')">📉 SMA50</a>
         <a onclick="showSection('pivot')">📍 Pivot Points</a>
         <div class="nav-sep"></div>
-        <a onclick="showSection('signal')">🎯 Segnale</a>
+        <a onclick="showSection('signal')" data-i18n="nav_signal">🎯 Segnale</a>
         <a onclick="showSection('levels')">🪜 E1/E2/E3</a>
-        <a onclick="showSection('etf')">📋 ETF lista</a>
+        <a onclick="showSection('etf')" data-i18n="nav_etf">📋 ETF lista</a>
         <a onclick="showSection('workflow')">✅ Workflow</a>
       </nav>
 
@@ -554,7 +555,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
       <div class="help-content">
 
         <!-- PANORAMICA -->
-        <div class="help-section active" id="sec-overview">
+        <div class="help-section active" id="sec-overview" data-i18n-html="sec_overview">
           <h3>🏠 Panoramica</h3>
           <p><strong>FinancePalmirioBot</strong> è una dashboard web per monitorare ETF tematici legati ai macro-trend geopolitici (Iran-USA, Russia-Ucraina, ecc.). Aggrega prezzi live da Yahoo Finance, calcola indicatori tecnici su dati storici a 3 mesi, e combina tutto in un <strong>segnale di trading</strong> che si adatta allo scenario geopolitico corrente.</p>
           <h4>Le tre viste principali</h4>
@@ -570,7 +571,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
         </div>
 
         <!-- MACRO BAR -->
-        <div class="help-section" id="sec-macro">
+        <div class="help-section" id="sec-macro" data-i18n-html="sec_macro">
           <h3>📡 Barra Macro</h3>
           <p>Sempre visibile in fondo alla pagina. Mostra in tempo reale quattro benchmark globali per leggere il contesto di mercato.</p>
           <table class="help-tbl">
@@ -584,7 +585,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
         </div>
 
         <!-- REGIME -->
-        <div class="help-section" id="sec-regime">
+        <div class="help-section" id="sec-regime" data-i18n-html="sec_regime">
           <h3>🎚️ Regime di Mercato (auto-rilevato)</h3>
           <p>Il sistema classifica automaticamente il contesto di mercato ogni minuto combinando i dati di Gold, S&P500 e VIX. Il badge appare nella barra macro.</p>
           <table class="help-tbl">
@@ -597,7 +598,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
         </div>
 
         <!-- SCENARI -->
-        <div class="help-section" id="sec-scenarios">
+        <div class="help-section" id="sec-scenarios" data-i18n-html="sec_scenarios">
           <h3>🎭 Scenari Geopolitici (manuali)</h3>
           <p>Permettono di "colorare" i segnali tecnici con la tua visione macro. Si selezionano manualmente nella barra macro. Cambiare scenario aggiorna istantaneamente tutti i segnali senza ricaricare i dati.</p>
           <p><strong>Toggle:</strong> clicca uno scenario attivo per tornare a Neutro. La selezione viene salvata automaticamente.</p>
@@ -621,7 +622,7 @@ Volatile:      ENERGIA +0.20 PAURA +0.15  METALLI +0.10<br>
         </div>
 
         <!-- RSI -->
-        <div class="help-section" id="sec-rsi">
+        <div class="help-section" id="sec-rsi" data-i18n-html="sec_rsi">
           <h3>📊 RSI(14) — Relative Strength Index</h3>
           <p>Misura la forza del trend recente su <strong>14 giorni</strong>. Va da 0 a 100. Calcolato su dati storici giornalieri degli ultimi 3 mesi.</p>
           <table class="help-tbl">
@@ -636,7 +637,7 @@ Volatile:      ENERGIA +0.20 PAURA +0.15  METALLI +0.10<br>
         </div>
 
         <!-- MACD -->
-        <div class="help-section" id="sec-macd">
+        <div class="help-section" id="sec-macd" data-i18n-html="sec_macd">
           <h3>〰️ MACD(12/26/9) — Moving Average Convergence/Divergence</h3>
           <p>Confronta due medie mobili esponenziali per misurare il <strong>momentum</strong> del trend.</p>
           <table class="help-tbl">
@@ -656,7 +657,7 @@ Volatile:      ENERGIA +0.20 PAURA +0.15  METALLI +0.10<br>
         </div>
 
         <!-- BOLLINGER -->
-        <div class="help-section" id="sec-boll">
+        <div class="help-section" id="sec-boll" data-i18n-html="sec_boll">
           <h3>〽️ Bollinger Bands (20/2σ)</h3>
           <p>Tre bande calcolate intorno alla media mobile a 20 giorni. La larghezza delle bande si espande in periodi di alta volatilità e si restringe in periodi tranquilli.</p>
           <div class="help-code">
@@ -675,7 +676,7 @@ Banda inferiore = SMA(20) − 2 × deviazione standard
         </div>
 
         <!-- SMA50 -->
-        <div class="help-section" id="sec-sma">
+        <div class="help-section" id="sec-sma" data-i18n-html="sec_sma">
           <h3>📉 SMA50 — Media Mobile Semplice 50 giorni</h3>
           <p>La media dei prezzi di chiusura degli ultimi <strong>50 giorni di trading</strong>. Rappresenta il "giusto prezzo" di medio termine e definisce la direzione del trend.</p>
           <table class="help-tbl">
@@ -687,7 +688,7 @@ Banda inferiore = SMA(20) − 2 × deviazione standard
         </div>
 
         <!-- PIVOT -->
-        <div class="help-section" id="sec-pivot">
+        <div class="help-section" id="sec-pivot" data-i18n-html="sec_pivot">
           <h3>📍 Pivot Points</h3>
           <p>Livelli di supporto e resistenza calcolati automaticamente dai dati della <strong>sessione precedente</strong> (High, Low, Close). Aggiornati ogni giorno con i dati del giorno prima.</p>
           <div class="help-code">
@@ -708,7 +709,7 @@ S2 = PP − (High − Low)             ← Supporto 2   (supporto più profondo)
         </div>
 
         <!-- SEGNALE -->
-        <div class="help-section" id="sec-signal">
+        <div class="help-section" id="sec-signal" data-i18n-html="sec_signal">
           <h3>🎯 Segnale Composito</h3>
           <p>Il sistema combina tutti gli indicatori in un <strong>punteggio unico</strong> e lo traduce in un badge colorato. Passando il mouse sul badge vedi lo score esatto (es. "Score 0.82").</p>
           <h4>Formula di calcolo</h4>
@@ -734,7 +735,7 @@ Agg. regime       = +0,20 se regime corrente = regime ideale ETF<br>
         </div>
 
         <!-- LIVELLI E1/E2/E3 -->
-        <div class="help-section" id="sec-levels">
+        <div class="help-section" id="sec-levels" data-i18n-html="sec_levels">
           <h3>🪜 Ladder di Entrata E1 / E2 / E3</h3>
           <p>Strategia di acquisto <strong>scaglionato</strong> (ladder entry) per ridurre il rischio di timing sbagliato. Invece di comprare tutto in un colpo solo, distribuisci gli acquisti su tre livelli di supporto.</p>
           <table class="help-tbl">
@@ -761,7 +762,7 @@ Se non usavi la ladder e compravi tutto a 95 → avresti pagato 3% in più
         </div>
 
         <!-- ETF LISTA -->
-        <div class="help-section" id="sec-etf">
+        <div class="help-section" id="sec-etf" data-i18n-html="sec_etf">
           <h3>📋 ETF in Watchlist</h3>
           <p>19 ETF tematici selezionati per la loro sensibilità ai macro-trend geopolitici. Ogni ETF ha un <strong>driver</strong> (la tematica che guida il prezzo) e un <strong>regime ideale</strong> (contesto di mercato in cui performa meglio).</p>
           <table class="help-tbl">
@@ -780,7 +781,7 @@ Se non usavi la ladder e compravi tutto a 95 → avresti pagato 3% in più
         </div>
 
         <!-- WORKFLOW -->
-        <div class="help-section" id="sec-workflow">
+        <div class="help-section" id="sec-workflow" data-i18n-html="sec_workflow">
           <h3>✅ Workflow Quotidiano</h3>
           <p>Come usare la dashboard in modo efficace in pochi minuti ogni giorno:</p>
           <div class="help-step">
@@ -841,7 +842,7 @@ Se non usavi la ladder e compravi tutto a 95 → avresti pagato 3% in più
     <div id="detail-period-perf" style="padding:4px 20px 0;font-size:.8rem;min-height:20px"></div>
     <div class="detail-chart-wrap">
       <canvas class="detail-canvas" id="detail-canvas"></canvas>
-      <div class="detail-loading hidden" id="detail-loading">Caricamento grafico…</div>
+      <div class="detail-loading hidden" id="detail-loading"></div>
     </div>
     <div class="detail-stats" id="detail-stats"></div>
   </div>
@@ -850,6 +851,373 @@ Se non usavi la ladder e compravi tutto a 95 → avresti pagato 3% in più
 <div id="toast"></div>
 
 <script>
+/* ═══════════════════════════════════════════════════════════
+   I18N
+═══════════════════════════════════════════════════════════ */
+const BROWSER_LANG = (navigator.language || navigator.userLanguage || 'en').toLowerCase().startsWith('it') ? 'it' : 'en';
+let LANG = (() => { try { return localStorage.getItem('fpb_lang') || BROWSER_LANG; } catch(e){ return BROWSER_LANG; } })();
+
+const STRINGS = {
+  it: {
+    tab_live:'📊 Live', tab_signals:'📈 Segnali',
+    cur_native:'Nativa',
+    search_placeholder:'Cerca per ticker, ISIN o nome (es. SWDA, IE00…)',
+    add_btn:'+ Aggiungi',
+    export_btn:'⬇ Esporta lista', export_title:'Scarica la tua lista personalizzata',
+    import_btn:'⬆ Importa lista', import_title:'Ripristina lista da file',
+    empty_title:'Nessun titolo',
+    macro_lbl:'Macro', scen_lbl:'Scenario',
+    scen_neutro:'⚖️ Neutro', scen_volatile:'😵 Volatile',
+    scen_escalation:'🔥 Escalation', scen_tregua:'🕊️ De-escalation',
+    signals_heading:'📈 Segnali di Trading', signals_refresh:'↺ Aggiorna',
+    th_price:'Prezzo', th_var:'Var%', th_signal:'SEGNALE',
+    th_e1_title:'E1 — ingresso 30% a S1',
+    th_e2_title:'E2 — ingresso 30% a mid S1-S2',
+    th_e3_title:'E3 — ingresso 40% a S2',
+    th_r1_title:'Vendi ≥ R1 (prima resistenza)',
+    th_r2_title:'Target R2 (seconda resistenza)',
+    th_rsi_title:'RSI(14) — <30 ipervenduto · >70 ipercomprato',
+    th_sma_title:'Distanza % dalla SMA50',
+    th_macd_title:'MACD(12/26/9) — istogramma',
+    th_vol_title:'Volume odierno ÷ media 20 sessioni',
+    legend_signals:'Segnali:', legend_levels_label:'Livelli:',
+    legend_levels_text:'S1=buy S2=stop R1=vendi R2=target (Pivot Points sessione precedente)',
+    legend_rsi:'<30 ipervenduto · >70 ipercomprato',
+    sig_buy_strong:'★ COMPRA', sig_buy:'↑ ACCUM.', sig_hold:'◆ HOLD',
+    sig_hold_desc:'neutro', sig_sell:'↓ RIDUCI', sig_sell_strong:'✖ VENDI',
+    help_title:'📖 Guida <span>FinancePalmirioBot</span>', help_close:'✕ Chiudi',
+    nav_overview:'🏠 Panoramica', nav_macro:'📡 Barra Macro',
+    nav_regime:'🎚️ Regime', nav_scenarios:'🎭 Scenari',
+    nav_signal:'🎯 Segnale', nav_etf:'📋 ETF lista',
+    // dynamic
+    mkt_open:'Aperto', mkt_pre:'Pre-Mkt', mkt_post:'Post-Mkt', mkt_closed:'Chiuso',
+    loading:'Caricamento…', chart_loading:'Caricamento grafico…', chart_error:'Errore caricamento dati',
+    period_perf_in:'nel periodo',
+    warn_below_supports:'Prezzo sotto tutti i supporti — livelli ora fungono da resistenza',
+    vol_hi_tip:'Vol {r}× media — conferma il movimento',
+    vol_lo_tip:'Vol {r}× media — segnale poco convinto',
+    vol_norm_tip:'Vol {r}× media',
+    toast_copied:'📋 {id} copiato', toast_copy_fail:'❌ Copia non riuscita',
+    toast_refreshing:'Aggiornamento…', toast_already:'${id} già presente',
+    toast_added:'{id} aggiunto, caricamento…', toast_removed:'{id} rimosso',
+    toast_exported:'Lista esportata', toast_imported:'Lista importata — {n} extra, {m} nascosti',
+    toast_invalid:'File non valido', toast_wl_warn:'⚠️ watchlist.json non trovato — uso lista predefinita',
+    detail_open:'Apri dettaglio {id}',
+    stat_rsi:'RSI 14', stat_macd:'MACD H', stat_sma:'vs SMA50',
+    stat_vol:'Vol ×avg', stat_pivot:'Pivot PP', stat_r1:'R1', stat_s1:'S1',
+    regime_unknown:'Regime —',
+    // help sections html
+    sec_overview: `<h3>🏠 Panoramica</h3>
+<p><strong>FinancePalmirioBot</strong> è una dashboard web per monitorare ETF tematici legati ai macro-trend geopolitici (Iran-USA, Russia-Ucraina, ecc.). Aggrega prezzi live da Yahoo Finance, calcola indicatori tecnici su dati storici a 3 mesi, e combina tutto in un <strong>segnale di trading</strong> che si adatta allo scenario geopolitico corrente.</p>
+<h4>Le tre viste principali</h4>
+<table class="help-tbl"><tr><th>Tab</th><th>Cosa mostra</th></tr>
+<tr><td>📊 Live</td><td>Card per ogni ETF con prezzo in tempo reale, variazione giornaliera, range di seduta e mini-segnale</td></tr>
+<tr><td>📈 Segnali</td><td>Tabella completa con tutti gli indicatori tecnici, livelli di entrata/uscita e segnale composito — <strong>ordinabile cliccando le intestazioni</strong></td></tr></table>
+<h4>Aggiornamento automatico</h4>
+<p>I <strong>prezzi live</strong> si aggiornano ogni <strong>60 secondi</strong>. Gli <strong>indicatori tecnici</strong> vengono caricati all'apertura della tab Segnali e si possono aggiornare manualmente con <strong>↺ Aggiorna</strong>.</p>
+<div class="help-callout"><strong>Nota valuta:</strong> Gli ETF su London Stock Exchange vengono quotati in pence (GBp). La dashboard normalizza automaticamente in sterline (GBP) dividendo per 100.</div>`,
+    sec_macro: `<h3>📡 Barra Macro</h3>
+<p>Sempre visibile in cima alla pagina. Mostra in tempo reale quattro benchmark globali per leggere il contesto di mercato.</p>
+<table class="help-tbl"><tr><th>Simbolo</th><th>Cosa misura</th><th>Perché conta</th></tr>
+<tr><td>🛢️ Brent</td><td>Prezzo petrolio greggio</td><td>Proxy tensioni geopolitiche. Sale forte se si teme blocco Stretto di Hormuz</td></tr>
+<tr><td>🥇 Gold</td><td>Prezzo oro spot</td><td>Rifugio in fasi risk-off: sale quando c'è paura, scende in risk-on</td></tr>
+<tr><td>📊 S&P500</td><td>Indice azionario USA</td><td>Termometro del risk appetite globale</td></tr>
+<tr><td>😰 VIX</td><td>Volatilità implicita S&P500</td><td>"Fear index": sopra 25 il mercato è nervoso e incerto</td></tr></table>
+<div class="help-callout">La barra si aggiorna ogni 60 secondi. Cliccando <strong>↺</strong> si forza l'aggiornamento immediato.</div>`,
+    sec_regime: `<h3>🎚️ Regime di Mercato (auto-rilevato)</h3>
+<p>Il sistema classifica automaticamente il contesto di mercato ogni minuto combinando i dati di Gold, S&P500 e VIX.</p>
+<table class="help-tbl"><tr><th>Badge</th><th>Condizione</th><th>Significato</th></tr>
+<tr><td><span class="help-pill green">📈 Risk-On</span></td><td>Gold↓ e S&P500 &gt; +0,5%</td><td>Investitori comprano rischio. Favorisce ETF equity, tech, ciclo</td></tr>
+<tr><td><span class="help-pill red">🛡️ Risk-Off</span></td><td>Gold &gt; +0,5% e S&P500↓</td><td>Fuga verso sicurezza. Favorisce oro, argento, volatilità</td></tr>
+<tr><td><span class="help-pill orange">😵 Volatile</span></td><td>VIX &gt; 25 oppure |S&P500| &gt; 1,5%</td><td>Alta incertezza, movimenti bruschi in entrambe le direzioni</td></tr></table>
+<div class="help-callout"><strong>Differenza chiave:</strong> il regime viene <em>rilevato automaticamente</em> dai dati di mercato. Il regime corrente viene confrontato con il regime ideale di ogni ETF: se coincidono il segnale riceve un boost di <strong>+0,20</strong>, se sono opposti subisce una penalità di <strong>−0,20</strong>.</div>`,
+    sec_scenarios: `<h3>🎭 Scenari Geopolitici (manuali)</h3>
+<p>Permettono di "colorare" i segnali tecnici con la tua visione macro. Si selezionano manualmente nella barra macro.</p>
+<table class="help-tbl"><tr><th>Scenario</th><th>Contesto</th><th>Favorisce</th><th>Penalizza</th></tr>
+<tr><td>⚖️ Neutro</td><td>Nessun bias geopolitico, segnali puramente tecnici</td><td>—</td><td>—</td></tr>
+<tr><td>😵 Volatile</td><td>Incertezza elevata, nessuna direzione chiara</td><td>PAURA, ENERGIA</td><td>EQUITY, TECH</td></tr>
+<tr><td>🔥 Escalation</td><td>Tensione in aumento, rischio blocco Hormuz</td><td>ENERGIA ★, PAURA, METALLI</td><td>EQUITY, TECH, CICLO</td></tr>
+<tr><td>🕊️ De-escalation</td><td>Trattative, accordi, distensione</td><td>EQUITY, TECH, CICLO, INFRA</td><td>PAURA, ENERGIA, METALLI</td></tr></table>
+<div class="help-callout"><strong>Iran-USA vs Russia-Ucraina:</strong> In questo contesto il driver primario è <strong>ENERGIA</strong> (rischio blocco Stretto di Hormuz → shock petrolifero), non FOOD come nel conflitto ucraino.</div>`,
+    sec_rsi: `<h3>📊 RSI(14) — Relative Strength Index</h3>
+<p>Misura la forza del trend recente su <strong>14 giorni</strong>. Va da 0 a 100.</p>
+<table class="help-tbl"><tr><th>Valore</th><th>Zona</th><th>Segnale</th></tr>
+<tr><td><span class="help-pill green">&lt; 30</span></td><td>🟢 Ipervenduto forte</td><td>Possibile rimbalzo, zona acquisto</td></tr>
+<tr><td><span class="help-pill green">30–45</span></td><td>🟢 Debolezza</td><td>Leggero bias bullish</td></tr>
+<tr><td><span class="help-pill muted">45–55</span></td><td>⚪ Neutro</td><td>Nessun segnale direzionale chiaro</td></tr>
+<tr><td><span class="help-pill red">55–70</span></td><td>🔴 Forza</td><td>Leggero bias bearish</td></tr>
+<tr><td><span class="help-pill red">&gt; 70</span></td><td>🔴 Ipercomprato</td><td>Possibile correzione, zona vendita</td></tr></table>`,
+    sec_macd: `<h3>〰️ MACD(12/26/9)</h3>
+<p>Confronta due medie mobili esponenziali per misurare il <strong>momentum</strong> del trend.</p>
+<table class="help-tbl"><tr><th>Componente</th><th>Formula</th></tr>
+<tr><td>MACD Line</td><td>EMA(12) − EMA(26)</td></tr>
+<tr><td>Signal Line</td><td>EMA(9) della MACD Line</td></tr>
+<tr><td>Istogramma ★</td><td>MACD Line − Signal Line</td></tr></table>
+<div class="help-callout">Il MACD è un <strong>indicatore lagging</strong>: conferma trend già in atto, non li anticipa.</div>`,
+    sec_boll: `<h3>〽️ Bollinger Bands (20/2σ)</h3>
+<p>Tre bande calcolate intorno alla media mobile a 20 giorni.</p>
+<table class="help-tbl"><tr><th>Posizione prezzo</th><th>Segnale</th></tr>
+<tr><td>Sotto la banda inferiore</td><td><span class="help-pill green">++ Bullish</span></td></tr>
+<tr><td>Tra banda inf. e mid</td><td><span class="help-pill green">+ Lievemente bullish</span></td></tr>
+<tr><td>Intorno alla mid</td><td><span class="help-pill muted">Neutro</span></td></tr>
+<tr><td>Tra mid e banda sup.</td><td><span class="help-pill red">− Lievemente bearish</span></td></tr>
+<tr><td>Sopra la banda superiore</td><td><span class="help-pill red">−− Bearish</span></td></tr></table>`,
+    sec_sma: `<h3>📉 SMA50 — Media Mobile Semplice 50 giorni</h3>
+<p>La media dei prezzi di chiusura degli ultimi <strong>50 giorni di trading</strong>. Rappresenta la direzione del trend di medio termine.</p>
+<table class="help-tbl"><tr><th>Colonna "vs SMA50"</th><th>Significato</th></tr>
+<tr><td><span class="help-pill green">+X.XX%</span></td><td>Prezzo sopra la media → trend rialzista</td></tr>
+<tr><td><span class="help-pill red">−X.XX%</span></td><td>Prezzo sotto la media → trend ribassista</td></tr></table>`,
+    sec_pivot: `<h3>📍 Pivot Points</h3>
+<p>Livelli di supporto e resistenza calcolati dai dati della <strong>sessione precedente</strong>.</p>
+<div class="help-code">PP = (High + Low + Close) / 3<br>R1 = 2×PP − Low &nbsp;&nbsp; R2 = PP + (High − Low)<br>S1 = 2×PP − High &nbsp; S2 = PP − (High − Low)</div>
+<table class="help-tbl"><tr><th>Livello</th><th>Uso pratico</th></tr>
+<tr><td>S1</td><td>Primo ingresso (E1)</td></tr>
+<tr><td>S2</td><td>Supporto forte (E3)</td></tr>
+<tr><td>R1</td><td>Prima resistenza — take profit parziale</td></tr>
+<tr><td>R2</td><td>Obiettivo di prezzo</td></tr></table>`,
+    sec_signal: `<h3>🎯 Segnale Composito</h3>
+<p>Combina tutti gli indicatori in un <strong>punteggio unico</strong> e lo traduce in un badge colorato.</p>
+<div class="help-code">Score = Score tecnico + Aggiustamento scenario + Aggiustamento regime</div>
+<table class="help-tbl"><tr><th>Badge</th><th>Score</th><th>Significato</th></tr>
+<tr><td><span class="sig-badge sig-buy-strong">★ COMPRA</span></td><td>≥ +0,70</td><td>Forte segnale rialzista</td></tr>
+<tr><td><span class="sig-badge sig-buy">↑ ACCUM.</span></td><td>≥ +0,25</td><td>Accumulo progressivo consigliato</td></tr>
+<tr><td><span class="sig-badge sig-hold">◆ HOLD</span></td><td>−0,25 / +0,25</td><td>Nessuna direzione chiara</td></tr>
+<tr><td><span class="sig-badge sig-sell">↓ RIDUCI</span></td><td>≤ −0,25</td><td>Considera riduzione dell'esposizione</td></tr>
+<tr><td><span class="sig-badge sig-sell-strong">✖ VENDI</span></td><td>≤ −0,70</td><td>Forte segnale ribassista, uscita consigliata</td></tr></table>`,
+    sec_levels: `<h3>🪜 Ladder di Entrata E1 / E2 / E3</h3>
+<p>Strategia di acquisto <strong>scaglionato</strong> per ridurre il rischio di timing sbagliato.</p>
+<table class="help-tbl"><tr><th>Livello</th><th>Prezzo</th><th>Peso</th></tr>
+<tr><td><span class="help-pill green">E1</span></td><td>S1</td><td>30%</td></tr>
+<tr><td><span class="help-pill orange">E2</span></td><td>Midpoint S1–S2</td><td>30%</td></tr>
+<tr><td><span class="help-pill red">E3</span></td><td>S2</td><td>40%</td></tr></table>
+<div class="help-callout"><strong>Strategia:</strong> compra E1→E2→E3 con segnale ★ COMPRA o ↑ ACCUM., poi vendi a R1 o R2.</div>`,
+    sec_etf: `<h3>📋 ETF in Watchlist</h3>
+<p>ETF tematici selezionati per la loro sensibilità ai macro-trend geopolitici.</p>
+<table class="help-tbl"><tr><th>Driver</th><th>Tema</th></tr>
+<tr><td>😰 PAURA</td><td>Safe haven, oro fisico</td></tr>
+<tr><td>🥈 METALLI</td><td>Metalli preziosi e critici</td></tr>
+<tr><td>⚡ ENERGIA</td><td>Nucleare, rinnovabili</td></tr>
+<tr><td>💻 TECH</td><td>Tecnologia, semiconduttori</td></tr>
+<tr><td>📈 EQUITY</td><td>Azionario globale/qualità</td></tr>
+<tr><td>🏗️ INFRA</td><td>Infrastrutture fisiche</td></tr>
+<tr><td>🌍 GEO</td><td>Geopolitico diretto / minerali strategici</td></tr></table>`,
+    sec_workflow: `<h3>✅ Workflow Quotidiano</h3>
+<p>Come usare la dashboard in modo efficace ogni giorno:</p>
+<div class="help-step"><div class="help-step-num">1</div><p><strong>Guarda la Barra Macro</strong> — qual è il regime? Questo ti dice subito il contesto di mercato.</p></div>
+<div class="help-step"><div class="help-step-num">2</div><p><strong>Imposta lo Scenario</strong> — come leggi il contesto geopolitico oggi?</p></div>
+<div class="help-step"><div class="help-step-num">3</div><p><strong>Apri la tab Segnali</strong> → ordina per SEGNALE decrescente. I migliori ETF salgono in cima.</p></div>
+<div class="help-step"><div class="help-step-num">4</div><p><strong>Filtra per RSI</strong> — tra i migliori, cerca RSI sotto 45.</p></div>
+<div class="help-step"><div class="help-step-num">5</div><p><strong>Pianifica gli ingressi</strong> con E1/E2/E3.</p></div>
+<div class="help-callout"><strong>⚠️ Avvertenze:</strong> I dati vengono da Yahoo Finance tramite proxy — possibili ritardi fino a 15 minuti. I segnali sono <strong>puramente indicativi</strong> e non costituiscono consulenza finanziaria.</div>`,
+  },
+  en: {
+    tab_live:'📊 Live', tab_signals:'📈 Signals',
+    cur_native:'Native',
+    search_placeholder:'Search by ticker, ISIN or name (e.g. SWDA, IE00…)',
+    add_btn:'+ Add',
+    export_btn:'⬇ Export list', export_title:'Download your custom watchlist',
+    import_btn:'⬆ Import list', import_title:'Restore list from file',
+    empty_title:'No instruments',
+    macro_lbl:'Macro', scen_lbl:'Scenario',
+    scen_neutro:'⚖️ Neutral', scen_volatile:'😵 Volatile',
+    scen_escalation:'🔥 Escalation', scen_tregua:'🕊️ De-escalation',
+    signals_heading:'📈 Trading Signals', signals_refresh:'↺ Refresh',
+    th_price:'Price', th_var:'Chg%', th_signal:'SIGNAL',
+    th_e1_title:'E1 — 30% entry at S1',
+    th_e2_title:'E2 — 30% entry at mid S1-S2',
+    th_e3_title:'E3 — 40% entry at S2',
+    th_r1_title:'Sell ≥ R1 (first resistance)',
+    th_r2_title:'Target R2 (second resistance)',
+    th_rsi_title:'RSI(14) — <30 oversold · >70 overbought',
+    th_sma_title:'% distance from SMA50',
+    th_macd_title:'MACD(12/26/9) — histogram',
+    th_vol_title:'Today\'s volume ÷ 20-session average',
+    legend_signals:'Signals:', legend_levels_label:'Levels:',
+    legend_levels_text:'S1=buy S2=stop R1=sell R2=target (previous session Pivot Points)',
+    legend_rsi:'<30 oversold · >70 overbought',
+    sig_buy_strong:'★ BUY', sig_buy:'↑ ACCUM.', sig_hold:'◆ HOLD',
+    sig_hold_desc:'neutral', sig_sell:'↓ REDUCE', sig_sell_strong:'✖ SELL',
+    help_title:'📖 Guide <span>FinancePalmirioBot</span>', help_close:'✕ Close',
+    nav_overview:'🏠 Overview', nav_macro:'📡 Macro Bar',
+    nav_regime:'🎚️ Regime', nav_scenarios:'🎭 Scenarios',
+    nav_signal:'🎯 Signal', nav_etf:'📋 ETF list',
+    // dynamic
+    mkt_open:'Open', mkt_pre:'Pre-Mkt', mkt_post:'Post-Mkt', mkt_closed:'Closed',
+    loading:'Loading…', chart_loading:'Loading chart…', chart_error:'Error loading data',
+    period_perf_in:'in period',
+    warn_below_supports:'Price below all supports — levels now act as resistance',
+    vol_hi_tip:'Vol {r}× avg — confirms the move',
+    vol_lo_tip:'Vol {r}× avg — weak conviction',
+    vol_norm_tip:'Vol {r}× avg',
+    toast_copied:'📋 {id} copied', toast_copy_fail:'❌ Copy failed',
+    toast_refreshing:'Refreshing…', toast_already:'{id} already in list',
+    toast_added:'{id} added, loading…', toast_removed:'{id} removed',
+    toast_exported:'List exported', toast_imported:'List imported — {n} extra, {m} hidden',
+    toast_invalid:'Invalid file', toast_wl_warn:'⚠️ watchlist.json not found — using default list',
+    detail_open:'Open detail {id}',
+    stat_rsi:'RSI 14', stat_macd:'MACD H', stat_sma:'vs SMA50',
+    stat_vol:'Vol ×avg', stat_pivot:'Pivot PP', stat_r1:'R1', stat_s1:'S1',
+    regime_unknown:'Regime —',
+    // help sections html
+    sec_overview: `<h3>🏠 Overview</h3>
+<p><strong>FinancePalmirioBot</strong> is a web dashboard for monitoring thematic ETFs tied to geopolitical macro trends (Iran-USA, Russia-Ukraine, etc.). It aggregates live prices from Yahoo Finance, computes technical indicators on 3-month historical data, and combines everything into a <strong>trading signal</strong> that adapts to the current geopolitical scenario.</p>
+<h4>Main views</h4>
+<table class="help-tbl"><tr><th>Tab</th><th>What it shows</th></tr>
+<tr><td>📊 Live</td><td>Card for each ETF with real-time price, daily change, session range and mini-signal</td></tr>
+<tr><td>📈 Signals</td><td>Full table with all technical indicators, entry/exit levels and composite signal — <strong>sortable by clicking headers</strong></td></tr></table>
+<h4>Auto-refresh</h4>
+<p><strong>Live prices</strong> refresh every <strong>60 seconds</strong>. <strong>Technical indicators</strong> are loaded when the Signals tab is opened and can be refreshed manually with <strong>↺ Refresh</strong>.</p>
+<div class="help-callout"><strong>Currency note:</strong> ETFs on the London Stock Exchange are quoted in pence (GBp). The dashboard automatically normalises to pounds (GBP) by dividing by 100.</div>`,
+    sec_macro: `<h3>📡 Macro Bar</h3>
+<p>Always visible at the top of the page. Shows four global benchmarks in real time to read market context.</p>
+<table class="help-tbl"><tr><th>Symbol</th><th>What it measures</th><th>Why it matters</th></tr>
+<tr><td>🛢️ Brent</td><td>Crude oil price</td><td>Geopolitical tension proxy. Spikes on Strait of Hormuz risk</td></tr>
+<tr><td>🥇 Gold</td><td>Spot gold price</td><td>Risk-off refuge: rises on fear, falls in risk-on</td></tr>
+<tr><td>📊 S&P500</td><td>US equity index</td><td>Global risk appetite thermometer</td></tr>
+<tr><td>😰 VIX</td><td>Implied S&P500 volatility</td><td>Fear index: above 25 means nervous, uncertain market</td></tr></table>
+<div class="help-callout">The bar refreshes every 60 seconds. Click <strong>↺</strong> to force an immediate update.</div>`,
+    sec_regime: `<h3>🎚️ Market Regime (auto-detected)</h3>
+<p>The system automatically classifies the market context every minute by combining Gold, S&P500 and VIX data.</p>
+<table class="help-tbl"><tr><th>Badge</th><th>Condition</th><th>Meaning</th></tr>
+<tr><td><span class="help-pill green">📈 Risk-On</span></td><td>Gold↓ and S&P500 &gt; +0.5%</td><td>Investors buying risk. Favours equity, tech, cyclical ETFs</td></tr>
+<tr><td><span class="help-pill red">🛡️ Risk-Off</span></td><td>Gold &gt; +0.5% and S&P500↓</td><td>Flight to safety. Favours gold, silver, volatility</td></tr>
+<tr><td><span class="help-pill orange">😵 Volatile</span></td><td>VIX &gt; 25 or |S&P500| &gt; 1.5%</td><td>High uncertainty, sharp moves in both directions</td></tr></table>
+<div class="help-callout"><strong>Key distinction:</strong> regime is <em>auto-detected</em> from market data. If it matches an ETF's ideal regime, the signal gets a <strong>+0.20</strong> boost; if opposite, a <strong>−0.20</strong> penalty.</div>`,
+    sec_scenarios: `<h3>🎭 Geopolitical Scenarios (manual)</h3>
+<p>Allow you to colour the technical signals with your macro view. Select manually in the macro bar.</p>
+<table class="help-tbl"><tr><th>Scenario</th><th>Context</th><th>Favours</th><th>Penalises</th></tr>
+<tr><td>⚖️ Neutral</td><td>No geopolitical bias, purely technical signals</td><td>—</td><td>—</td></tr>
+<tr><td>😵 Volatile</td><td>High uncertainty, no clear direction</td><td>PAURA, ENERGIA</td><td>EQUITY, TECH</td></tr>
+<tr><td>🔥 Escalation</td><td>Rising tension, Hormuz blockade risk</td><td>ENERGIA ★, PAURA, METALLI</td><td>EQUITY, TECH, CICLO</td></tr>
+<tr><td>🕊️ De-escalation</td><td>Negotiations, agreements, détente</td><td>EQUITY, TECH, CICLO, INFRA</td><td>PAURA, ENERGIA, METALLI</td></tr></table>
+<div class="help-callout"><strong>Iran-USA vs Russia-Ukraine:</strong> In this context the primary driver is <strong>ENERGIA</strong> (Strait of Hormuz blockade risk → oil shock), not FOOD as in the Ukraine conflict where wheat was the key factor.</div>`,
+    sec_rsi: `<h3>📊 RSI(14) — Relative Strength Index</h3>
+<p>Measures recent trend strength over <strong>14 days</strong>. Ranges from 0 to 100.</p>
+<table class="help-tbl"><tr><th>Value</th><th>Zone</th><th>Signal</th></tr>
+<tr><td><span class="help-pill green">&lt; 30</span></td><td>🟢 Strong oversold</td><td>Possible bounce — buying zone</td></tr>
+<tr><td><span class="help-pill green">30–45</span></td><td>🟢 Weakness</td><td>Slight bullish bias, recovery likely</td></tr>
+<tr><td><span class="help-pill muted">45–55</span></td><td>⚪ Neutral</td><td>No clear directional signal</td></tr>
+<tr><td><span class="help-pill red">55–70</span></td><td>🔴 Strength</td><td>Slight bearish bias, caution on entry</td></tr>
+<tr><td><span class="help-pill red">&gt; 70</span></td><td>🔴 Overbought</td><td>Possible correction — selling zone</td></tr></table>`,
+    sec_macd: `<h3>〰️ MACD(12/26/9)</h3>
+<p>Compares two exponential moving averages to measure trend <strong>momentum</strong>.</p>
+<table class="help-tbl"><tr><th>Component</th><th>Formula</th></tr>
+<tr><td>MACD Line</td><td>EMA(12) − EMA(26)</td></tr>
+<tr><td>Signal Line</td><td>EMA(9) of MACD Line</td></tr>
+<tr><td>Histogram ★</td><td>MACD Line − Signal Line</td></tr></table>
+<div class="help-callout">MACD is a <strong>lagging indicator</strong>: it confirms trends already underway, it does not anticipate them.</div>`,
+    sec_boll: `<h3>〽️ Bollinger Bands (20/2σ)</h3>
+<p>Three bands calculated around the 20-day moving average. Width expands in volatile periods.</p>
+<table class="help-tbl"><tr><th>Price position</th><th>Signal</th></tr>
+<tr><td>Below lower band</td><td><span class="help-pill green">++ Bullish</span> — anomalously low price</td></tr>
+<tr><td>Between lower and mid</td><td><span class="help-pill green">+ Slightly bullish</span></td></tr>
+<tr><td>Around mid</td><td><span class="help-pill muted">Neutral</span></td></tr>
+<tr><td>Between mid and upper</td><td><span class="help-pill red">− Slightly bearish</span></td></tr>
+<tr><td>Above upper band</td><td><span class="help-pill red">−− Bearish</span> — anomalously high price</td></tr></table>`,
+    sec_sma: `<h3>📉 SMA50 — 50-day Simple Moving Average</h3>
+<p>The average of closing prices over the last <strong>50 trading days</strong>. Defines medium-term trend direction.</p>
+<table class="help-tbl"><tr><th>Column "vs SMA50"</th><th>Meaning</th></tr>
+<tr><td><span class="help-pill green">+X.XX%</span></td><td>Price above average → medium-term uptrend</td></tr>
+<tr><td><span class="help-pill red">−X.XX%</span></td><td>Price below average → medium-term downtrend</td></tr></table>`,
+    sec_pivot: `<h3>📍 Pivot Points</h3>
+<p>Support and resistance levels automatically calculated from the <strong>previous session</strong> data (High, Low, Close).</p>
+<div class="help-code">PP = (High + Low + Close) / 3<br>R1 = 2×PP − Low &nbsp;&nbsp; R2 = PP + (High − Low)<br>S1 = 2×PP − High &nbsp; S2 = PP − (High − Low)</div>
+<table class="help-tbl"><tr><th>Level</th><th>Practical use</th></tr>
+<tr><td>S1</td><td>First entry (E1) — price tends to bounce here</td></tr>
+<tr><td>S2</td><td>Strong support (E3) — aggressive buying zone</td></tr>
+<tr><td>R1</td><td>First resistance — partial take profit</td></tr>
+<tr><td>R2</td><td>Realistic short-term price target</td></tr></table>`,
+    sec_signal: `<h3>🎯 Composite Signal</h3>
+<p>Combines all indicators into a <strong>single score</strong> and translates it into a coloured badge.</p>
+<div class="help-code">Final score = Technical score + Scenario adjustment + Regime adjustment</div>
+<table class="help-tbl"><tr><th>Badge</th><th>Score</th><th>Meaning</th></tr>
+<tr><td><span class="sig-badge sig-buy-strong">★ BUY</span></td><td>≥ +0.70</td><td>Strong bullish signal: 3+ bullish indicators aligned</td></tr>
+<tr><td><span class="sig-badge sig-buy">↑ ACCUM.</span></td><td>≥ +0.25</td><td>Progressive accumulation advised, favourable trend</td></tr>
+<tr><td><span class="sig-badge sig-hold">◆ HOLD</span></td><td>−0.25 / +0.25</td><td>No clear direction, hold position</td></tr>
+<tr><td><span class="sig-badge sig-sell">↓ REDUCE</span></td><td>≤ −0.25</td><td>Bearish signal, consider reducing exposure</td></tr>
+<tr><td><span class="sig-badge sig-sell-strong">✖ SELL</span></td><td>≤ −0.70</td><td>Strong bearish signal: 3+ bearish indicators, exit advised</td></tr></table>`,
+    sec_levels: `<h3>🪜 Entry Ladder E1 / E2 / E3</h3>
+<p><strong>Scaled entry</strong> strategy to reduce timing risk. Split purchases across three support levels.</p>
+<table class="help-tbl"><tr><th>Level</th><th>Price</th><th>Weight</th><th>Logic</th></tr>
+<tr><td><span class="help-pill green">E1</span></td><td>S1 (Support 1)</td><td>30%</td><td>First entry if price touches first support</td></tr>
+<tr><td><span class="help-pill orange">E2</span></td><td>Midpoint S1–S2</td><td>30%</td><td>Intermediate entry if it falls further</td></tr>
+<tr><td><span class="help-pill red">E3</span></td><td>S2 (Support 2)</td><td>40%</td><td>Final entry at deepest support — larger weight as price is cheaper</td></tr></table>
+<div class="help-callout"><strong>Full strategy:</strong> buy E1→E2→E3 when signal is ★ BUY or ↑ ACCUM., then sell at R1 or R2 depending on risk tolerance.</div>`,
+    sec_etf: `<h3>📋 ETF Watchlist</h3>
+<p>Thematic ETFs selected for their sensitivity to geopolitical macro trends.</p>
+<table class="help-tbl"><tr><th>Driver</th><th>Theme</th></tr>
+<tr><td>😰 PAURA</td><td>Safe haven, physical gold</td></tr>
+<tr><td>🥈 METALLI</td><td>Precious and critical metals</td></tr>
+<tr><td>⚡ ENERGIA</td><td>Nuclear, renewables</td></tr>
+<tr><td>💻 TECH</td><td>Technology, semiconductors</td></tr>
+<tr><td>📈 EQUITY</td><td>Global/quality equities</td></tr>
+<tr><td>🏗️ INFRA</td><td>Physical infrastructure</td></tr>
+<tr><td>🌍 GEO</td><td>Direct geopolitical / strategic minerals</td></tr></table>`,
+    sec_workflow: `<h3>✅ Daily Workflow</h3>
+<p>How to use the dashboard effectively in a few minutes each day:</p>
+<div class="help-step"><div class="help-step-num">1</div><p><strong>Check the Macro Bar</strong> — what is the regime? <span class="help-pill green">Risk-On</span> <span class="help-pill red">Risk-Off</span> <span class="help-pill orange">Volatile</span>?</p></div>
+<div class="help-step"><div class="help-step-num">2</div><p><strong>Set the Scenario</strong> — how do you read today's geopolitical context? Escalation? De-escalation? Uncertain?</p></div>
+<div class="help-step"><div class="help-step-num">3</div><p><strong>Open the Signals tab</strong> → sort by SIGNAL descending. The best ETFs for the current context rise to the top.</p></div>
+<div class="help-step"><div class="help-step-num">4</div><p><strong>Filter by RSI</strong> — among the best, look for RSI below 45. Low RSI + positive signal = best risk/reward.</p></div>
+<div class="help-step"><div class="help-step-num">5</div><p><strong>Plan entries</strong> with E1/E2/E3. Don't buy all at once: 30% at E1, 30% at E2, 40% at E3.</p></div>
+<div class="help-callout"><strong>⚠️ Disclaimer:</strong> Data comes from Yahoo Finance via public proxy — possible delays up to 15 minutes. Signals are <strong>purely indicative</strong> and do not constitute financial advice.</div>`,
+  }
+};
+
+function t(key, vars) {
+  const s = STRINGS[LANG] || STRINGS.en;
+  let str = s[key] ?? STRINGS.en[key] ?? key;
+  if (vars) Object.entries(vars).forEach(([k,v]) => { str = str.replaceAll('{'+k+'}', v); });
+  return str;
+}
+
+function applyI18n() {
+  // text nodes
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.dataset.i18n;
+    const s = STRINGS[LANG]?.[k] ?? STRINGS.en[k];
+    if (s != null) el.textContent = s;
+  });
+  // placeholder
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const k = el.dataset.i18nPlaceholder;
+    const s = STRINGS[LANG]?.[k] ?? STRINGS.en[k];
+    if (s != null) el.placeholder = s;
+  });
+  // title attribute
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const k = el.dataset.i18nTitle;
+    const s = STRINGS[LANG]?.[k] ?? STRINGS.en[k];
+    if (s != null) el.title = s;
+  });
+  // innerHTML (help sections)
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const k = el.dataset.i18nHtml;
+    const s = STRINGS[LANG]?.[k] ?? STRINGS.en[k];
+    if (s != null) el.innerHTML = s;
+  });
+  // help title (has inner span)
+  const helpTitle = document.querySelector('[data-i18n="help_title"]');
+  if (helpTitle) helpTitle.innerHTML = t('help_title');
+  // lang button flag
+  const langBtn = document.getElementById('lang-btn');
+  if (langBtn) langBtn.textContent = LANG === 'it' ? '🇬🇧' : '🇮🇹';
+  langBtn.title = LANG === 'it' ? 'Switch to English' : 'Passa all\'italiano';
+  // help button title
+  const helpBtn = document.getElementById('help-btn');
+  if (helpBtn) helpBtn.title = LANG === 'it' ? 'Guida completa' : 'Full guide';
+  // re-render dynamic tables if already loaded
+  if (typeof renderSignalsTable === 'function') renderSignalsTable();
+  if (typeof renderCompact === 'function') renderCompact();
+  if (typeof renderCards === 'function') renderCards();
+}
+
+function toggleLang() {
+  LANG = LANG === 'it' ? 'en' : 'it';
+  try { localStorage.setItem('fpb_lang', LANG); } catch(e){}
+  applyI18n();
+}
+
 /* ═══════════════════════════════════════════════════════════
    CONFIG
 ═══════════════════════════════════════════════════════════ */
@@ -1084,11 +1452,11 @@ function compositeSignal(rsiV, macdH, price, bb, sma50, PP, driver, itemRegime, 
   const tLow  = isVol ? 0.35 : 0.25;
 
   function labelFrom(sc) {
-    if (sc >= tHigh)  return { label:'★ COMPRA', cls:'sig-buy-strong' };
-    if (sc >= tLow)   return { label:'↑ ACCUM.', cls:'sig-buy'        };
-    if (sc <= -tHigh) return { label:'✖ VENDI',  cls:'sig-sell-strong'};
-    if (sc <= -tLow)  return { label:'↓ RIDUCI', cls:'sig-sell'       };
-    return                   { label:'◆ HOLD',   cls:'sig-hold'       };
+    if (sc >= tHigh)  return { label:t('sig_buy_strong'), cls:'sig-buy-strong', score:sc };
+    if (sc >= tLow)   return { label:t('sig_buy'),        cls:'sig-buy',        score:sc };
+    if (sc <= -tHigh) return { label:t('sig_sell_strong'),cls:'sig-sell-strong',score:sc };
+    if (sc <= -tLow)  return { label:t('sig_sell'),       cls:'sig-sell',       score:sc };
+    return                   { label:t('sig_hold'), cls:'sig-hold', score:sc };
   }
 
   // Downtrend estremo: se prezzo è >12% sotto SMA50, cap a HOLD
@@ -1286,7 +1654,7 @@ function renderMacroBar() {
       'risk-off': ['regime-risk-off', '🛡️ Risk-Off'],
       'volatile': ['regime-volatile', '😵 Volatile'],
     };
-    const [cls, label] = MAP[macroRegime] || ['regime-unknown','Regime —'];
+    const [cls, label] = MAP[macroRegime] || ['regime-unknown', t('regime_unknown')];
     badge.className = `regime-badge ${cls}`;
     badge.textContent = label;
   }
@@ -1434,7 +1802,7 @@ function fmtVol(v) {
   return String(v);
 }
 function mktCls(s)  { return s==='REGULAR'?'mkt-open':s==='PRE'||s==='POST'?'mkt-pre':'mkt-closed'; }
-function mktLbl(s)  { return s==='REGULAR'?'Aperto':s==='PRE'?'Pre-Mkt':s==='POST'?'Post-Mkt':'Chiuso'; }
+function mktLbl(s)  { return s==='REGULAR'?t('mkt_open'):s==='PRE'?t('mkt_pre'):s==='POST'?t('mkt_post'):t('mkt_closed'); }
 function dirCls(chg){ return chg==null?'flat':chg>0?'up':chg<0?'down':'flat'; }
 function arrow(chg) { return chg>0?'▲':chg<0?'▼':'—'; }
 
@@ -1567,8 +1935,8 @@ function copyRow(id) {
     `MACD:     ${macdStr}`,
   ];
   navigator.clipboard.writeText(lines.join('\n'))
-    .then(() => toast(`📋 ${item.id} copiato`))
-    .catch(() => toast('❌ Copia non riuscita'));
+    .then(() => toast(t('toast_copied',{id:item.id})))
+    .catch(() => toast(t('toast_copy_fail')));
 }
 
 function renderSignalsTable() {
@@ -1637,7 +2005,7 @@ function renderSignalsTable() {
     const curPrice = quotes[item.id]?.price ?? null;
     // Se prezzo < S2 (tutti i supporti rotti), mostra warning invece di valori
     const belowAll = pv && curPrice !== null && curPrice < pv.S2;
-    const warnSpan = `<span title="Prezzo sotto tutti i supporti — livelli ora fungono da resistenza" style="color:var(--orange);font-size:.75rem">⚠️</span>`;
+    const warnSpan = `<span title="${t('warn_below_supports')}" style="color:var(--orange);font-size:.75rem">⚠️</span>`;
     const e1Cell = loading ? spin : (pv ? `<span class="e1" ${belowAll?'style="opacity:.45"':''}>${fmtN(pv.S1)}</span>${belowAll?warnSpan:''}` : '—');
     const e2Cell = loading ? spin : (pv ? `<span class="e2" ${belowAll?'style="opacity:.45"':''}>${fmtN((pv.S1+pv.S2)/2)}</span>` : '—');
     const e3Cell = loading ? spin : (pv ? `<span class="e3" ${belowAll?'style="opacity:.45"':''}>${fmtN(pv.S2)}</span>` : '—');
@@ -1676,13 +2044,13 @@ function renderSignalsTable() {
       let cls, tip;
       if (ratio >= 1.5) {
         cls = up ? 'vol-hi-up' : 'vol-hi-dn';
-        tip = up ? `Vol ${ratio.toFixed(1)}× media — rialzo confermato` : `Vol ${ratio.toFixed(1)}× media — pressione ribassista forte`;
+        tip = t('vol_hi_tip', {r: ratio.toFixed(1)});
       } else if (ratio < 0.7) {
         cls = 'vol-lo';
-        tip = `Vol ${ratio.toFixed(1)}× media — segnale poco convinto`;
+        tip = t('vol_lo_tip', {r: ratio.toFixed(1)});
       } else {
         cls = 'vol-norm';
-        tip = `Vol ${ratio.toFixed(1)}× media`;
+        tip = t('vol_norm_tip', {r: ratio.toFixed(1)});
       }
       return `<span class="${cls}" title="${tip}">${ratio.toFixed(1)}×</span>`;
     })();
@@ -1692,7 +2060,7 @@ function renderSignalsTable() {
       : '—';
 
     return `<tr>
-      <td><span class="td-ticker" onclick="openDetail('${item.id}')" title="Apri dettaglio ${item.id}">${item.id}</span></td>
+      <td><span class="td-ticker" onclick="openDetail('${item.id}')" title="${t('detail_open',{id:item.id})}">${item.id}</span></td>
       <td><span class="td-name" title="${item.name}">${item.name}</span></td>
       <td class="c">${drvCell}</td>
       <td class="r td-price">${priceDisp}</td>
@@ -1790,7 +2158,7 @@ function resetCountdown() {
 async function manualRefresh() {
   clearInterval(cdTimer);
   countdown=REFRESH; setRing(countdown);
-  toast('Aggiornamento…');
+  toast(t('toast_refreshing'));
   await refreshAll();
   if (currentTab==='signals' && sigLoaded) refreshSignals(true);
   resetCountdown();
@@ -1803,11 +2171,11 @@ async function manualRefresh() {
 async function addCustom(sym, displayName='') {
   const s = sym.trim().toUpperCase();
   if (!s) return;
-  if (allItems().find(i=>i.id===s||i.yf===s)) { toast(`${s} già presente`); return; }
+  if (allItems().find(i=>i.id===s||i.yf===s)) { toast(t('toast_already',{id:s})); return; }
   const item = { id:s, name: displayName || s, yf:s };
   extraItems.push(item);
   localStorage.setItem('fpb_extra', JSON.stringify(extraItems));
-  toast(`${s} aggiunto, caricamento…`);
+  toast(t('toast_added',{id:s}));
   document.getElementById('add-btn').disabled=true;
   // Se il nome non è noto (inserimento manuale), prova a risolverlo via search
   if (!displayName) {
@@ -1840,7 +2208,7 @@ function removeItem(id) {
   }
   delete quotes[id]; delete signalCache[id];
   render();
-  toast(`${id} rimosso`);
+  toast(t('toast_removed',{id}));
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1860,7 +2228,7 @@ function exportList() {
   a.download = `financebot-lista-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
-  toast('Lista esportata');
+  toast(t('toast_exported'));
 }
 
 function importList(e) {
@@ -1876,8 +2244,8 @@ function importList(e) {
       Object.keys(quotes).forEach(id => { delete quotes[id]; delete signalCache[id]; });
       render();
       refreshAll();
-      toast(`Lista importata — ${extraItems.length} extra, ${hiddenIds.size} nascosti`);
-    } catch { toast('File non valido', true); }
+      toast(t('toast_imported',{n:extraItems.length, m:hiddenIds.size}));
+    } catch { toast(t('toast_invalid'), true); }
     e.target.value = ''; // reset input per permettere reimport dello stesso file
   };
   reader.readAsText(file);
@@ -1968,12 +2336,14 @@ document.getElementById('add-form').addEventListener('submit', e=>{
   } catch (e) {
     console.error('Errore caricamento watchlist.json', e);
     WATCHLIST = WATCHLIST_DEFAULT;
-    toast('⚠️ watchlist.json non trovato — uso lista predefinita');
+    toast(t('toast_wl_warn'));
   }
   // Restore scenario button active state from localStorage
   document.querySelectorAll('.scen-btn').forEach(b => b.classList.remove('active'));
   const initBtn = document.getElementById(`scen-${scenario}`);
   if (initBtn) initBtn.classList.add('active');
+  // apply i18n translations
+  applyI18n();
   // start on signals tab
   refreshSignals();
   // fetch live data + macro (renders macro bar and detects regime)
@@ -2112,13 +2482,13 @@ function renderDetailStats(item, q, s) {
     : null;
 
   const stats = [
-    { label:'RSI 14',   val: s?.rsiV != null ? s.rsiV.toFixed(1) : '—' },
-    { label:'MACD H',   val: s?.macdH != null ? `${s.macdH > 0 ? '▲' : '▼'} ${s.macdH.toFixed(4)}` : '—' },
-    { label:'vs SMA50', val: vsSma != null ? `${vsSma>=0?'+':''}${vsSma.toFixed(1)}%` : '—' },
-    { label:'Vol ×avg', val: (q?.vol && s?.avgVol) ? `${(q.vol/s.avgVol).toFixed(1)}×` : '—' },
-    { label:'Pivot PP', val: pv?.PP != null ? fmt(pv.PP) : '—' },
-    { label:'R1',       val: pv?.R1 != null ? fmt(pv.R1) : '—' },
-    { label:'S1',       val: pv?.S1 != null ? fmt(pv.S1) : '—' },
+    { label:t('stat_rsi'),   val: s?.rsiV != null ? s.rsiV.toFixed(1) : '—' },
+    { label:t('stat_macd'),  val: s?.macdH != null ? `${s.macdH > 0 ? '▲' : '▼'} ${s.macdH.toFixed(4)}` : '—' },
+    { label:t('stat_sma'),   val: vsSma != null ? `${vsSma>=0?'+':''}${vsSma.toFixed(1)}%` : '—' },
+    { label:t('stat_vol'),   val: (q?.vol && s?.avgVol) ? `${(q.vol/s.avgVol).toFixed(1)}×` : '—' },
+    { label:t('stat_pivot'), val: pv?.PP != null ? fmt(pv.PP) : '—' },
+    { label:t('stat_r1'),    val: pv?.R1 != null ? fmt(pv.R1) : '—' },
+    { label:t('stat_s1'),    val: pv?.S1 != null ? fmt(pv.S1) : '—' },
   ];
 
   el.innerHTML = stats.map(s =>
@@ -2137,6 +2507,7 @@ async function loadDetailChart() {
   const loading = document.getElementById('detail-loading');
   const ctx = canvas.getContext('2d');
 
+  loading.textContent = t('chart_loading');
   loading.classList.remove('hidden');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   detailChartState = null;
@@ -2176,7 +2547,7 @@ async function loadDetailChart() {
       const sign = pct >= 0 ? '+' : '';
       const col = pct >= 0 ? 'var(--green)' : 'var(--red)';
       const arrow = pct >= 0 ? '▲' : '▼';
-      perfEl.innerHTML = `<span style="color:${col};font-weight:700">${arrow} ${sign}${pct.toFixed(2)}% nel periodo</span>`;
+      perfEl.innerHTML = `<span style="color:${col};font-weight:700">${arrow} ${sign}${pct.toFixed(2)}% ${t('period_perf_in')}</span>`;
     } else {
       perfEl.innerHTML = '';
     }
@@ -2201,7 +2572,7 @@ async function loadDetailChart() {
       if (idx !== null) drawPriceChart(canvas, pts, range, idx);
     };
   } catch(e) {
-    loading.textContent = 'Errore caricamento dati';
+    loading.textContent = t('chart_error');
     loading.classList.remove('hidden');
   }
 }
