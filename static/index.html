@@ -949,7 +949,7 @@ const STRINGS = {
     toast_copied:'📋 {id} copiato', toast_copy_fail:'❌ Copia non riuscita',
     toast_refreshing:'Aggiornamento…', toast_already:'${id} già presente',
     toast_added:'{id} aggiunto, caricamento…', toast_removed:'{id} rimosso',
-    toast_exported:'Lista esportata', toast_imported:'Lista importata — {n} extra, {m} nascosti',
+    toast_exported:'Lista esportata', toast_imported:'{n} titoli importati',
     toast_invalid:'File non valido', toast_wl_warn:'⚠️ watchlist.json non trovato — uso lista predefinita',
     detail_open:'Apri dettaglio {id}',
     stat_rsi:'RSI 14', stat_macd:'MACD H', stat_sma:'vs SMA50',
@@ -1103,7 +1103,7 @@ const STRINGS = {
     toast_copied:'📋 {id} copied', toast_copy_fail:'❌ Copy failed',
     toast_refreshing:'Refreshing…', toast_already:'{id} already in list',
     toast_added:'{id} added, loading…', toast_removed:'{id} removed',
-    toast_exported:'List exported', toast_imported:'List imported — {n} extra, {m} hidden',
+    toast_exported:'List exported', toast_imported:'{n} items imported',
     toast_invalid:'Invalid file', toast_wl_warn:'⚠️ watchlist.json not found — using default list',
     detail_open:'Open detail {id}',
     stat_rsi:'RSI 14', stat_macd:'MACD H', stat_sma:'vs SMA50',
@@ -1280,7 +1280,7 @@ const YF_SRCH  = 'https://query2.finance.yahoo.com/v1/finance/search?quotesCount
 const REFRESH  = 60;
 
 /* ═══════════════════════════════════════════════════════════
-   WATCHLIST  (19 ETF pre-caricati)
+   WATCHLIST  (18 titoli pre-caricati)
 ═══════════════════════════════════════════════════════════ */
 // Watchlist caricata da watchlist.json all'avvio (fallback hardcodato se fetch non disponibile)
 const WATCHLIST_DEFAULT = [
@@ -1298,8 +1298,10 @@ const WATCHLIST_DEFAULT = [
   { id:'SWDA',  name:'iShares Core MSCI World',            yf:'SWDA.MI',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
   { id:'COPM',  name:'iShares Copper Miners',              yf:'COPM.MI',   driver:'METALLI', dEmoji:'🥈', regime:'neutro'   },
   { id:'SGLE',  name:'Invesco Gold ETC EUR Hedged',        yf:'SGLE.MI',   driver:'PAURA',   dEmoji:'😰', regime:'risk-off' },
-  { id:'UKRN',  name:'Ukraine Reconstruction',             yf:'UKRN.MI',   driver:'GEO',     dEmoji:'🌍', regime:'neutro'   },
-  { id:'GRIDG', name:'First Trust Smart Grid Infra',       yf:'GRID.MI',   driver:'INFRA',   dEmoji:'🏗️', regime:'neutro'   },
+  { id:'UKRN',     name:'Ukraine Reconstruction',             yf:'UKRN.MI',    driver:'GEO',     dEmoji:'🌍', regime:'neutro'   },
+  { id:'GRIDG',    name:'First Trust Smart Grid Infra',       yf:'GRID.MI',    driver:'INFRA',   dEmoji:'🏗️', regime:'neutro'   },
+  { id:'STLAM.MI', name:'Stellantis N.V.',                    yf:'STLAM.MI',   driver:'',        dEmoji:'',   regime:'neutro'   },
+  { id:'RACE.MI',  name:'Ferrari N.V.',                       yf:'RACE.MI',    driver:'',        dEmoji:'',   regime:'neutro'   },
 ];
 let WATCHLIST = [];
 
@@ -1308,7 +1310,12 @@ let extraItems = JSON.parse(localStorage.getItem('fpb_extra') || '[]');
 let hiddenIds  = new Set(JSON.parse(localStorage.getItem('fpb_hidden') || '[]'));
 
 function allItems() {
-  return [...WATCHLIST, ...extraItems].filter(i => !hiddenIds.has(i.id));
+  const seen = new Set();
+  return [...WATCHLIST, ...extraItems].filter(i => {
+    if (seen.has(i.id) || hiddenIds.has(i.id)) return false;
+    seen.add(i.id);
+    return true;
+  });
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -2262,9 +2269,11 @@ function removeItem(id) {
 
 function exportList() {
   const data = {
-    version: 1,
-    extra:  extraItems,
-    hidden: [...hiddenIds],
+    version: 2,
+    watchlist: allItems().map(({id, name, yf, driver, dEmoji, regime}) =>
+      ({id, name, yf, ...(driver  ? {driver}  : {}),
+                      ...(dEmoji  ? {dEmoji}  : {}),
+                      ...(regime  ? {regime}  : {})})),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
@@ -2283,13 +2292,30 @@ function importList(e) {
   reader.onload = ev => {
     try {
       const data = JSON.parse(ev.target.result);
-      if (data.version !== 1) throw new Error('Formato non riconosciuto');
-      if (Array.isArray(data.extra))  { extraItems = data.extra;  localStorage.setItem('fpb_extra',  JSON.stringify(extraItems)); }
-      if (Array.isArray(data.hidden)) { hiddenIds  = new Set(data.hidden); localStorage.setItem('fpb_hidden', JSON.stringify(data.hidden)); }
+      if (!data.version || (!Array.isArray(data.watchlist) && !Array.isArray(data.extra)))
+        throw new Error('Formato non riconosciuto');
+
+      const existingIds  = new Set(allItems().map(i => i.id));
+      const defaultIds   = new Set(WATCHLIST.map(i => i.id));
+      const items = data.version >= 2 ? data.watchlist : (data.extra || []);
+      let added = 0;
+      items.forEach(item => {
+        if (!item.id) return;
+        if (existingIds.has(item.id)) return;        // già presente → salta
+        if (defaultIds.has(item.id)) {
+          hiddenIds.delete(item.id);                 // era stato rimosso → ripristina
+        } else {
+          extraItems.push(item);                     // nuovo → aggiungi
+        }
+        existingIds.add(item.id);
+        added++;
+      });
+      localStorage.setItem('fpb_extra',  JSON.stringify(extraItems));
+      localStorage.setItem('fpb_hidden', JSON.stringify([...hiddenIds]));
       Object.keys(quotes).forEach(id => { delete quotes[id]; delete signalCache[id]; });
       render();
       refreshAll();
-      toast(t('toast_imported',{n:extraItems.length, m:hiddenIds.size}));
+      toast(t('toast_imported', {n: added}));
     } catch { toast(t('toast_invalid'), true); }
     e.target.value = ''; // reset input per permettere reimport dello stesso file
   };
