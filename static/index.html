@@ -1542,11 +1542,33 @@ function compositeSignal(rsiV, macdH, price, bb, sma50, PP, driver, itemRegime, 
    DATA FETCHING
 ═══════════════════════════════════════════════════════════ */
 
-async function fetchChart(ticker, range='1d', interval='1m') {
-  const url = `${YF_CHART}${encodeURIComponent(ticker)}?interval=${interval}&range=${range}&_=${Date.now()}`;
-  const r   = await fetch(PROXY + encodeURIComponent(url), { cache: 'no-store' });
-  const j   = await r.json();
-  return j?.chart?.result?.[0] ?? null;
+/* Concurrency-limited async map — evita di saturare corsproxy.io */
+async function pMap(items, fn, concurrency = 5) {
+  const results = new Array(items.length);
+  let idx = 0;
+  async function worker() {
+    while (idx < items.length) {
+      const i = idx++;
+      results[i] = await fn(items[i], i);
+    }
+  }
+  await Promise.all(Array.from({length: Math.min(concurrency, items.length)}, worker));
+  return results;
+}
+
+async function fetchChart(ticker, range='1d', interval='1m', attempt=0) {
+  try {
+    const url = `${YF_CHART}${encodeURIComponent(ticker)}?interval=${interval}&range=${range}&_=${Date.now()}`;
+    const r   = await fetch(PROXY + encodeURIComponent(url), { cache: 'no-store' });
+    const j   = await r.json();
+    return j?.chart?.result?.[0] ?? null;
+  } catch(e) {
+    if (attempt < 2) {
+      await new Promise(res => setTimeout(res, 800 * (attempt + 1)));
+      return fetchChart(ticker, range, interval, attempt + 1);
+    }
+    return null;
+  }
 }
 
 function marketState(result) {
@@ -1777,7 +1799,7 @@ function getSortVal(item, col) {
 
 async function refreshAll() {
   await fetchMacro();
-  const results = await Promise.all(allItems().map(fetchLive));
+  const results = await pMap(allItems(), fetchLive, 5);
   const anyOk = results.some(q => q != null);
   results.forEach(q => { if (q) quotes[q.id] = q; });
   if (anyOk) {
@@ -1798,7 +1820,7 @@ async function refreshSignals(force=false) {
 
   const items = allItems();
   let done = 0;
-  await Promise.all(items.map(async item => {
+  await pMap(items, async item => {
     const h = await fetchHistorical(item);
     // Always write to cache — even if null — so the row exits loading state
     signalCache[item.id] = h || { pv:null, rsiV:null, macdH:null, bb:null, sma50:null };
@@ -1806,7 +1828,7 @@ async function refreshSignals(force=false) {
     document.getElementById('sig-status').textContent =
       `Caricamento ${done}/${items.length}…`;
     renderSignalsTable();
-  }));
+  }, 5);
 
   sigLoaded  = true;
   sigFetching= false;
