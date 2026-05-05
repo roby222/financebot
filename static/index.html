@@ -1503,8 +1503,12 @@ function compositeSignal(rsiV, macdH, price, bb, sma50, PP, driver, itemRegime, 
   const techScore  = votes.reduce((a,b)=>a+b,0) / votes.length;
   const scenAdj    = (SCENARIO_WEIGHTS[scenario]?.[driver]) ?? 0;
   const regimeAdj  = calcRegimeBoost(itemRegime);
-  const macroBoost = macroDriverBoost(driver);              // Fix 4
-  const finalScore = techScore + scenAdj + regimeAdj + macroBoost;
+  const macroBoost = macroDriverBoost(driver);
+  // Cap totale aggiustamenti non-tecnici: ±0.20
+  // Evita che scenario/regime da soli capovolgano un segnale tecnico chiaramente negativo
+  const adjRaw   = scenAdj + regimeAdj + macroBoost;
+  const adj      = Math.max(-0.20, Math.min(0.20, adjRaw));
+  const finalScore = techScore + adj;
 
   // Fix 2: thresholds più larghi in regime Volatile → zona HOLD più ampia
   const isVol = macroRegime === 'volatile';
