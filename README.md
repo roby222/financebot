@@ -1,9 +1,10 @@
 # FinancePalmirioBot
 
-A single-file ETF dashboard with composite trading signals and geopolitical macro context.
+A single-file ETF dashboard with composite trading signals, geopolitical macro context, and a semiconductor / AI cycle monitor.
 
 ## Features
 
+### ETF Dashboard
 - **Live prices** via Yahoo Finance (auto-refresh every 60 s, cache-busted)
 - **Composite signal** — RSI, MACD, Bollinger Bands, SMA50, Pivot Points combined into a single ACCUMULATE / HOLD / REDUCE / SELL rating
   - Hysteresis (score must shift >0.08 to flip signal)
@@ -21,6 +22,24 @@ A single-file ETF dashboard with composite trading signals and geopolitical macr
   - Stats bar: RSI 14, MACD H, vs SMA50, Vol×avg, Pivot PP, R1, S1
 - **Custom watchlist** — add any Yahoo Finance ticker via search autocomplete
 - **Export / Import** — save and restore your watchlist as JSON
+
+### Semis / AI Cycle Monitor (new tab)
+- **6 semiconductor cycle indicators** tracked in real time:
+  1. Nvidia inventory days (SEC EDGAR 10-Q filings)
+  2. TSMC book-to-bill ratio (manual + earnings update)
+  3. SOX Index vs SMA50 (Yahoo Finance)
+  4. Google News sentiment — semis/AI headlines (RSS via CORS proxy)
+  5. OSS AI momentum — ROCm + PyTorch GitHub star delta (GitHub API)
+  6. HBM supply tightness — keyword density in HBM news (Google News RSS)
+- **Composite score** (0–100) with GREEN / YELLOW / RED regime label and sparkline history
+- **Per-indicator cards** with current value, trend sparkline and editable thresholds
+- **Catalyst calendar** — upcoming events that could move the cycle (editable)
+- **Export / Reset** — export state as JSON or restore defaults
+- **Lazy-loaded**: indicators only fetch when the tab is first opened
+
+### General
+- **i18n** — full Italian / English toggle (all UI strings, including Semis Monitor)
+- **Dark theme** — GitHub-style, single CSS variable set shared across all tabs
 - **GitHub Pages deployment** — fully static, no backend required
 
 ## Structure
@@ -29,10 +48,11 @@ A single-file ETF dashboard with composite trading signals and geopolitical macr
 static/
   index.html       ← entire dashboard (single file, no framework)
   watchlist.json   ← default ETF list (edit here to change defaults)
+proxy-worker/      ← Cloudflare Worker proxy for Yahoo Finance requests
 quotes.py          ← CLI utility: live quotes
 trading_signals.py ← CLI utility: technical signals in terminal
 skills/
-  etf-classify/   ← skill for classifying ETF drivers
+  etf-classify/    ← skill for classifying ETF drivers
   signal-algorithm/← skill documenting the signal algorithm
 ```
 
