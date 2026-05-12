@@ -403,6 +403,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
   .help-content{padding:14px 14px}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -418,6 +419,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
     <div class="tabs">
       <button class="tab-btn" onclick="switchTab('cards')" data-i18n="tab_live">📊 Live</button>
       <button class="tab-btn active" onclick="switchTab('signals')" data-i18n="tab_signals">📈 Segnali</button>
+      <button class="tab-btn" onclick="switchTab('semis')" data-i18n="tab_semis">🔬 Semis</button>
     </div>
     <div class="status-info">
       <div class="dot"></div>
@@ -572,6 +574,189 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
       <tbody id="compact-body"></tbody>
     </table>
   </div>
+</div>
+
+<!-- ════════════════════ SEMIS MONITOR ════════════════════ -->
+<div id="view-semis" class="view">
+<style>
+/* ── Semis Monitor: dark-theme scoped CSS ── */
+#view-semis{
+  --sc-bg:var(--bg);--sc-surf:var(--surface);--sc-surf2:var(--surface2);
+  --sc-border:var(--border);--sc-text:var(--text);--sc-mute:var(--muted);
+  --sc-primary:var(--accent);--sc-secondary:#79c0ff;
+  --sc-green:#3fb950;--sc-green-bg:rgba(63,185,80,.13);
+  --sc-yellow:#d29922;--sc-yellow-bg:rgba(210,153,34,.13);
+  --sc-red:#f85149;--sc-red-bg:rgba(248,81,73,.13);
+  --sc-radius:10px;--sc-shadow:0 1px 4px rgba(0,0,0,.4);
+  background:var(--sc-bg);padding:8px 0 40px;
+}
+#view-semis .sm-wrap{max-width:1280px;margin:0 auto;padding:0 16px}
+#view-semis .sm-hdr{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid var(--sc-primary)}
+#view-semis .sm-hdr h2{margin:0;font-size:1.1rem;font-weight:700;color:var(--sc-primary)}
+#view-semis .sm-hdr .sm-meta{font-size:.72rem;color:var(--sc-mute);text-align:right}
+/* ticker bar */
+#view-semis .sm-ticker{background:var(--sc-surf);padding:8px 14px;border-radius:var(--sc-radius);box-shadow:var(--sc-shadow);margin-bottom:16px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;border:1px solid var(--sc-border)}
+#view-semis .sm-ticker .sm-tlbl{font-size:.65rem;color:var(--sc-mute);font-weight:700;letter-spacing:.7px;text-transform:uppercase;flex-shrink:0}
+#view-semis .sm-ticker .sm-tlist{display:flex;gap:14px;flex-wrap:wrap;flex:1}
+#view-semis .sm-tick{display:inline-flex;gap:5px;align-items:baseline;font-size:.75rem}
+#view-semis .sm-tick .sym{font-weight:700;color:var(--sc-text)}
+#view-semis .sm-tick .px{color:var(--sc-mute)}
+#view-semis .sm-tick .chg{font-weight:600;font-size:.7rem}
+#view-semis .sm-tick .chg.up{color:var(--sc-green)}
+#view-semis .sm-tick .chg.dn{color:var(--sc-red)}
+#view-semis .sm-tick .chg.flat{color:var(--sc-mute)}
+/* composite */
+#view-semis .sm-composite{display:grid;grid-template-columns:180px 1fr auto;gap:16px;background:var(--sc-surf);padding:16px 20px;border-radius:var(--sc-radius);box-shadow:var(--sc-shadow);margin-bottom:20px;align-items:center;border:1px solid var(--sc-border)}
+#view-semis .sm-score-circle{width:100px;height:100px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-weight:600}
+#view-semis .sm-score-circle .slbl{font-size:.65rem;opacity:.9;letter-spacing:.5px;text-transform:uppercase}
+#view-semis .sm-score-circle .sval{font-size:1.6rem;line-height:1;margin:3px 0}
+#view-semis .sm-score-circle .sstat{font-size:.7rem}
+#view-semis .sm-breakdown{display:flex;gap:10px;flex-wrap:wrap}
+#view-semis .sm-pill{padding:4px 10px;border-radius:999px;font-size:.72rem;font-weight:600;display:inline-flex;align-items:center;gap:5px}
+#view-semis .sm-pill .dot{width:7px;height:7px;border-radius:50%}
+#view-semis .sm-narrative{font-size:.78rem;color:var(--sc-mute);max-width:500px;line-height:1.5;margin-top:10px}
+#view-semis .sm-actions{display:flex;flex-direction:column;gap:6px}
+#view-semis .sm-btn{background:var(--accent);color:#0d1117;border:none;padding:6px 12px;border-radius:6px;font-size:.72rem;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:5px;justify-content:center;white-space:nowrap}
+#view-semis .sm-btn:disabled{opacity:.5;cursor:not-allowed}
+#view-semis .sm-btn.sec{background:var(--sc-surf2);color:var(--sc-text);border:1px solid var(--sc-border)}
+#view-semis .sm-btn:hover:not(:disabled){opacity:.85}
+#view-semis .sm-spinner{display:inline-block;width:11px;height:11px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sm-spin .8s linear infinite}
+@keyframes sm-spin{to{transform:rotate(360deg)}}
+/* grid */
+#view-semis .sm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:14px}
+#view-semis .sm-card{background:var(--sc-surf);border-radius:var(--sc-radius);box-shadow:var(--sc-shadow);padding:16px;display:flex;flex-direction:column;gap:9px;border-left:4px solid var(--sc-border);border:1px solid var(--sc-border);border-left:4px solid var(--sc-border);position:relative;overflow:hidden}
+#view-semis .sm-card.st-green{border-left-color:var(--sc-green)}
+#view-semis .sm-card.st-yellow{border-left-color:var(--sc-yellow)}
+#view-semis .sm-card.st-red{border-left-color:var(--sc-red)}
+#view-semis .sm-card.fetching::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--sc-primary),transparent);animation:sm-shimmer 1.4s linear infinite}
+@keyframes sm-shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+#view-semis .sm-card-hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+#view-semis .sm-card-hdr h3{margin:0;font-size:.88rem;font-weight:700;color:var(--sc-text)}
+#view-semis .sm-card-hdr .sm-num{font-size:.65rem;color:var(--sc-mute);font-weight:700;letter-spacing:.5px}
+#view-semis .sm-badges{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+#view-semis .sm-badge{padding:2px 8px;border-radius:999px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+#view-semis .sm-badge.green{background:var(--sc-green-bg);color:var(--sc-green)}
+#view-semis .sm-badge.yellow{background:var(--sc-yellow-bg);color:var(--sc-yellow)}
+#view-semis .sm-badge.red{background:var(--sc-red-bg);color:var(--sc-red)}
+#view-semis .sm-badge.auto{background:rgba(88,166,255,.15);color:var(--sc-primary)}
+#view-semis .sm-badge.manual{background:rgba(139,148,158,.12);color:var(--sc-mute)}
+#view-semis .sm-reading{display:flex;align-items:baseline;gap:10px;padding:4px 0;flex-wrap:wrap}
+#view-semis .sm-reading .val{font-size:1.25rem;font-weight:700;color:var(--sc-primary)}
+#view-semis .sm-reading .unit{font-size:.72rem;color:var(--sc-mute)}
+#view-semis .sm-reading .delta{font-size:.68rem;padding:2px 7px;border-radius:4px;font-weight:600}
+#view-semis .sm-reading .delta.up{background:var(--sc-red-bg);color:var(--sc-red)}
+#view-semis .sm-reading .delta.down{background:var(--sc-green-bg);color:var(--sc-green)}
+#view-semis .sm-reading .delta.flat{background:rgba(139,148,158,.1);color:var(--sc-mute)}
+#view-semis .sm-chips{display:flex;gap:5px;flex-wrap:wrap}
+#view-semis .sm-chip{background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.2);color:var(--sc-secondary);padding:2px 7px;border-radius:4px;font-size:.68rem;display:inline-flex;gap:4px}
+#view-semis .sm-chip .lbl{color:var(--sc-mute)}
+#view-semis .sm-chip .v{font-weight:700;color:var(--sc-primary)}
+#view-semis .sm-chip .ch.up{color:var(--sc-red)}
+#view-semis .sm-chip .ch.dn{color:var(--sc-green)}
+#view-semis .sm-signal{background:var(--sc-surf2);border-radius:6px;padding:9px 11px;font-size:.75rem;color:var(--sc-mute);line-height:1.5;border:1px solid var(--sc-border)}
+#view-semis .sm-signal b{color:var(--sc-text);font-weight:600}
+#view-semis .sm-spark{height:46px;position:relative}
+#view-semis .sm-headlines{background:var(--sc-surf2);border-radius:6px;padding:7px 9px;font-size:.72rem;border:1px solid var(--sc-border)}
+#view-semis .sm-headlines summary{cursor:pointer;color:var(--sc-primary);font-weight:600;outline:none;list-style:none;display:flex;justify-content:space-between;align-items:center}
+#view-semis .sm-headlines summary::-webkit-details-marker{display:none}
+#view-semis .sm-headlines summary::after{content:"▾";transition:transform .2s}
+#view-semis .sm-headlines[open] summary::after{transform:rotate(180deg)}
+#view-semis .sm-headlines ul{margin:7px 0 0 0;padding-left:16px}
+#view-semis .sm-headlines li{margin:3px 0;line-height:1.4}
+#view-semis .sm-headlines li a{color:var(--sc-text);text-decoration:none;font-size:.7rem}
+#view-semis .sm-headlines li a:hover{color:var(--sc-primary);text-decoration:underline}
+#view-semis .sm-headlines li .when{color:var(--sc-mute);font-size:.62rem;margin-left:3px}
+#view-semis .sm-card-footer{border-top:1px solid var(--sc-border);padding-top:9px;margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:.7rem;gap:10px;flex-wrap:wrap}
+#view-semis .sm-card-footer .next{color:var(--sc-mute)}
+#view-semis .sm-card-footer .sources a{color:var(--sc-primary);text-decoration:none;margin-right:7px;font-size:.66rem}
+#view-semis .sm-card-footer .sources a:hover{text-decoration:underline}
+#view-semis .sm-card-footer .stamp{color:var(--sc-mute);font-size:.64rem}
+#view-semis .sm-edit-trigger{background:transparent;border:1px dashed var(--sc-border);color:var(--sc-mute);border-radius:4px;padding:2px 7px;font-size:.68rem;cursor:pointer}
+#view-semis .sm-edit-trigger:hover{background:var(--sc-surf2);color:var(--sc-primary);border-color:var(--sc-primary)}
+#view-semis .sm-edit-form{display:none;flex-direction:column;gap:7px;padding:9px;background:var(--sc-surf2);border-radius:6px;border:1px solid var(--sc-border)}
+#view-semis .sm-edit-form.open{display:flex}
+#view-semis .sm-edit-form label{font-size:.68rem;color:var(--sc-mute);font-weight:600}
+#view-semis .sm-edit-form input,#view-semis .sm-edit-form select,#view-semis .sm-edit-form textarea{border:1px solid var(--sc-border);border-radius:4px;padding:5px 8px;font-size:.8rem;font-family:inherit;width:100%;background:var(--sc-surf);color:var(--sc-text)}
+#view-semis .sm-edit-form textarea{resize:vertical;min-height:54px}
+#view-semis .sm-edit-form .row{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+#view-semis .sm-edit-form .sm-ef-actions{display:flex;gap:7px;justify-content:flex-end}
+#view-semis .sm-note{font-style:italic;color:var(--sc-mute);font-size:.72rem;background:rgba(210,153,34,.07);border-left:3px solid var(--sc-yellow);padding:7px 9px;border-radius:4px}
+#view-semis .sm-fetch-err{background:var(--sc-red-bg);border-left:3px solid var(--sc-red);padding:5px 9px;color:var(--sc-red);font-size:.68rem;border-radius:4px}
+/* calendar */
+#view-semis .sm-cal{background:var(--sc-surf);border-radius:var(--sc-radius);box-shadow:var(--sc-shadow);padding:18px;margin-top:20px;border:1px solid var(--sc-border)}
+#view-semis .sm-cal h3{margin:0 0 12px 0;font-size:.95rem;font-weight:700;color:var(--sc-primary)}
+#view-semis .sm-cal table{width:100%;border-collapse:collapse;font-size:.78rem}
+#view-semis .sm-cal th{text-align:left;font-weight:700;color:var(--sc-mute);padding:7px;border-bottom:1px solid var(--sc-border);font-size:.66rem;text-transform:uppercase;letter-spacing:.5px}
+#view-semis .sm-cal td{padding:9px 7px;border-bottom:1px solid var(--sc-border);vertical-align:top}
+#view-semis .sm-cal tr:last-child td{border-bottom:none}
+#view-semis .sm-cal td.date{white-space:nowrap;font-weight:600;color:var(--sc-primary);width:120px}
+#view-semis .sm-cal td.ticker{font-weight:700;width:90px}
+#view-semis .sm-cal td.matters{color:var(--sc-mute);font-size:.72rem}
+#view-semis .sm-cal .imminent{background:var(--sc-yellow-bg)}
+#view-semis .sm-cal a{color:var(--sc-primary);text-decoration:none}
+#view-semis .sm-cal a:hover{text-decoration:underline}
+#view-semis .sm-foot{margin-top:20px;padding-top:14px;border-top:1px solid var(--sc-border);font-size:.66rem;color:var(--sc-mute);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+@media(max-width:700px){
+  #view-semis .sm-composite{grid-template-columns:1fr}
+  #view-semis .sm-score-circle{margin:0 auto}
+  #view-semis .sm-actions{flex-direction:row}
+}
+</style>
+
+<div class="sm-wrap">
+  <div class="sm-hdr">
+    <div>
+      <h2>Semiconductors / AI Cycle Monitor</h2>
+      <div style="font-size:.72rem;color:var(--muted)" data-i18n="sm_subtitle">Sei indicatori auto-aggiornati · checklist viva</div>
+    </div>
+    <div class="sm-meta">
+      <div><span data-i18n="sm_last_update">Ultimo update:</span> <span id="sm-lastUpdate">—</span></div>
+      <div id="sm-todayDate"></div>
+    </div>
+  </div>
+
+  <div class="sm-ticker" id="sm-tickerBar">
+    <span class="sm-tlbl">Live</span>
+    <div class="sm-tlist" id="sm-tickers"><span style="color:var(--muted);font-size:.72rem" data-i18n="sm_loading">Carico prezzi…</span></div>
+  </div>
+
+  <div class="sm-composite">
+    <div class="sm-score-circle" id="sm-scoreCircle">
+      <div class="slbl">Cycle health</div>
+      <div class="sval" id="sm-scoreValue">—</div>
+      <div class="sstat" id="sm-scoreStatus">—</div>
+    </div>
+    <div>
+      <div class="sm-breakdown" id="sm-breakdown"></div>
+      <div class="sm-narrative" id="sm-narrative"></div>
+    </div>
+    <div class="sm-actions">
+      <button class="sm-btn" id="sm-refreshBtn" onclick="sm_refreshAll()" data-i18n="sm_refresh_btn">Aggiorna ora</button>
+      <button class="sm-btn sec" onclick="sm_export()" data-i18n="sm_export_btn">Esporta JSON</button>
+      <button class="sm-btn sec" onclick="sm_reset()" data-i18n="sm_reset_btn">Reset default</button>
+    </div>
+  </div>
+
+  <div class="sm-grid" id="sm-cardGrid"></div>
+
+  <div class="sm-cal">
+    <h3 data-i18n="sm_cal_title">Calendario earnings &amp; eventi chiave — prossimi 4 mesi</h3>
+    <table id="sm-calTable">
+      <thead><tr>
+        <th data-i18n="sm_cal_th_date">Data</th>
+        <th data-i18n="sm_cal_th_event">Società / evento</th>
+        <th data-i18n="sm_cal_th_why">Perché conta</th>
+        <th data-i18n="sm_cal_th_link">Link</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="sm-foot">
+    <div data-i18n="sm_footer_data">Auto-fetch via SEC EDGAR, GitHub API, Yahoo Finance, Google News RSS (proxy: api.allorigins.win). Errori di rete o rate-limit possono far fallire singole letture.</div>
+    <div data-i18n="sm_footer_storage">Stato salvato in localStorage — nessun dato sul server.</div>
+  </div>
+</div>
 </div>
 
 <!-- ════════════════════ HELP MODAL ════════════════════ -->
@@ -909,7 +1094,35 @@ let LANG = (() => { try { return localStorage.getItem('fpb_lang') || BROWSER_LAN
 
 const STRINGS = {
   it: {
-    tab_live:'📊 Live', tab_signals:'📈 Segnali',
+    tab_live:'📊 Live', tab_signals:'📈 Segnali', tab_semis:'🔬 Semis',
+    // semis monitor
+    sm_subtitle:'Sei indicatori auto-aggiornati · checklist viva',
+    sm_last_update:'Ultimo update:',
+    sm_loading:'Carico prezzi…',
+    sm_refresh_btn:'Aggiorna ora', sm_refreshing:'Aggiornamento…',
+    sm_export_btn:'Esporta JSON', sm_reset_btn:'Reset default',
+    sm_cal_title:'Calendario earnings & eventi chiave — prossimi 4 mesi',
+    sm_cal_th_date:'Data', sm_cal_th_event:'Società / evento',
+    sm_cal_th_why:'Perché conta', sm_cal_th_link:'Link',
+    sm_footer_data:'Auto-fetch via SEC EDGAR, GitHub API, Yahoo Finance, Google News RSS (proxy: api.allorigins.win). Errori di rete o rate-limit possono far fallire singole letture.',
+    sm_footer_storage:'Stato salvato in localStorage — nessun dato sul server.',
+    sm_st_green:'Calmo', sm_st_yellow:'Warning', sm_st_red:'Allerta',
+    sm_indicator:'INDICATOR',
+    sm_headlines_lbl:'Ultime headline ({n}) · "{q}"',
+    sm_fetch_err:'Fetch parziale:',
+    sm_next_update:'Prossimo update:',
+    sm_autofetch:'Auto-fetch:',
+    sm_ef_value:'Valore corrente', sm_ef_status:'Status',
+    sm_ef_green:'Green — Calmo', sm_ef_yellow:'Yellow — Warning', sm_ef_red:'Red — Allerta',
+    sm_ef_append:'Aggiungi punto alla cronologia', sm_ef_append_ph:'Lascia vuoto per non modificare',
+    sm_ef_label:'Etichetta nuovo punto', sm_ef_label_ph:'es. Q2 26',
+    sm_ef_note:'Nota personale', sm_ef_cancel:'Annulla', sm_ef_save:'Salva',
+    sm_comp_expansion:'EXPANSION', sm_comp_latecycle:'LATE CYCLE', sm_comp_digestion:'DIGESTION RISK',
+    sm_narr_expansion:'Ciclo in fase espansiva. Pochi segnali di stress.',
+    sm_narr_latecycle:'Indicatori misti. Attenzione a double-ordering e capacity adds sincronizzati.',
+    sm_narr_digestion:'Pattern coerente con svolta nei prossimi 2-3 trimestri. Rivalutare esposizione memoria e merchant accelerator.',
+    sm_col_green:'Green', sm_col_yellow:'Yellow', sm_col_red:'Red',
+    sm_fetch_btn:'↻ Fetch', sm_ir_link:'IR →',
     search_placeholder:'Cerca per ticker, ISIN o nome (es. SWDA, IE00…)',
     add_btn:'+ Aggiungi',
     export_btn:'⬇ Esporta lista', export_title:'Scarica la tua lista personalizzata',
@@ -1062,7 +1275,35 @@ const STRINGS = {
 <div class="help-callout"><strong>⚠️ Avvertenze:</strong> I dati vengono da Yahoo Finance tramite proxy — possibili ritardi fino a 15 minuti. I segnali sono <strong>puramente indicativi</strong> e non costituiscono consulenza finanziaria.</div>`,
   },
   en: {
-    tab_live:'📊 Live', tab_signals:'📈 Signals',
+    tab_live:'📊 Live', tab_signals:'📈 Signals', tab_semis:'🔬 Semis',
+    // semis monitor
+    sm_subtitle:'Six auto-updated indicators · living checklist',
+    sm_last_update:'Last update:',
+    sm_loading:'Loading prices…',
+    sm_refresh_btn:'Refresh now', sm_refreshing:'Refreshing…',
+    sm_export_btn:'Export JSON', sm_reset_btn:'Reset defaults',
+    sm_cal_title:'Earnings & key events calendar — next 4 months',
+    sm_cal_th_date:'Date', sm_cal_th_event:'Company / event',
+    sm_cal_th_why:'Why it matters', sm_cal_th_link:'Link',
+    sm_footer_data:'Auto-fetch via SEC EDGAR, GitHub API, Yahoo Finance, Google News RSS (proxy: api.allorigins.win). Network errors or rate-limits may fail individual reads.',
+    sm_footer_storage:'State saved in localStorage — no data on server.',
+    sm_st_green:'Calm', sm_st_yellow:'Warning', sm_st_red:'Alert',
+    sm_indicator:'INDICATOR',
+    sm_headlines_lbl:'Latest headlines ({n}) · "{q}"',
+    sm_fetch_err:'Partial fetch:',
+    sm_next_update:'Next update:',
+    sm_autofetch:'Auto-fetch:',
+    sm_ef_value:'Current value', sm_ef_status:'Status',
+    sm_ef_green:'Green — Calm', sm_ef_yellow:'Yellow — Warning', sm_ef_red:'Red — Alert',
+    sm_ef_append:'Add point to history', sm_ef_append_ph:'Leave empty to keep series unchanged',
+    sm_ef_label:'New point label', sm_ef_label_ph:'e.g. Q2 26',
+    sm_ef_note:'Personal note', sm_ef_cancel:'Cancel', sm_ef_save:'Save',
+    sm_comp_expansion:'EXPANSION', sm_comp_latecycle:'LATE CYCLE', sm_comp_digestion:'DIGESTION RISK',
+    sm_narr_expansion:'Cycle still in expansion phase. Few stress signals.',
+    sm_narr_latecycle:'Mixed indicators. Watch for double-ordering and synchronised capacity adds.',
+    sm_narr_digestion:'Pattern consistent with a turn in the next 2-3 quarters. Reassess memory and merchant accelerator exposure.',
+    sm_col_green:'Green', sm_col_yellow:'Yellow', sm_col_red:'Red',
+    sm_fetch_btn:'↻ Fetch', sm_ir_link:'IR →',
     cur_native:'Native',
     search_placeholder:'Search by ticker, ISIN or name (e.g. SWDA, IE00…)',
     add_btn:'+ Add',
@@ -1263,6 +1504,7 @@ function applyI18n() {
   if (typeof renderSignalsTable === 'function') renderSignalsTable();
   if (typeof renderCompact === 'function') renderCompact();
   if (typeof renderCards === 'function') renderCards();
+  if (sm_initialized) sm_onTabOpen();
 }
 
 function toggleLang() {
@@ -2209,13 +2451,15 @@ function render() {
 
 function switchTab(tab) {
   currentTab = tab;
+  const tabs = ['cards','signals','semis'];
   document.querySelectorAll('.tab-btn').forEach((b,i)=>{
-    b.classList.toggle('active', ['cards','signals'][i]===tab);
+    b.classList.toggle('active', tabs[i]===tab);
   });
-  ['cards','signals'].forEach(t=>{
+  tabs.forEach(t=>{
     document.getElementById(`view-${t}`).classList.toggle('active', t===tab);
   });
   if (tab==='signals' && !sigLoaded && !sigFetching) refreshSignals();
+  else if (tab==='semis') sm_onTabOpen();
   else render();
 }
 
@@ -3032,6 +3276,453 @@ function drawPriceChart(canvas, pts, range, hoverIdx) {
     ctx.fillStyle = '#8b949e';
     ctx.font = '10px sans-serif';
     ctx.fillText(line2, bx + 10, by + 28);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SEMIS MONITOR — namespaced sm_*
+═══════════════════════════════════════════════════════════ */
+const sm_CORS       = "https://api.allorigins.win/raw?url=";
+const sm_TIMEOUT    = 15000;
+const sm_STORAGE    = "semis_ai_monitor_v2";
+const sm_AUTO_H     = 2;
+let   sm_initialized = false;
+const sm_charts     = {};   // canvas id → Chart instance
+
+const sm_DEFAULTS = {
+  indicators: [
+    { id:"hbm3e", number:"01", title:"HBM3E contract pricing",
+      subtitle:"Il canarino. Prima discesa sequenziale = supply raggiunge demand.",
+      value:8.50, unit:"$/GB (HBM3E blended, manual)",
+      history:[7.20,7.80,8.20,8.40,8.50,8.50], labels:["Q4 24","Q1 25","Q2 25","Q3 25","Q4 25","Q1 26"],
+      direction:"lower_is_signal", status:"yellow",
+      signal:"Prezzi <b>piatti</b> negli ultimi due trimestri dopo 18 mesi di rialzo. Fase pre-svolta classica.",
+      next:"TrendForce monthly · ~15 mag 2026", autoMode:"news+proxy",
+      newsQuery:"HBM3E contract price", proxyTicker:"000660.KS", proxyLabel:"SK Hynix (KRX)",
+      sources:[{name:"TrendForce",url:"https://www.trendforce.com/news"},{name:"DRAMeXchange",url:"https://www.dramexchange.com"},{name:"SK Hynix IR",url:"https://www.skhynix.com/eng/ir/financial.do"}],
+      headlines:[],proxy:null,lastFetched:null,fetchError:null,note:"" },
+    { id:"cowos", number:"02", title:"CoWoS shipments (TSMC)",
+      subtitle:"Il bottleneck fisico. Over-shipment vs accelerator builds = inventario nascosto.",
+      value:45, unit:"k WPM capacity (stima, manual)",
+      history:[12,18,25,32,40,45], labels:["Q4 24","Q1 25","Q2 25","Q3 25","Q4 25","Q1 26"],
+      direction:"watch_overshoot", status:"green",
+      signal:"Capacità ancora <b>fully utilized</b>. TSMC ha indicato raddoppio nel 2H26. Nessun over-shipment.",
+      next:"TSMC Monthly Revenue ~10 giu 2026", autoMode:"news+proxy",
+      newsQuery:"TSMC CoWoS capacity", proxyTicker:"TSM", proxyLabel:"TSM (NYSE)",
+      sources:[{name:"TSMC Monthly",url:"https://investor.tsmc.com/english/monthly-revenue"},{name:"TSMC Quarterly",url:"https://investor.tsmc.com/english/quarterly-results"},{name:"DigiTimes",url:"https://www.digitimes.com"}],
+      headlines:[],proxy:null,lastFetched:null,fetchError:null,note:"" },
+    { id:"hyperscaler", number:"03", title:"Hyperscaler 2027 capex language",
+      subtitle:"Primi tagli appaiono come 'mix shift to opex' o 'operating leverage'.",
+      value:0, unit:"menzioni 'shift to opex' (Q1 26 calls)",
+      history:[0,0,0,0,0,0], labels:["Q4 24","Q1 25","Q2 25","Q3 25","Q4 25","Q1 26"],
+      direction:"higher_is_signal", status:"green",
+      signal:"Nessuna menzione di shift to opex nei call Q1 2026 (MSFT,GOOGL,META,AMZN,ORCL). Capex 2027 ancora 'continued investment'.",
+      next:"Q2 2026 earnings: 23-31 lug 2026", autoMode:"news+basket",
+      newsQuery:"hyperscaler AI capex 2027 guidance", basket:["MSFT","GOOGL","META","AMZN","ORCL"], basketLabel:"Hyperscaler basket (1d %)",
+      sources:[{name:"SEC EDGAR",url:"https://www.sec.gov/edgar/searchedgar/companysearch"},{name:"MSFT IR",url:"https://www.microsoft.com/en-us/Investor"},{name:"GOOGL IR",url:"https://abc.xyz/investor"},{name:"META IR",url:"https://investor.atmeta.com"},{name:"AMZN IR",url:"https://ir.aboutamazon.com"}],
+      headlines:[],proxy:null,lastFetched:null,fetchError:null,note:"" },
+    { id:"nvda_inv", number:"04", title:"Nvidia data center inventory days",
+      subtitle:"Anticipa il ciclo di 2 trimestri. AUTO da SEC EDGAR.",
+      value:55, unit:"giorni (Inv / COGS × 90)",
+      history:[48,50,52,50,53,55], labels:["Q4 24","Q1 25","Q2 25","Q3 25","Q4 25","Q1 26"],
+      direction:"higher_is_signal", status:"yellow",
+      signal:"Threshold warning: <b>&gt;70 giorni</b>. Lieve uptick ultimi due trimestri.",
+      next:"Nvidia FY27 Q1: 28 mag 2026", autoMode:"sec_edgar", secCik:1045810,
+      newsQuery:"Nvidia inventory data center", proxyTicker:"NVDA", proxyLabel:"NVDA",
+      sources:[{name:"Nvidia IR",url:"https://investor.nvidia.com"},{name:"Nvidia 10-Q",url:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001045810&type=10-Q"}],
+      headlines:[],proxy:null,lastFetched:null,fetchError:null,note:"" },
+    { id:"amd_rocm", number:"05", title:"AMD MI400 & ROCm adoption",
+      subtitle:"Erosione del moat CUDA. AUTO da GitHub API.",
+      value:12, unit:"% workload share (manual stima)",
+      history:[6,8,9,10,11,12], labels:["Q4 24","Q1 25","Q2 25","Q3 25","Q4 25","Q1 26"],
+      direction:"higher_is_signal", status:"yellow",
+      signal:"Evento chiave: <b>AMD Advancing AI ~12 giu 2026</b>. ROCm 6.x con PyTorch nativo.",
+      next:"AMD Advancing AI: 12 giu 2026", autoMode:"github",
+      githubRepos:[{owner:"ROCm",repo:"ROCm",label:"ROCm"},{owner:"pytorch",repo:"pytorch",label:"PyTorch"}],
+      newsQuery:"AMD MI400 ROCm", proxyTicker:"AMD", proxyLabel:"AMD",
+      sources:[{name:"AMD IR",url:"https://ir.amd.com"},{name:"MLPerf",url:"https://mlcommons.org/benchmarks"},{name:"ROCm GitHub",url:"https://github.com/ROCm/ROCm"}],
+      headlines:[],proxy:null,github:null,lastFetched:null,fetchError:null,note:"" },
+    { id:"memory_capex", number:"06", title:"Memory capex pause signals",
+      subtitle:"Samsung + SK Hynix + Micron. Pausa coordinata = svolta.",
+      value:115, unit:"$B aggregato 2026E (manual)",
+      history:[60,68,75,90,110,115], labels:["2021","2022","2023","2024","2025E","2026E"],
+      direction:"lower_is_signal", status:"green",
+      signal:"Tutti e tre i player ancora in <b>guidance up YoY</b>. Samsung tono 'disciplined ramp'.",
+      next:"Samsung/SK Hynix Q2: ~29 lug 2026 · Micron FY26 Q4: ~25 set 2026", autoMode:"news+basket",
+      newsQuery:"memory capex Samsung SK Hynix Micron HBM", basket:["MU","000660.KS","005930.KS"], basketLabel:"Memory basket (1d %)",
+      sources:[{name:"Samsung IR",url:"https://www.samsung.com/global/ir"},{name:"SK Hynix IR",url:"https://www.skhynix.com/eng/ir/financial.do"},{name:"Micron IR",url:"https://investors.micron.com"},{name:"ASML IR",url:"https://www.asml.com/en/investors"}],
+      headlines:[],proxy:null,lastFetched:null,fetchError:null,note:"" }
+  ],
+  calendar:[
+    {date:"28 mag 2026",ticker:"NVDA",what:"FY27 Q1 earnings",matters:"Inventory days, channel commentary, Rubin update",url:"https://investor.nvidia.com"},
+    {date:"10 giu 2026",ticker:"TSMC",what:"May monthly revenue",matters:"Conferma trend CoWoS",url:"https://investor.tsmc.com/english/monthly-revenue"},
+    {date:"12 giu 2026",ticker:"AMD",what:"Advancing AI 2026",matters:"Roadmap MI400, ROCm metrics, design wins",url:"https://ir.amd.com"},
+    {date:"23 lug 2026",ticker:"GOOGL",what:"Q2 earnings",matters:"Capex 2026 update + 2027 framing",url:"https://abc.xyz/investor"},
+    {date:"24 lug 2026",ticker:"MSFT",what:"FY26 Q4 earnings",matters:"Capex guidance FY27; primi 'shift to opex'?",url:"https://www.microsoft.com/en-us/Investor"},
+    {date:"25 lug 2026",ticker:"META",what:"Q2 earnings",matters:"Capex 2026 revision; Llama infra spend",url:"https://investor.atmeta.com"},
+    {date:"29 lug 2026",ticker:"SK Hynix",what:"Q2 earnings",matters:"HBM pricing + capex guidance H2",url:"https://www.skhynix.com/eng/ir/financial.do"},
+    {date:"30 lug 2026",ticker:"Samsung",what:"Q2 preliminary",matters:"Memory ASP commentary, HBM qualification",url:"https://www.samsung.com/global/ir"},
+    {date:"31 lug 2026",ticker:"AMZN",what:"Q2 earnings",matters:"AWS capex, Trainium ramp",url:"https://ir.aboutamazon.com"},
+    {date:"28 ago 2026",ticker:"NVDA",what:"FY27 Q2 earnings",matters:"Inventory days check #2; H2 outlook",url:"https://investor.nvidia.com"},
+    {date:"25 set 2026",ticker:"Micron",what:"FY26 Q4 earnings",matters:"HBM3E pricing + capex guidance 2027",url:"https://investors.micron.com"}
+  ]
+};
+
+// ── state ──
+function sm_loadState(){
+  try{
+    const s=localStorage.getItem(sm_STORAGE);
+    if(s){
+      const p=JSON.parse(s);
+      p.indicators=p.indicators.map(i=>{const d=sm_DEFAULTS.indicators.find(x=>x.id===i.id);return d?Object.assign({},d,i):i;});
+      return p;
+    }
+  }catch(e){}
+  return JSON.parse(JSON.stringify(sm_DEFAULTS));
+}
+function sm_saveState(){
+  smState.lastUpdate=new Date().toISOString();
+  localStorage.setItem(sm_STORAGE,JSON.stringify(smState));
+  document.getElementById('sm-lastUpdate').textContent=sm_fmtDate(smState.lastUpdate);
+}
+let smState=sm_loadState();
+
+function sm_fmtDate(iso){
+  if(!iso)return'—';
+  const d=new Date(iso);
+  return d.toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+}
+function sm_timeAgo(iso){
+  if(!iso)return'mai';
+  const m=Math.floor((Date.now()-new Date(iso))/60000);
+  if(m<1)return'ora';if(m<60)return m+'min fa';
+  const h=Math.floor(m/60);if(h<24)return h+'h fa';
+  return Math.floor(h/24)+'g fa';
+}
+
+// ── fetch helpers ──
+function sm_fetchTimeout(url,opts={}){
+  const c=new AbortController();
+  const t=setTimeout(()=>c.abort(),sm_TIMEOUT);
+  return fetch(url,Object.assign({},opts,{signal:c.signal})).finally(()=>clearTimeout(t));
+}
+function sm_proxied(url){return sm_CORS+encodeURIComponent(url);}
+
+async function sm_fetchYahoo(sym){
+  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=5d&interval=1d`;
+  const r=await sm_fetchTimeout(sm_proxied(url));
+  if(!r.ok)throw new Error('Yahoo '+r.status);
+  const j=await r.json();
+  const res=j.chart?.result?.[0];
+  if(!res)throw new Error('Yahoo: no result');
+  return{price:res.meta.regularMarketPrice,prev:res.meta.chartPreviousClose};
+}
+async function sm_fetchSecConcept(cik,concept){
+  const padded=String(cik).padStart(10,'0');
+  const url=`https://data.sec.gov/api/xbrl/companyconcept/CIK${padded}/us-gaap/${concept}.json`;
+  const r=await sm_fetchTimeout(sm_proxied(url));
+  if(!r.ok)throw new Error('SEC '+r.status);
+  return r.json();
+}
+async function sm_fetchGithub(owner,repo){
+  const r=await sm_fetchTimeout(`https://api.github.com/repos/${owner}/${repo}`);
+  if(!r.ok)throw new Error('GitHub '+r.status);
+  return r.json();
+}
+async function sm_fetchNews(query){
+  const url=`https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`;
+  const r=await sm_fetchTimeout(sm_proxied(url));
+  if(!r.ok)throw new Error('GNews '+r.status);
+  const txt=await r.text();
+  const xml=new DOMParser().parseFromString(txt,'text/xml');
+  return Array.from(xml.querySelectorAll('item')).slice(0,4).map(i=>({
+    title:i.querySelector('title')?.textContent||'',
+    link:i.querySelector('link')?.textContent||'',
+    pubDate:i.querySelector('pubDate')?.textContent||''
+  }));
+}
+
+// ── ticker bar ──
+async function sm_refreshTickers(){
+  const tickers=[
+    {sym:'NVDA',yahoo:'NVDA'},{sym:'AMD',yahoo:'AMD'},{sym:'TSM',yahoo:'TSM'},
+    {sym:'MU',yahoo:'MU'},{sym:'AVGO',yahoo:'AVGO'},{sym:'ASML',yahoo:'ASML'},
+    {sym:'SK Hynix',yahoo:'000660.KS'},{sym:'Samsung',yahoo:'005930.KS'}
+  ];
+  const host=document.getElementById('sm-tickers');
+  const res=await Promise.allSettled(tickers.map(t=>sm_fetchYahoo(t.yahoo)));
+  host.innerHTML='';
+  tickers.forEach((t,i)=>{
+    const r=res[i];const div=document.createElement('div');div.className='sm-tick';
+    if(r.status==='fulfilled'){
+      const{price,prev}=r.value;const chg=((price-prev)/prev)*100;
+      const cls=chg>0.1?'up':chg<-0.1?'dn':'flat';
+      const sign=chg>=0?'+':'';
+      div.innerHTML=`<span class="sym">${t.sym}</span><span class="px">${price.toFixed(2)}</span><span class="chg ${cls}">${sign}${chg.toFixed(2)}%</span>`;
+    }else{
+      div.innerHTML=`<span class="sym">${t.sym}</span><span class="px" style="opacity:.4">—</span>`;
+    }
+    host.appendChild(div);
+  });
+}
+
+// ── per-indicator refresh ──
+async function sm_refreshIndicator(ind){
+  ind.fetching=true;ind.fetchError=null;sm_renderCards();
+  try{
+    const tasks={};
+    if(ind.newsQuery)tasks.news=sm_fetchNews(ind.newsQuery);
+    if(ind.proxyTicker)tasks.proxy=sm_fetchYahoo(ind.proxyTicker);
+    if(ind.basket)tasks.basket=Promise.all(ind.basket.map(s=>sm_fetchYahoo(s).catch(()=>null))).then(a=>a.filter(Boolean));
+    if(ind.autoMode==='sec_edgar'&&ind.secCik){
+      tasks.inv=sm_fetchSecConcept(ind.secCik,'InventoryNet').catch(()=>null);
+      tasks.cogs=sm_fetchSecConcept(ind.secCik,'CostOfRevenue').catch(()=>null);
+    }
+    if(ind.autoMode==='github'&&ind.githubRepos)
+      tasks.github=Promise.all(ind.githubRepos.map(r=>sm_fetchGithub(r.owner,r.repo).then(d=>({...r,data:d})).catch(()=>null))).then(a=>a.filter(Boolean));
+
+    const keys=Object.keys(tasks);
+    const results=await Promise.allSettled(Object.values(tasks));
+    const out={};keys.forEach((k,i)=>{out[k]=results[i].status==='fulfilled'?results[i].value:null;});
+
+    if(out.news)ind.headlines=out.news;
+    if(out.proxy){
+      const chg=((out.proxy.price-out.proxy.prev)/out.proxy.prev)*100;
+      ind.proxy={name:ind.proxyLabel||ind.proxyTicker,v:out.proxy.price.toFixed(2),chg:chg.toFixed(2)};
+    }
+    if(out.basket&&out.basket.length>0){
+      const avg=out.basket.map(b=>((b.price-b.prev)/b.prev)*100).reduce((a,b)=>a+b,0)/out.basket.length;
+      ind.proxy={name:ind.basketLabel||'Basket',v:(avg>=0?'+':'')+avg.toFixed(2)+'%',chg:null};
+    }
+    if(ind.autoMode==='sec_edgar'&&out.inv&&out.cogs){
+      const srt=(a,b)=>new Date(b.end)-new Date(a.end);
+      const invU=out.inv.units?.USD||[];const cogsU=out.cogs.units?.USD||[];
+      const lastInv=invU.sort(srt)[0];
+      const lastCogs=cogsU.filter(c=>c.fp&&(c.fp.startsWith('Q')||c.fp==='FY')).sort(srt).find(c=>c.end===lastInv?.end&&c.fp?.startsWith('Q'))||cogsU.sort(srt)[0];
+      if(lastInv&&lastCogs){
+        const days=Math.round((lastInv.val/lastCogs.val)*90);
+        const lbl='Q'+lastCogs.fp.replace('Q','')+' '+lastInv.end.substring(2,4);
+        if(!ind.labels.includes(lbl)&&Math.abs(days-ind.value)>0){
+          ind.history.push(days);ind.labels.push(lbl);
+          if(ind.history.length>8){ind.history.shift();ind.labels.shift();}
+        }
+        ind.value=days;
+        ind.unit=`giorni · as of ${lastInv.end} (${lastCogs.fp})`;
+        ind.status=days>=75?'red':days>=60?'yellow':'green';
+      }
+    }
+    if(out.github&&out.github.length>0){
+      ind.github=out.github.map(g=>({label:g.label,stars:g.data.stargazers_count,forks:g.data.forks_count}));
+      const rocm=ind.github.find(g=>g.label==='ROCm');
+      if(rocm)ind.proxy=ind.proxy||{name:'ROCm stars',v:rocm.stars.toLocaleString(),chg:null};
+    }
+    ind.lastFetched=new Date().toISOString();
+  }catch(e){ind.fetchError=e.message||String(e);}
+  finally{ind.fetching=false;}
+}
+
+async function sm_refreshAll(){
+  const btn=document.getElementById('sm-refreshBtn');
+  btn.disabled=true;btn.innerHTML=`<span class="sm-spinner"></span> ${t('sm_refreshing')}`;
+  const tickerTask=sm_refreshTickers();
+  for(const ind of smState.indicators)await sm_refreshIndicator(ind);
+  await tickerTask;sm_saveState();sm_renderAll();
+  btn.disabled=false;btn.innerHTML=t('sm_refresh_btn');
+}
+
+// ── composite ──
+function sm_composite(){
+  const c={green:0,yellow:0,red:0};
+  smState.indicators.forEach(i=>c[i.status]=(c[i.status]||0)+1);
+  const raw=c.yellow*1+c.red*2;
+  let label,color,narrative;
+  if(raw<=2){label=t('sm_comp_expansion');color='var(--sc-green)';narrative=t('sm_narr_expansion');}
+  else if(raw<=6){label=t('sm_comp_latecycle');color='var(--sc-yellow)';narrative=t('sm_narr_latecycle');}
+  else{label=t('sm_comp_digestion');color='var(--sc-red)';narrative=t('sm_narr_digestion');}
+  return{c,raw,label,color,narrative};
+}
+
+function sm_renderComposite(){
+  const comp=sm_composite();
+  const circle=document.getElementById('sm-scoreCircle');
+  circle.style.background=comp.color;
+  document.getElementById('sm-scoreValue').textContent=comp.raw+'/12';
+  document.getElementById('sm-scoreStatus').textContent=comp.label;
+  document.getElementById('sm-narrative').textContent=comp.narrative;
+  const pills=document.getElementById('sm-breakdown');pills.innerHTML='';
+  const cfg={green:{bg:'var(--sc-green-bg)',c:'var(--sc-green)',l:t('sm_col_green')},yellow:{bg:'var(--sc-yellow-bg)',c:'var(--sc-yellow)',l:t('sm_col_yellow')},red:{bg:'var(--sc-red-bg)',c:'var(--sc-red)',l:t('sm_col_red')}};
+  ['green','yellow','red'].forEach(s=>{
+    const d=document.createElement('div');d.className='sm-pill';
+    d.style.background=cfg[s].bg;d.style.color=cfg[s].c;
+    d.innerHTML=`<span class="dot" style="background:${cfg[s].c}"></span>${comp.c[s]||0} ${cfg[s].l}`;
+    pills.appendChild(d);
+  });
+}
+
+function sm_fmtVal(v){
+  if(typeof v!=='number')return v;if(v===0)return'0';
+  if(Math.abs(v)>=100)return v.toFixed(0);
+  if(Math.abs(v)>=10)return v.toFixed(1);
+  return v.toFixed(2);
+}
+function sm_shortDate(s){
+  if(!s)return'';const d=new Date(s);if(isNaN(d))return'';
+  return d.toLocaleDateString('it-IT',{day:'2-digit',month:'short'});
+}
+
+function sm_renderCards(){
+  const grid=document.getElementById('sm-cardGrid');grid.innerHTML='';
+  smState.indicators.forEach(ind=>{
+    const card=document.createElement('div');
+    card.className='sm-card st-'+ind.status+(ind.fetching?' fetching':'');
+    const prev=ind.history[ind.history.length-2],curr=ind.history[ind.history.length-1];
+    let dc='flat',dt='flat';
+    if(typeof prev==='number'&&prev!==0){
+      const pct=((curr-prev)/Math.abs(prev))*100;
+      if(Math.abs(pct)<1){dc='flat';dt='flat';}
+      else if(pct>0){dt='+'+pct.toFixed(1)+'% q/q';dc=ind.direction==='watch_overshoot'?'flat':'up';}
+      else{dt=pct.toFixed(1)+'% q/q';dc=ind.direction==='lower_is_signal'?'up':'down';}
+    }
+    const isAuto=ind.autoMode==='sec_edgar'||ind.autoMode==='github';
+    const autoBadge=isAuto?'<span class="sm-badge auto">AUTO</span>':'<span class="sm-badge manual">SEMI-AUTO</span>';
+    const stLbl={green:t('sm_st_green'),yellow:t('sm_st_yellow'),red:t('sm_st_red')}[ind.status];
+    let proxyHtml='';
+    if(ind.proxy){
+      const chgPart=ind.proxy.chg!==null&&ind.proxy.chg!==undefined
+        ?` <span class="ch ${parseFloat(ind.proxy.chg)>=0?'up':'dn'}">${parseFloat(ind.proxy.chg)>=0?'+':''}${ind.proxy.chg}%</span>`:'';
+      proxyHtml=`<div class="sm-chips"><div class="sm-chip"><span class="lbl">${ind.proxy.name}:</span><span class="v">${ind.proxy.v}</span>${chgPart}</div></div>`;
+    }
+    if(ind.github&&ind.github.length>0){
+      proxyHtml='<div class="sm-chips">'+ind.github.map(g=>`<div class="sm-chip"><span class="lbl">${g.label}:</span><span class="v">${g.stars.toLocaleString()} ★</span></div>`).join('')+'</div>';
+    }
+    const headlinesHtml=ind.headlines&&ind.headlines.length>0
+      ?`<details class="sm-headlines"><summary>${t('sm_headlines_lbl',{n:ind.headlines.length,q:ind.newsQuery})}</summary><ul>${ind.headlines.map(h=>`<li><a href="${h.link}" target="_blank" rel="noopener">${h.title}</a><span class="when">${sm_shortDate(h.pubDate)}</span></li>`).join('')}</ul></details>`:'';
+    const errHtml=ind.fetchError?`<div class="sm-fetch-err">${t('sm_fetch_err')} ${ind.fetchError}</div>`:'';
+    card.innerHTML=`
+      <div class="sm-card-hdr">
+        <div><div class="sm-num">${t('sm_indicator')} ${ind.number}</div><h3>${ind.title}</h3></div>
+        <div class="sm-badges">${autoBadge}<span class="sm-badge ${ind.status}">${stLbl}</span></div>
+      </div>
+      <div style="font-size:.72rem;color:var(--muted);line-height:1.4">${ind.subtitle}</div>
+      <div class="sm-reading">
+        <span class="val">${sm_fmtVal(ind.value)}</span>
+        <span class="unit">${ind.unit}</span>
+        <span class="delta ${dc}">${dt}</span>
+      </div>
+      ${proxyHtml}
+      <div class="sm-spark"><canvas id="sm-spark-${ind.id}"></canvas></div>
+      <div class="sm-signal">${ind.signal}</div>
+      ${headlinesHtml}${errHtml}
+      ${ind.note?`<div class="sm-note">${ind.note}</div>`:''}
+      <div class="sm-card-footer">
+        <div style="flex:1;min-width:0">
+          <div class="next">${t('sm_next_update')} <b>${ind.next}</b></div>
+          <div class="sources" style="margin-top:3px">${ind.sources.map(s=>`<a href="${s.url}" target="_blank" rel="noopener">${s.name} ${t('sm_ir_link')}</a>`).join('')}</div>
+          <div class="stamp">${t('sm_autofetch')} ${sm_timeAgo(ind.lastFetched)}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <button class="sm-edit-trigger" onclick="sm_refreshOne('${ind.id}')">${t('sm_fetch_btn')}</button>
+          <button class="sm-edit-trigger" onclick="sm_toggleEdit('${ind.id}')">Edit</button>
+        </div>
+      </div>
+      <div class="sm-edit-form" id="sm-ef-${ind.id}">
+        <div class="row">
+          <div><label>${t('sm_ef_value')}</label><input type="number" step="any" id="sm-val-${ind.id}" value="${ind.value}"></div>
+          <div><label>${t('sm_ef_status')}</label><select id="sm-st-${ind.id}">
+            <option value="green" ${ind.status==='green'?'selected':''}>${t('sm_ef_green')}</option>
+            <option value="yellow" ${ind.status==='yellow'?'selected':''}>${t('sm_ef_yellow')}</option>
+            <option value="red" ${ind.status==='red'?'selected':''}>${t('sm_ef_red')}</option>
+          </select></div>
+        </div>
+        <div><label>${t('sm_ef_append')}</label><input type="number" step="any" id="sm-app-${ind.id}" placeholder="${t('sm_ef_append_ph')}"></div>
+        <div><label>${t('sm_ef_label')}</label><input type="text" id="sm-lbl-${ind.id}" placeholder="${t('sm_ef_label_ph')}"></div>
+        <div><label>${t('sm_ef_note')}</label><textarea id="sm-note-${ind.id}">${ind.note||''}</textarea></div>
+        <div class="sm-ef-actions">
+          <button class="sm-btn sec" onclick="sm_toggleEdit('${ind.id}')">${t('sm_ef_cancel')}</button>
+          <button class="sm-btn" onclick="sm_saveInd('${ind.id}')">${t('sm_ef_save')}</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+  smState.indicators.forEach(ind=>sm_drawSparkline(ind));
+}
+
+function sm_drawSparkline(ind){
+  const ctx=document.getElementById('sm-spark-'+ind.id);if(!ctx)return;
+  if(sm_charts[ind.id]){sm_charts[ind.id].destroy();delete sm_charts[ind.id];}
+  const cmap={green:'#3fb950',yellow:'#d29922',red:'#f85149'};
+  const col=cmap[ind.status];
+  sm_charts[ind.id]=new Chart(ctx,{
+    type:'line',
+    data:{labels:ind.labels,datasets:[{data:ind.history,borderColor:col,backgroundColor:col+'22',borderWidth:2,tension:.3,fill:true,pointRadius:2,pointBackgroundColor:col}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{enabled:true,displayColors:false}},
+      scales:{x:{display:true,ticks:{font:{size:8},color:'#8b949e'},grid:{display:false}},y:{display:false}}}
+  });
+}
+
+function sm_renderCalendar(){
+  const tbody=document.querySelector('#sm-calTable tbody');tbody.innerHTML='';
+  const today=new Date();
+  const months={gen:0,feb:1,mar:2,apr:3,mag:4,giu:5,lug:6,ago:7,set:8,ott:9,nov:10,dic:11};
+  smState.calendar.forEach(row=>{
+    const tr=document.createElement('tr');
+    const m=row.date.match(/(\d{1,2})\s+(\w{3})\s+(\d{4})/i);
+    if(m){const mo=months[m[2].toLowerCase().substring(0,3)];if(mo!==undefined){
+      const ev=new Date(parseInt(m[3]),mo,parseInt(m[1]));
+      const diff=(ev-today)/86400000;
+      if(diff>=0&&diff<=14)tr.classList.add('imminent');
+    }}
+    tr.innerHTML=`<td class="date">${row.date}</td><td class="ticker">${row.ticker}<div style="font-weight:400;color:var(--muted);font-size:.66rem">${row.what}</div></td><td class="matters">${row.matters}</td><td><a href="${row.url}" target="_blank" rel="noopener">IR →</a></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function sm_renderAll(){sm_renderComposite();sm_renderCards();sm_renderCalendar();}
+
+function sm_toggleEdit(id){document.getElementById('sm-ef-'+id).classList.toggle('open');}
+function sm_saveInd(id){
+  const ind=smState.indicators.find(i=>i.id===id);if(!ind)return;
+  ind.value=parseFloat(document.getElementById('sm-val-'+id).value)||0;
+  ind.status=document.getElementById('sm-st-'+id).value;
+  const app=document.getElementById('sm-app-'+id).value;
+  if(app!==''&&!isNaN(parseFloat(app))){
+    ind.history.push(parseFloat(app));ind.labels.push(document.getElementById('sm-lbl-'+id).value||'new');
+    if(ind.history.length>12){ind.history.shift();ind.labels.shift();}
+  }
+  ind.note=document.getElementById('sm-note-'+id).value||'';
+  sm_saveState();sm_renderAll();
+}
+async function sm_refreshOne(id){
+  const ind=smState.indicators.find(i=>i.id===id);if(!ind)return;
+  await sm_refreshIndicator(ind);sm_saveState();sm_renderAll();
+}
+function sm_export(){
+  const blob=new Blob([JSON.stringify({exported_at:new Date().toISOString(),state:smState},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='semis_monitor_'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(a.href);
+}
+function sm_reset(){
+  if(confirm('Resettare tutti i valori ai default? Le note saranno cancellate.')){
+    localStorage.removeItem(sm_STORAGE);smState=JSON.parse(JSON.stringify(sm_DEFAULTS));
+    sm_renderAll();sm_refreshAll();
+  }
+}
+
+// ── lazy init (called on first tab open) ──
+function sm_onTabOpen(){
+  const todayFmt=new Date().toLocaleDateString(LANG==='it'?'it-IT':'en-GB',{day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('sm-todayDate').textContent=(LANG==='it'?'Oggi: ':'Today: ')+todayFmt;
+  document.getElementById('sm-lastUpdate').textContent=smState.lastUpdate?sm_fmtDate(smState.lastUpdate):(LANG==='it'?'mai (dati seed)':'never (seed data)');
+  sm_renderAll();
+  if(!sm_initialized){
+    sm_initialized=true;
+    const oldest=smState.indicators.reduce((min,i)=>{
+      if(!i.lastFetched)return 0;return Math.min(min,new Date(i.lastFetched).getTime());
+    },Date.now());
+    const ageMs=oldest===0?Infinity:Date.now()-oldest;
+    if(ageMs>sm_AUTO_H*3600000)setTimeout(sm_refreshAll,400);
+    else sm_refreshTickers();
   }
 }
 </script>
