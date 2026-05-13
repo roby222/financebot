@@ -695,6 +695,27 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 #view-semis .sm-cal .imminent{background:var(--sc-yellow-bg)}
 #view-semis .sm-cal a{color:var(--sc-primary);text-decoration:none}
 #view-semis .sm-cal a:hover{text-decoration:underline}
+/* thesis panel */
+#view-semis .sm-thesis{background:var(--sc-surf);border-radius:var(--sc-radius);box-shadow:var(--sc-shadow);padding:16px;margin-bottom:20px;border:1px solid var(--sc-border);border-left:4px solid var(--sc-primary)}
+#view-semis .sm-thesis-hdr{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+#view-semis .sm-thesis-hdr h4{margin:0;font-size:.88rem;font-weight:700;color:var(--sc-text)}
+#view-semis .sm-thesis-sub{font-size:.72rem;color:var(--sc-mute);margin-top:3px;font-style:italic;max-width:520px;line-height:1.4}
+#view-semis .sm-thesis-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+#view-semis .sm-verdict{padding:4px 12px;border-radius:999px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+#view-semis .sm-verdict.accumulate{background:var(--sc-green-bg);color:var(--sc-green)}
+#view-semis .sm-verdict.hold{background:var(--sc-yellow-bg);color:var(--sc-yellow)}
+#view-semis .sm-verdict.reduce,#view-semis .sm-verdict.avoid{background:var(--sc-red-bg);color:var(--sc-red)}
+#view-semis .sm-thesis-ver{font-size:.66rem;color:var(--sc-mute);white-space:nowrap}
+#view-semis .sm-th-dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:5px}
+#view-semis .sm-th-row{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:5px;background:var(--sc-surf2);border:1px solid var(--sc-border);font-size:.72rem}
+#view-semis .sm-th-row .th-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+#view-semis .sm-th-row .th-dot.green{background:var(--sc-green)}
+#view-semis .sm-th-row .th-dot.yellow{background:var(--sc-yellow)}
+#view-semis .sm-th-row .th-dot.red{background:var(--sc-red)}
+#view-semis .sm-th-row .th-dot.grey{background:var(--sc-mute)}
+#view-semis .sm-th-row .th-lbl{color:var(--sc-text);flex:1;font-weight:500}
+#view-semis .sm-th-row .th-red{color:var(--sc-mute);font-size:.62rem;white-space:nowrap}
+#view-semis .sm-th-stop{margin-top:10px;font-size:.68rem;color:var(--sc-red);background:var(--sc-red-bg);border-left:3px solid var(--sc-red);padding:7px 10px;border-radius:4px;line-height:1.6}
 #view-semis .sm-foot{margin-top:20px;padding-top:14px;border-top:1px solid var(--sc-border);font-size:.66rem;color:var(--sc-mute);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
 @media(max-width:700px){
   #view-semis .sm-composite{grid-template-columns:1fr}
@@ -735,6 +756,22 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
       <button class="sm-btn sec" onclick="sm_export()" data-i18n="sm_export_btn">Esporta JSON</button>
       <button class="sm-btn sec" onclick="sm_reset()" data-i18n="sm_reset_btn">Reset default</button>
     </div>
+  </div>
+
+  <!-- ── THESIS PANEL ── -->
+  <div class="sm-thesis">
+    <div class="sm-thesis-hdr">
+      <div>
+        <h4>📋 iShares MSCI Global Semiconductors (SEMI)</h4>
+        <div class="sm-thesis-sub" data-i18n="sm_th_oneliner">Esposizione diversificata al ciclo semis AI — $350B+ capex hyperscaler in arrivo nell'hardware stack.</div>
+      </div>
+      <div class="sm-thesis-meta">
+        <span class="sm-verdict accumulate" id="sm-thVerdict" data-i18n="sm_th_verdict">ACCUMULA</span>
+        <span class="sm-thesis-ver" id="sm-thVer">v1.0 · 13 mag 2026</span>
+      </div>
+    </div>
+    <div class="sm-th-dash" id="sm-thDash"></div>
+    <div class="sm-th-stop" data-i18n="sm_th_stop">⚠️ Stop-loss: (1) HBM3E pricing &lt; −15% HoH &nbsp;·&nbsp; (2) Capex hyperscaler flat/down 2027 &nbsp;·&nbsp; (3) SOX &lt; SMA200 per 3+ settimane &nbsp;·&nbsp; (4) Export controls su TSMC / ASML</div>
   </div>
 
   <div class="sm-grid" id="sm-cardGrid"></div>
@@ -1121,6 +1158,9 @@ const STRINGS = {
     sm_narr_expansion:'Ciclo in fase espansiva. Pochi segnali di stress.',
     sm_narr_latecycle:'Indicatori misti. Attenzione a double-ordering e capacity adds sincronizzati.',
     sm_narr_digestion:'Pattern coerente con svolta nei prossimi 2-3 trimestri. Rivalutare esposizione memoria e merchant accelerator.',
+    sm_th_oneliner:'Esposizione diversificata al ciclo semis AI — $350B+ capex hyperscaler in arrivo nell\'hardware stack.',
+    sm_th_verdict:'ACCUMULA',
+    sm_th_stop:'⚠️ Stop-loss thesis: (1) HBM3E pricing < −15% HoH · (2) Capex hyperscaler flat/down per 2027 · (3) SOX < SMA200 per 3+ settimane · (4) Export controls impattano TSMC / ASML',
     sm_col_green:'Green', sm_col_yellow:'Yellow', sm_col_red:'Red',
     sm_fetch_btn:'↻ Fetch', sm_ir_link:'IR →',
     search_placeholder:'Cerca per ticker, ISIN o nome (es. SWDA, IE00…)',
@@ -1302,6 +1342,9 @@ const STRINGS = {
     sm_narr_expansion:'Cycle still in expansion phase. Few stress signals.',
     sm_narr_latecycle:'Mixed indicators. Watch for double-ordering and synchronised capacity adds.',
     sm_narr_digestion:'Pattern consistent with a turn in the next 2-3 quarters. Reassess memory and merchant accelerator exposure.',
+    sm_th_oneliner:'Diversified exposure to the AI semis cycle — $350B+ hyperscaler capex landing in the hardware stack.',
+    sm_th_verdict:'ACCUMULATE',
+    sm_th_stop:'⚠️ Thesis stop-loss: (1) HBM3E pricing < −15% HoH · (2) Hyperscaler capex flat/down for 2027 · (3) SOX < SMA200 for 3+ weeks · (4) Export controls impairing TSMC / ASML',
     sm_col_green:'Green', sm_col_yellow:'Yellow', sm_col_red:'Red',
     sm_fetch_btn:'↻ Fetch', sm_ir_link:'IR →',
     cur_native:'Native',
@@ -3289,6 +3332,21 @@ function drawPriceChart(canvas, pts, range, hoverIdx) {
 // Usa lo stesso proxy del dashboard principale (Cloudflare Worker se configurato,
 // altrimenti corsproxy.io come fallback). Questo risolve i rate-limit di allorigins.
 const sm_CORS       = localStorage.getItem('fpb_proxy') || "https://corsproxy.io/?";
+
+/* ── THESIS CONFIG (SEMI ETF) ─────────────────────────── */
+const sm_THESIS = {
+  ticker:'SEMI', verdict:'accumulate', version:'v1.0', date:'13 mag 2026',
+  dashboard:[
+    {label:'HBM3E pricing',      redIf:'< −15% HoH',              indId:'hbm3e'},
+    {label:'CoWoS utilization',  redIf:'< 75%',                    indId:'cowos'},
+    {label:'Hyperscaler capex',  redIf:'"Pause" / flat 2027',      indId:'hyperscaler'},
+    {label:'NVDA inv. days',     redIf:'> 90 giorni',              indId:'nvda_inv'},
+    {label:'Memory capex',       redIf:'Pausa coordinata',         indId:'memory_capex'},
+    {label:'AMD / ROCm moat',    redIf:'ROCm > 70% CUDA YoY',     indId:'amd_rocm'},
+    {label:'SOX vs SMA200',      redIf:'< SMA200 × 3 settimane',  indId:null, status:'green'},
+    {label:'Export controls',    redIf:'Final rule TSMC/ASML',     indId:null, status:'green'},
+  ]
+};
 const sm_TIMEOUT    = 15000;
 const sm_STORAGE    = "semis_ai_monitor_v2";
 const sm_AUTO_H     = 2;
@@ -3372,17 +3430,24 @@ const sm_DEFAULTS = {
       headlines:[],proxy:null,lastFetched:null,fetchError:null,note:"" }
   ],
   calendar:[
-    {date:"28 mag 2026",ticker:"NVDA",what:"FY27 Q1 earnings",matters:"Inventory days, channel commentary, Rubin update",url:"https://investor.nvidia.com"},
-    {date:"10 giu 2026",ticker:"TSMC",what:"May monthly revenue",matters:"Conferma trend CoWoS",url:"https://investor.tsmc.com/english/monthly-revenue"},
+    {date:"28 mag 2026",ticker:"NVDA",what:"FY27 Q1 earnings",matters:"Inventory days, channel commentary, Rubin update — catalizzatore #1 della thesis SEMI",url:"https://investor.nvidia.com"},
+    {date:"10 giu 2026",ticker:"TSMC",what:"May monthly revenue",matters:"Conferma trend CoWoS; proxy utilization",url:"https://investor.tsmc.com/english/monthly-revenue"},
     {date:"12 giu 2026",ticker:"AMD",what:"Advancing AI 2026",matters:"Roadmap MI400, ROCm metrics, design wins",url:"https://ir.amd.com"},
+    {date:"27 giu 2026",ticker:"Computex",what:"Computex Taipei",matters:"Annunci roadmap NVDA/AMD; segnali ASIC custom competition",url:"https://www.computextaipei.com.tw"},
+    {date:"17 lug 2026",ticker:"TSMC",what:"Q2 2026 earnings",matters:"CoWoS utilization update; N2 ramp; guida 2H 2026",url:"https://investor.tsmc.com/english/quarterly-results"},
     {date:"23 lug 2026",ticker:"GOOGL",what:"Q2 earnings",matters:"Capex 2026 update + 2027 framing",url:"https://abc.xyz/investor"},
     {date:"24 lug 2026",ticker:"MSFT",what:"FY26 Q4 earnings",matters:"Capex guidance FY27; primi 'shift to opex'?",url:"https://www.microsoft.com/en-us/Investor"},
     {date:"25 lug 2026",ticker:"META",what:"Q2 earnings",matters:"Capex 2026 revision; Llama infra spend",url:"https://investor.atmeta.com"},
-    {date:"29 lug 2026",ticker:"SK Hynix",what:"Q2 earnings",matters:"HBM pricing + capex guidance H2",url:"https://www.skhynix.com/eng/ir/financial.do"},
-    {date:"30 lug 2026",ticker:"Samsung",what:"Q2 preliminary",matters:"Memory ASP commentary, HBM qualification",url:"https://www.samsung.com/global/ir"},
+    {date:"29 lug 2026",ticker:"SK Hynix",what:"Q2 earnings",matters:"HBM pricing + capex guidance H2 — indicatore #1 thesis SEMI",url:"https://www.skhynix.com/eng/ir/financial.do"},
+    {date:"30 lug 2026",ticker:"Samsung",what:"Q2 preliminary",matters:"Memory ASP commentary, HBM3E qualification NVDA",url:"https://www.samsung.com/global/ir"},
     {date:"31 lug 2026",ticker:"AMZN",what:"Q2 earnings",matters:"AWS capex, Trainium ramp",url:"https://ir.aboutamazon.com"},
-    {date:"28 ago 2026",ticker:"NVDA",what:"FY27 Q2 earnings",matters:"Inventory days check #2; H2 outlook",url:"https://investor.nvidia.com"},
-    {date:"25 set 2026",ticker:"Micron",what:"FY26 Q4 earnings",matters:"HBM3E pricing + capex guidance 2027",url:"https://investors.micron.com"}
+    {date:"28 ago 2026",ticker:"NVDA",what:"FY27 Q2 earnings",matters:"Inventory days check #2; revenue H2 outlook",url:"https://investor.nvidia.com"},
+    {date:"18 set 2026",ticker:"KLAC/AMAT",what:"FY Q4 earnings",matters:"Equipment order visibility; China DUV risk; GAA content/wafer",url:"https://ir.klac.com"},
+    {date:"25 set 2026",ticker:"Micron",what:"FY26 Q4 earnings",matters:"HBM3E pricing + capex guidance 2027",url:"https://investors.micron.com"},
+    {date:"~set 2026",ticker:"OpenAI",what:"Custom AI chip (atteso)",matters:"⚠️ Wildcard: primo ASIC custom targeting training — rischio CUDA moat",url:"https://openai.com"},
+    {date:"16 ott 2026",ticker:"TSMC",what:"Q3 2026 earnings",matters:"Prima lettura su 2027; CoWoS bookings H1 2027; N2 yield",url:"https://investor.tsmc.com/english/quarterly-results"},
+    {date:"27 ott 2026",ticker:"Hyperscalers",what:"Q3 earnings (MSFT/GOOGL/META/AMZN)",matters:"⚠️ Capex 2027 language — segnale più importante H2 2026 per la thesis",url:"https://www.microsoft.com/en-us/Investor"},
+    {date:"19 nov 2026",ticker:"NVDA",what:"FY27 Q3 earnings",matters:"Revenue run-rate vs digestion; inventory check #3; Rubin timeline",url:"https://investor.nvidia.com"}
   ]
 };
 
@@ -3699,7 +3764,28 @@ function sm_renderCalendar(){
   });
 }
 
-function sm_renderAll(){sm_renderComposite();sm_renderCards();sm_renderCalendar();}
+function sm_renderThesis(){
+  const dash=document.getElementById('sm-thDash');
+  if(!dash)return;
+  dash.innerHTML='';
+  sm_THESIS.dashboard.forEach(row=>{
+    let st=row.status||'green';
+    if(row.indId){
+      const ind=smState.indicators.find(i=>i.id===row.indId);
+      if(ind)st=ind.status;
+    }
+    const r=document.createElement('div');
+    r.className='sm-th-row';
+    r.innerHTML=`<span class="th-dot ${st}"></span><span class="th-lbl">${row.label}</span><span class="th-red">RED: ${row.redIf}</span>`;
+    dash.appendChild(r);
+  });
+  // update verdict badge class
+  const vEl=document.getElementById('sm-thVerdict');
+  if(vEl){vEl.className='sm-verdict '+sm_THESIS.verdict;}
+  const vr=document.getElementById('sm-thVer');
+  if(vr){vr.textContent=sm_THESIS.version+' · '+sm_THESIS.date;}
+}
+function sm_renderAll(){sm_renderComposite();sm_renderThesis();sm_renderCards();sm_renderCalendar();}
 
 function sm_toggleEdit(id){document.getElementById('sm-ef-'+id).classList.toggle('open');}
 function sm_saveInd(id){
