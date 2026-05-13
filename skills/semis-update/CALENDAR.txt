@@ -22,19 +22,19 @@ LUGLIO
   [ ] 23 lug  GOOGL Q2 earnings
   [ ] 24 lug  MSFT FY26 Q4 earnings
   [ ] 25 lug  META Q2 earnings
-  [ ] 31 lug  AMZN Q2 earnings
-              → dopo tutti e 4: "aggiorna dopo hyperscalers Q2"
   [ ] 29 lug  SK Hynix Q2 earnings
               → "SK Hynix ha riportato"
   [ ] 30 lug  Samsung Q2 preliminary
+  [ ] 31 lug  AMZN Q2 earnings
+              → dopo tutti e 4 hyperscaler: "aggiorna dopo hyperscalers Q2"
 
 AGOSTO
   [ ] 28 ago  NVDA FY27 Q2 earnings
               → "NVDA ha riportato"
 
 SETTEMBRE
-  [ ] ~set    OpenAI custom chip (atteso)
-              → "OpenAI chip annunciato" (se avviene)
+  [ ] set     OpenAI custom chip (data TBD)
+              → "OpenAI chip annunciato" (se avviene — data non confermata, skippa parsing)
   [ ] 18 set  KLAC / AMAT earnings
               → "KLAC AMAT hanno riportato"
   [ ] 25 set  Micron FY26 Q4 earnings

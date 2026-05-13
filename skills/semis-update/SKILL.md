@@ -259,7 +259,11 @@ con il takeaway (es. "Inv days: 62 — GREEN. Guida Q2 solida, no digestion sign
 | v1.1 | 2026-05-29 | Post NVDA FY27 Q1. nvda_inv aggiornato a 62 giorni (GREEN). Nessun segnale digestion. Verdict confermato ACCUMULATE. |
 ```
 
-**Step 7:** Commit + push.
+**Step 7:** Cerca nuove date earnings via WebSearch e aggiungi eventuali eventi non ancora presenti in CALENDAR.txt e sm_DEFAULTS.calendar.
+
+**Step 8:** Aggiorna CALENDAR.txt — spunta [✓] su NVDA, aggiungi nota con il risultato, marca [!] il prossimo evento.
+
+**Step 9:** Commit + push.
 
 ---
 
