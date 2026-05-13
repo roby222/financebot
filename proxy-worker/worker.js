@@ -13,10 +13,14 @@
  */
 
 const ALLOWED_HOSTS = [
+  // Yahoo Finance — ETF dashboard + Semis Monitor proxy tickers
   'query1.finance.yahoo.com',
   'query2.finance.yahoo.com',
   'finance.yahoo.com',
+  // Stooq — fallback price source
   'stooq.com',
+  // Google News RSS — Semis Monitor headlines (indicators 03, 04, 06)
+  'news.google.com',
 ];
 
 const CORS_HEADERS = {
@@ -60,14 +64,18 @@ export default {
         },
       });
 
-      // Cloudflare decomprime automaticamente — .text() restituisce sempre JSON leggibile
+      // Cloudflare decomprime automaticamente — .text() restituisce sempre il body leggibile
       const body = await upstream.text();
+      const upstreamType = upstream.headers.get('content-type') || '';
+      const contentType = upstreamType.includes('xml') || upstreamType.includes('rss')
+        ? 'application/xml; charset=utf-8'
+        : 'application/json; charset=utf-8';
 
       return new Response(body, {
         status: upstream.status,
         headers: {
           ...CORS_HEADERS,
-          'Content-Type': 'application/json; charset=utf-8',
+          'Content-Type': contentType,
           'Cache-Control': 'no-store',
         },
       });

@@ -753,7 +753,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
   </div>
 
   <div class="sm-foot">
-    <div data-i18n="sm_footer_data">Auto-fetch via SEC EDGAR, GitHub API, Yahoo Finance, Google News RSS (proxy: api.allorigins.win). Errori di rete o rate-limit possono far fallire singole letture.</div>
+    <div data-i18n="sm_footer_data">Auto-fetch via SEC EDGAR, GitHub API, Yahoo Finance, Google News RSS (proxy: Cloudflare Worker). Errori di rete o rate-limit possono far fallire singole letture.</div>
     <div data-i18n="sm_footer_storage">Stato salvato in localStorage — nessun dato sul server.</div>
   </div>
 </div>
@@ -1104,7 +1104,7 @@ const STRINGS = {
     sm_cal_title:'Calendario earnings & eventi chiave — prossimi 4 mesi',
     sm_cal_th_date:'Data', sm_cal_th_event:'Società / evento',
     sm_cal_th_why:'Perché conta', sm_cal_th_link:'Link',
-    sm_footer_data:'Auto-fetch via SEC EDGAR, GitHub API, Yahoo Finance, Google News RSS (proxy: api.allorigins.win). Errori di rete o rate-limit possono far fallire singole letture.',
+    sm_footer_data:'Auto-fetch via SEC EDGAR, GitHub API, Yahoo Finance, Google News RSS (proxy: Cloudflare Worker). Errori di rete o rate-limit possono far fallire singole letture.',
     sm_footer_storage:'Stato salvato in localStorage — nessun dato sul server.',
     sm_st_green:'Calmo', sm_st_yellow:'Warning', sm_st_red:'Allerta',
     sm_indicator:'INDICATOR',
@@ -1285,7 +1285,7 @@ const STRINGS = {
     sm_cal_title:'Earnings & key events calendar — next 4 months',
     sm_cal_th_date:'Date', sm_cal_th_event:'Company / event',
     sm_cal_th_why:'Why it matters', sm_cal_th_link:'Link',
-    sm_footer_data:'Auto-fetch via SEC EDGAR, GitHub API, Yahoo Finance, Google News RSS (proxy: api.allorigins.win). Network errors or rate-limits may fail individual reads.',
+    sm_footer_data:'Auto-fetch via SEC EDGAR, GitHub API, Yahoo Finance, Google News RSS (proxy: Cloudflare Worker). Network errors or rate-limits may fail individual reads.',
     sm_footer_storage:'State saved in localStorage — no data on server.',
     sm_st_green:'Calm', sm_st_yellow:'Warning', sm_st_red:'Alert',
     sm_indicator:'INDICATOR',
@@ -3286,7 +3286,9 @@ function drawPriceChart(canvas, pts, range, hoverIdx) {
 /* ═══════════════════════════════════════════════════════════
    SEMIS MONITOR — namespaced sm_*
 ═══════════════════════════════════════════════════════════ */
-const sm_CORS       = "https://api.allorigins.win/raw?url=";
+// Usa lo stesso proxy del dashboard principale (Cloudflare Worker se configurato,
+// altrimenti corsproxy.io come fallback). Questo risolve i rate-limit di allorigins.
+const sm_CORS       = localStorage.getItem('fpb_proxy') || "https://corsproxy.io/?";
 const sm_TIMEOUT    = 15000;
 const sm_STORAGE    = "semis_ai_monitor_v2";
 const sm_AUTO_H     = 2;
