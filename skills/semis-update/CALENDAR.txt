@@ -1,0 +1,82 @@
+SEMIS MONITOR — CATALYST CALENDAR 2026
+Quando lanciare la skill semis-update
+======================================
+
+MAGGIO
+  28 mag  NVDA FY27 Q1 earnings
+          → "NVDA ha riportato"
+
+GIUGNO
+  10 giu  TSMC May monthly revenue
+          → "TSMC mensile"
+  12 giu  AMD Advancing AI 2026
+          → "AMD Advancing AI"
+  27 giu  Computex Taipei
+          → "aggiorna dopo Computex"
+
+LUGLIO
+  17 lug  TSMC Q2 2026 earnings
+          → "TSMC ha riportato"
+  23 lug  GOOGL Q2 earnings
+  24 lug  MSFT FY26 Q4 earnings
+  25 lug  META Q2 earnings
+  31 lug  AMZN Q2 earnings
+          → dopo tutti e 4: "aggiorna dopo hyperscalers Q2"
+  29 lug  SK Hynix Q2 earnings
+          → "SK Hynix ha riportato"
+  30 lug  Samsung Q2 preliminary
+  31 lug  AMZN Q2 earnings
+
+AGOSTO
+  28 ago  NVDA FY27 Q2 earnings
+          → "NVDA ha riportato"
+
+SETTEMBRE
+  ~set    OpenAI custom chip (atteso)
+          → "OpenAI chip annunciato" (se avviene)
+  18 set  KLAC / AMAT earnings
+          → "KLAC AMAT hanno riportato"
+  25 set  Micron FY26 Q4 earnings
+          → "Micron ha riportato"
+
+OTTOBRE
+  16 ott  TSMC Q3 2026 earnings
+          → "TSMC ha riportato"
+  27 ott  Hyperscalers Q3 (MSFT/GOOGL/META/AMZN)
+          → "aggiorna dopo hyperscalers Q3"
+
+NOVEMBRE
+  19 nov  NVDA FY27 Q3 earnings
+          → "NVDA ha riportato"
+
+======================================
+SOGLIE DI ALLERTA RAPIDA
+
+HBM3E pricing       GREEN  flat / +5% HoH
+                    YELLOW -5% / -15% HoH
+                    RED    < -15% HoH        ← STOP-LOSS thesis
+
+CoWoS utilization   GREEN  > 90%
+                    YELLOW 75–90%
+                    RED    < 75%
+
+Hyperscaler capex   GREEN  "accelerating" / "constrained"
+                    YELLOW "moderating" / "optimizing"
+                    RED    "pause" / flat/down 2027  ← STOP-LOSS thesis
+
+NVDA inventory days GREEN  < 65 gg
+                    YELLOW 65–90 gg
+                    RED    > 90 gg
+
+SOX vs SMA200       GREEN  sopra SMA200
+                    RED    sotto SMA200 per 3+ settimane  ← STOP-LOSS thesis
+
+Export controls     RED    final rule vs TSMC / ASML  ← STOP-LOSS thesis
+
+======================================
+VERDICT SEMI (aggiornare in sm_THESIS.verdict)
+
+0 RED, ≤2 YELLOW  →  ACCUMULATE
+1 RED o ≥3 YELLOW →  HOLD
+2+ RED            →  REDUCE
+4 stop-loss       →  AVOID
