@@ -1,53 +1,54 @@
 SEMIS MONITOR — CATALYST CALENDAR 2026
 Quando lanciare la skill semis-update
+Aggiornato: 2026-05-13
 ======================================
+[ ] = da fare   [✓] = completato   [!] = prossimo
 
 MAGGIO
-  28 mag  NVDA FY27 Q1 earnings
-          → "NVDA ha riportato"
+  [!] 28 mag  NVDA FY27 Q1 earnings
+              → "NVDA ha riportato"
 
 GIUGNO
-  10 giu  TSMC May monthly revenue
-          → "TSMC mensile"
-  12 giu  AMD Advancing AI 2026
-          → "AMD Advancing AI"
-  27 giu  Computex Taipei
-          → "aggiorna dopo Computex"
+  [ ] 10 giu  TSMC May monthly revenue
+              → "TSMC mensile"
+  [ ] 12 giu  AMD Advancing AI 2026
+              → "AMD Advancing AI"
+  [ ] 27 giu  Computex Taipei
+              → "aggiorna dopo Computex"
 
 LUGLIO
-  17 lug  TSMC Q2 2026 earnings
-          → "TSMC ha riportato"
-  23 lug  GOOGL Q2 earnings
-  24 lug  MSFT FY26 Q4 earnings
-  25 lug  META Q2 earnings
-  31 lug  AMZN Q2 earnings
-          → dopo tutti e 4: "aggiorna dopo hyperscalers Q2"
-  29 lug  SK Hynix Q2 earnings
-          → "SK Hynix ha riportato"
-  30 lug  Samsung Q2 preliminary
-  31 lug  AMZN Q2 earnings
+  [ ] 17 lug  TSMC Q2 2026 earnings
+              → "TSMC ha riportato"
+  [ ] 23 lug  GOOGL Q2 earnings
+  [ ] 24 lug  MSFT FY26 Q4 earnings
+  [ ] 25 lug  META Q2 earnings
+  [ ] 31 lug  AMZN Q2 earnings
+              → dopo tutti e 4: "aggiorna dopo hyperscalers Q2"
+  [ ] 29 lug  SK Hynix Q2 earnings
+              → "SK Hynix ha riportato"
+  [ ] 30 lug  Samsung Q2 preliminary
 
 AGOSTO
-  28 ago  NVDA FY27 Q2 earnings
-          → "NVDA ha riportato"
+  [ ] 28 ago  NVDA FY27 Q2 earnings
+              → "NVDA ha riportato"
 
 SETTEMBRE
-  ~set    OpenAI custom chip (atteso)
-          → "OpenAI chip annunciato" (se avviene)
-  18 set  KLAC / AMAT earnings
-          → "KLAC AMAT hanno riportato"
-  25 set  Micron FY26 Q4 earnings
-          → "Micron ha riportato"
+  [ ] ~set    OpenAI custom chip (atteso)
+              → "OpenAI chip annunciato" (se avviene)
+  [ ] 18 set  KLAC / AMAT earnings
+              → "KLAC AMAT hanno riportato"
+  [ ] 25 set  Micron FY26 Q4 earnings
+              → "Micron ha riportato"
 
 OTTOBRE
-  16 ott  TSMC Q3 2026 earnings
-          → "TSMC ha riportato"
-  27 ott  Hyperscalers Q3 (MSFT/GOOGL/META/AMZN)
-          → "aggiorna dopo hyperscalers Q3"
+  [ ] 16 ott  TSMC Q3 2026 earnings
+              → "TSMC ha riportato"
+  [ ] 27 ott  Hyperscalers Q3 (MSFT/GOOGL/META/AMZN)
+              → "aggiorna dopo hyperscalers Q3"
 
 NOVEMBRE
-  19 nov  NVDA FY27 Q3 earnings
-          → "NVDA ha riportato"
+  [ ] 19 nov  NVDA FY27 Q3 earnings
+              → "NVDA ha riportato"
 
 ======================================
 SOGLIE DI ALLERTA RAPIDA

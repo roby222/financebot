@@ -137,10 +137,25 @@ aggiorna anche:
 - Il badge nel file markdown (`**Status:** ACCUMULATE (with conditions)`)
 - La sezione **§9 VERDICT** del file markdown con il razionale aggiornato
 
-### Step 7 — Commit
+### Step 7 — Aggiorna CALENDAR.txt
+
+Leggi `skills/semis-update/CALENDAR.txt` e:
+
+1. Marca l'evento appena processato: sostituisci `[ ]` con `[✓]` sulla riga corrispondente
+2. Se esiste un evento `[!]` precedente, rimuovi il `[!]` (era il precedente "prossimo")
+3. Individua il prossimo evento ancora `[ ]` in ordine cronologico e marcalo con `[!]`
+4. Aggiorna la riga `Aggiornato:` in testa al file con la data odierna (formato YYYY-MM-DD)
+5. Se l'evento ha prodotto un segnale importante (es. RED su un indicatore), aggiungi
+   una nota indentata sotto la riga `[✓]`:
+   ```
+   [✓] 28 mag  NVDA FY27 Q1 earnings
+               → inv_days: 62 (GREEN) · nessun digestion signal
+   ```
+
+### Step 8 — Commit
 
 ```bash
-git add static/index.html theses/SEMI_thesis.md
+git add static/index.html theses/SEMI_thesis.md skills/semis-update/CALENDAR.txt
 git commit -m "update: semis monitor post-[TICKER] [PERIOD] — [headline 1 frase]"
 git push origin main
 ```
