@@ -1540,7 +1540,7 @@ const WATCHLIST_DEFAULT = [
   { id:'SEME',  name:'iShares MSCI Global Semiconductors', yf:'SEME.MI',   driver:'TECH',    dEmoji:'💻', regime:'risk-on'  },
   { id:'IWQU',  name:'iShares MSCI World Quality Factor',  yf:'IWQU.MI',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
   { id:'SWDA',  name:'iShares Core MSCI World',            yf:'SWDA.MI',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
-  { id:'COPM',  name:'iShares Copper Miners',              yf:'COPM.MI',   driver:'METALLI', dEmoji:'🥈', regime:'neutro'   },
+  { id:'COPM',  name:'iShares Copper Miners',              yf:'COPM.MI',   driver:'RAME',    dEmoji:'🟤', regime:'risk-on'  },
   { id:'SGLE',  name:'Invesco Gold ETC EUR Hedged',        yf:'SGLE.MI',   driver:'PAURA',   dEmoji:'😰', regime:'risk-off' },
   { id:'UKRN',     name:'Ukraine Reconstruction',             yf:'UKRN.MI',    driver:'GEO',     dEmoji:'🌍', regime:'neutro'   },
   { id:'GRIDG',    name:'First Trust Smart Grid Infra',       yf:'GRID.MI',    driver:'INFRA',   dEmoji:'🏗️', regime:'neutro'   },
@@ -1577,18 +1577,20 @@ function brentFrontMonth() {
 }
 
 const MACRO_TICKERS = [
-  { id:'brent', yf: brentFrontMonth(), label:'Brent', emoji:'🛢️' },
-  { id:'gold',  yf:'GC=F',  label:'Gold',   emoji:'🥇' },
-  { id:'spy',   yf:'^GSPC', label:'S&P500', emoji:'📊' },
-  { id:'vix',   yf:'^VIX',  label:'VIX',    emoji:'😰' },
+  { id:'brent',  yf: brentFrontMonth(), label:'Brent',  emoji:'🛢️' },
+  { id:'gold',   yf:'GC=F',  label:'Gold',    emoji:'🥇' },
+  { id:'copper', yf:'HG=F',  label:'Rame',    emoji:'🟤', scale: 2204.62, unit:'$/t' }, // HG=F in $/lb → ×2204.62 = $/t
+  { id:'spy',    yf:'^GSPC', label:'S&P500',  emoji:'📊' },
+  { id:'vix',    yf:'^VIX',  label:'VIX',     emoji:'😰' },
 ];
 
 // Sanity bounds [min, max] — se il prezzo è fuori range, il dato è spazzatura
 const MACRO_BOUNDS = {
-  brent: [20,   300],   // USD/barile
-  gold:  [500, 8000],   // USD/oz
-  spy:   [500, 20000],  // livello indice S&P500
-  vix:   [5,   150],    // livello VIX
+  brent:  [20,    300],    // USD/barile
+  gold:   [500,  8000],    // USD/oz
+  copper: [3000, 25000],   // USD/t (HG=F $/lb × 2204.62)
+  spy:    [500,  20000],   // livello indice S&P500
+  vix:    [5,    150],     // livello VIX
 };
 
 /* ═══════════════════════════════════════════════════════════
@@ -1598,17 +1600,17 @@ const MACRO_BOUNDS = {
 // Calibrato sul contesto Iran-USA: il driver chiave è ENERGIA (Stretto di Hormuz)
 const SCENARIO_WEIGHTS = {
   // Attacco militare, chiusura Hormuz, escalation Iran-USA
-  escalation: { PAURA:+0.45, METALLI:+0.25, FOOD:+0.10, ENERGIA:+0.50,
+  escalation: { PAURA:+0.45, METALLI:+0.25, RAME:+0.10, FOOD:+0.10, ENERGIA:+0.50,
                 GEO:+0.20,   CICLO:-0.25,   EQUITY:-0.40, TECH:-0.40, INFRA:-0.10 },
   // Diplomazia, accordo nucleare, de-tensione
-  tregua:     { PAURA:-0.35, METALLI:-0.15, FOOD:-0.10,  ENERGIA:-0.30,
+  tregua:     { PAURA:-0.35, METALLI:-0.15, RAME:+0.15, FOOD:-0.10, ENERGIA:-0.30,
                 GEO:+0.15,   CICLO:+0.30,   EQUITY:+0.40, TECH:+0.30, INFRA:+0.15 },
   // Tensione latente, notizie contraddittorie, mercato nervoso
-  volatile:   { PAURA:+0.15, METALLI:+0.10, FOOD:+0.05,  ENERGIA:+0.20,
+  volatile:   { PAURA:+0.15, METALLI:+0.10, RAME:+0.05, FOOD:+0.05, ENERGIA:+0.20,
                 GEO:+0.05,   CICLO:-0.15,   EQUITY:-0.15, TECH:-0.20, INFRA:0 },
   // Nessun aggiustamento: segnale puramente tecnico
-  neutro:     { PAURA:0, METALLI:0, FOOD:0, ENERGIA:0,
-                GEO:0,   CICLO:0,   EQUITY:0,  TECH:0,  INFRA:0 },
+  neutro:     { PAURA:0, METALLI:0, RAME:0, FOOD:0, ENERGIA:0,
+                GEO:0,   CICLO:0,   EQUITY:0, TECH:0,  INFRA:0 },
 };
 
 /* ═══════════════════════════════════════════════════════════
@@ -1707,12 +1709,18 @@ const HYSTERESIS = 0.08;
    Gold >+1%  → METALLI/PAURA +0.15   Gold <-1%  → -0.15
    Oil  <-2%  → ENERGIA -0.15         Oil  >+2%  → +0.15     */
 function macroDriverBoost(driver) {
-  const goldPct  = macroData.gold?.pct  ?? 0;
-  const brentPct = macroData.brent?.pct ?? 0;
+  const goldPct   = macroData.gold?.pct   ?? 0;
+  const brentPct  = macroData.brent?.pct  ?? 0;
+  const copperPct = macroData.copper?.pct ?? 0;
   let boost = 0;
   if (driver === 'METALLI' || driver === 'PAURA') {
     if      (goldPct >  0.01) boost += 0.15;
     else if (goldPct < -0.01) boost -= 0.15;
+  }
+  if (driver === 'RAME') {
+    // Copper miners hanno beta ~2-3× al prezzo LME — usiamo soglia più bassa
+    if      (copperPct >  0.005) boost += 0.15;
+    else if (copperPct < -0.005) boost -= 0.15;
   }
   if (driver === 'ENERGIA') {
     if      (brentPct < -0.02) boost -= 0.15;
@@ -1930,17 +1938,18 @@ async function fetchMacro() {
     try {
       const res = await fetchChart(m.yf,'1d','1m');
       if (!res?.meta) return;
-      const price = res.meta.regularMarketPrice;
-      const prev  = res.meta.previousClose ?? res.meta.chartPreviousClose;
-      const pct   = prev ? (price-prev)/prev : null;
-      // Sanity check: se il prezzo è fuori dai bounds realistici, ignora il dato
+      const rawPrice    = res.meta.regularMarketPrice;
+      const rawPrev     = res.meta.previousClose ?? res.meta.chartPreviousClose;
+      const pct         = rawPrev ? (rawPrice - rawPrev) / rawPrev : null;
+      const price       = m.scale ? rawPrice * m.scale : rawPrice; // scala (es. HG=F $/lb → $/t)
+      // Sanity check sui bounds (tutti in unità scalata)
       const bounds = MACRO_BOUNDS[m.id];
       if (bounds && (price < bounds[0] || price > bounds[1])) {
-        console.warn(`[macro] ${m.id} (${m.yf}): prezzo ${price} fuori bounds [${bounds}] — scartato`);
+        console.warn(`[macro] ${m.id}: prezzo ${price} fuori bounds [${bounds}] — scartato`);
         macroData[m.id] = { price:null, pct:null, label:m.label, emoji:m.emoji, err:true };
         return;
       }
-      macroData[m.id] = { price, pct, label:m.label, emoji:m.emoji };
+      macroData[m.id] = { price, pct, label:m.label, emoji:m.emoji, unit:m.unit };
     } catch {}
   }));
   // Detect regime from macro data
@@ -1968,7 +1977,8 @@ function renderMacroBar() {
     const priceStr = m.id==='vix'
       ? d.price.toFixed(2)
       : d.price.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
-    return `<span class="macro-item"><span class="mi-label">${m.emoji} ${m.label}</span> <span class="mi-price">${priceStr}</span>${pctStr}</span>`;
+    const unitStr  = d.unit ? ` <span class="mi-label">${d.unit}</span>` : '';
+    return `<span class="macro-item"><span class="mi-label">${m.emoji} ${m.label}</span> <span class="mi-price">${priceStr}</span>${unitStr}${pctStr}</span>`;
   }).join('');
   const badge = document.getElementById('regime-badge');
   if (badge) {
@@ -2677,7 +2687,7 @@ document.getElementById('add-form').addEventListener('submit', e=>{
 (async ()=>{
   // Carica watchlist da JSON esterno
   try {
-    const res = await fetch('watchlist.json');
+    const res = await fetch(`watchlist.json?v=${Date.now()}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (!Array.isArray(data)) throw new Error('watchlist.json non è un array');
