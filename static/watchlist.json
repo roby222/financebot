@@ -11,7 +11,7 @@
   { "id": "SEME",  "name": "iShares MSCI Global Semiconductors", "yf": "SEME.MI",   "driver": "TECH",    "dEmoji": "💻", "regime": "risk-on"  },
   { "id": "IWQU",  "name": "iShares MSCI World Quality Factor",  "yf": "IWQU.MI",   "driver": "EQUITY",  "dEmoji": "📈", "regime": "risk-on"  },
   { "id": "SWDA",  "name": "iShares Core MSCI World",            "yf": "SWDA.MI",   "driver": "EQUITY",  "dEmoji": "📈", "regime": "risk-on"  },
-  { "id": "COPM",  "name": "iShares Copper Miners",              "yf": "COPM.MI",   "driver": "RAME",    "dEmoji": "🟤", "regime": "risk-on"  },
+  { "id": "COPM",  "name": "iShares Copper Miners",              "yf": "COPM.MI",   "driver": "METALLI", "dEmoji": "🥈", "regime": "neutro"   },
   { "id": "SGLE",  "name": "Invesco Gold ETC EUR Hedged",        "yf": "SGLE.MI",   "driver": "PAURA",   "dEmoji": "😰", "regime": "risk-off" },
   { "id": "UKRN",    "name": "Ukraine Reconstruction",             "yf": "UKRN.MI",    "driver": "GEO",     "dEmoji": "🌍", "regime": "neutro"   },
   { "id": "GRIDG",   "name": "First Trust Smart Grid Infra",       "yf": "GRID.MI",    "driver": "INFRA",   "dEmoji": "🏗️", "regime": "neutro"   },

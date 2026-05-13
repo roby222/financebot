@@ -1540,7 +1540,7 @@ const WATCHLIST_DEFAULT = [
   { id:'SEME',  name:'iShares MSCI Global Semiconductors', yf:'SEME.MI',   driver:'TECH',    dEmoji:'💻', regime:'risk-on'  },
   { id:'IWQU',  name:'iShares MSCI World Quality Factor',  yf:'IWQU.MI',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
   { id:'SWDA',  name:'iShares Core MSCI World',            yf:'SWDA.MI',   driver:'EQUITY',  dEmoji:'📈', regime:'risk-on'  },
-  { id:'COPM',  name:'iShares Copper Miners',              yf:'COPM.MI',   driver:'RAME',    dEmoji:'🟤', regime:'risk-on'  },
+  { id:'COPM',  name:'iShares Copper Miners',              yf:'COPM.MI',   driver:'METALLI', dEmoji:'🥈', regime:'neutro'   },
   { id:'SGLE',  name:'Invesco Gold ETC EUR Hedged',        yf:'SGLE.MI',   driver:'PAURA',   dEmoji:'😰', regime:'risk-off' },
   { id:'UKRN',     name:'Ukraine Reconstruction',             yf:'UKRN.MI',    driver:'GEO',     dEmoji:'🌍', regime:'neutro'   },
   { id:'GRIDG',    name:'First Trust Smart Grid Infra',       yf:'GRID.MI',    driver:'INFRA',   dEmoji:'🏗️', regime:'neutro'   },
@@ -1600,17 +1600,17 @@ const MACRO_BOUNDS = {
 // Calibrato sul contesto Iran-USA: il driver chiave è ENERGIA (Stretto di Hormuz)
 const SCENARIO_WEIGHTS = {
   // Attacco militare, chiusura Hormuz, escalation Iran-USA
-  escalation: { PAURA:+0.45, METALLI:+0.25, RAME:+0.10, FOOD:+0.10, ENERGIA:+0.50,
+  escalation: { PAURA:+0.45, METALLI:+0.25, FOOD:+0.10, ENERGIA:+0.50,
                 GEO:+0.20,   CICLO:-0.25,   EQUITY:-0.40, TECH:-0.40, INFRA:-0.10 },
   // Diplomazia, accordo nucleare, de-tensione
-  tregua:     { PAURA:-0.35, METALLI:-0.15, RAME:+0.15, FOOD:-0.10, ENERGIA:-0.30,
+  tregua:     { PAURA:-0.35, METALLI:-0.15, FOOD:-0.10,  ENERGIA:-0.30,
                 GEO:+0.15,   CICLO:+0.30,   EQUITY:+0.40, TECH:+0.30, INFRA:+0.15 },
   // Tensione latente, notizie contraddittorie, mercato nervoso
-  volatile:   { PAURA:+0.15, METALLI:+0.10, RAME:+0.05, FOOD:+0.05, ENERGIA:+0.20,
+  volatile:   { PAURA:+0.15, METALLI:+0.10, FOOD:+0.05,  ENERGIA:+0.20,
                 GEO:+0.05,   CICLO:-0.15,   EQUITY:-0.15, TECH:-0.20, INFRA:0 },
   // Nessun aggiustamento: segnale puramente tecnico
-  neutro:     { PAURA:0, METALLI:0, RAME:0, FOOD:0, ENERGIA:0,
-                GEO:0,   CICLO:0,   EQUITY:0, TECH:0,  INFRA:0 },
+  neutro:     { PAURA:0, METALLI:0, FOOD:0, ENERGIA:0,
+                GEO:0,   CICLO:0,   EQUITY:0,  TECH:0,  INFRA:0 },
 };
 
 /* ═══════════════════════════════════════════════════════════
@@ -1709,18 +1709,12 @@ const HYSTERESIS = 0.08;
    Gold >+1%  → METALLI/PAURA +0.15   Gold <-1%  → -0.15
    Oil  <-2%  → ENERGIA -0.15         Oil  >+2%  → +0.15     */
 function macroDriverBoost(driver) {
-  const goldPct   = macroData.gold?.pct   ?? 0;
-  const brentPct  = macroData.brent?.pct  ?? 0;
-  const copperPct = macroData.copper?.pct ?? 0;
+  const goldPct  = macroData.gold?.pct  ?? 0;
+  const brentPct = macroData.brent?.pct ?? 0;
   let boost = 0;
   if (driver === 'METALLI' || driver === 'PAURA') {
     if      (goldPct >  0.01) boost += 0.15;
     else if (goldPct < -0.01) boost -= 0.15;
-  }
-  if (driver === 'RAME') {
-    // Copper miners hanno beta ~2-3× al prezzo LME — usiamo soglia più bassa
-    if      (copperPct >  0.005) boost += 0.15;
-    else if (copperPct < -0.005) boost -= 0.15;
   }
   if (driver === 'ENERGIA') {
     if      (brentPct < -0.02) boost -= 0.15;
@@ -3352,6 +3346,18 @@ const sm_DEFAULTS = {
       newsQuery:"AMD MI400 ROCm", proxyTicker:"AMD", proxyLabel:"AMD",
       sources:[{name:"AMD IR",url:"https://ir.amd.com"},{name:"MLPerf",url:"https://mlcommons.org/benchmarks"},{name:"ROCm GitHub",url:"https://github.com/ROCm/ROCm"}],
       headlines:[],proxy:null,github:null,lastFetched:null,fetchError:null,note:"" },
+    { id:"copper_copm", number:"07", title:"Copper / COPM — AI Infra Picks & Shovels",
+      subtitle:"Un livello sotto i semi: datacenter AI usa 4–5× più rame di un DC cloud tradizionale. Supply strutturalmente rigida.",
+      value:10200, unit:"$/t (LME · COMEX HG=F)",
+      history:[8800,9400,10200,11500,13000,10200], labels:["Q2 25","Q3 25","Q4 25","Q1 26","Apr 26","live"],
+      direction:"higher_is_signal", status:"green",
+      signal:"Setup pluriennale bullish: <b>domanda AI + elettrificazione</b> +5–7%/anno vs storico +1–2%. Supply rigida: Cobre Panamá −350kt/anno, grade ore Cile in calo, permitting 10–15 anni. Goldman/Citi/JPM target $11k–13k/t 2026–27. <b>COPM ha beta ~2–3× al prezzo rame</b> — amplifica sia l'upside che il drawdown vs ETF puri.",
+      next:"Guidance Freeport Q2: ~23 lug 2026 · Antofagasta Q2 prod: ~24 lug 2026",
+      autoMode:"news+proxy",
+      newsQuery:"copper LME price AI datacenter supply deficit mining",
+      proxyTicker:"COPM.MI", proxyLabel:"COPM.MI",
+      sources:[{name:"LME Copper",url:"https://www.lme.com/Metals/Non-ferrous/LME-Copper"},{name:"Freeport IR",url:"https://fcx.com/investor-relations/"},{name:"Antofagasta IR",url:"https://www.antofagasta.co.uk/investors/"}],
+      headlines:[],proxy:null,lastFetched:null,fetchError:null,note:"" },
     { id:"memory_capex", number:"06", title:"Memory capex pause signals",
       subtitle:"Samsung + SK Hynix + Micron. Pausa coordinata = svolta.",
       value:115, unit:"$B aggregato 2026E (manual)",
@@ -3385,6 +3391,9 @@ function sm_loadState(){
     if(s){
       const p=JSON.parse(s);
       p.indicators=p.indicators.map(i=>{const d=sm_DEFAULTS.indicators.find(x=>x.id===i.id);return d?Object.assign({},d,i):i;});
+      // Aggiunge indicatori nuovi dai defaults non ancora in localStorage
+      const seen=new Set(p.indicators.map(i=>i.id));
+      sm_DEFAULTS.indicators.forEach(d=>{if(!seen.has(d.id))p.indicators.push(JSON.parse(JSON.stringify(d)));});
       return p;
     }
   }catch(e){}
@@ -3720,10 +3729,35 @@ function sm_reset(){
 }
 
 // ── lazy init (called on first tab open) ──
+function sm_updateCopperCard(){
+  const ind=smState.indicators.find(i=>i.id==='copper_copm');
+  if(!ind)return;
+  // Prezzo rame live da macroData (già in $/t)
+  const cu=macroData.copper;
+  if(cu?.price!=null){
+    const p=Math.round(cu.price);
+    ind.value=p;
+    ind.history[ind.history.length-1]=p;
+    ind.unit='$/t (LME · COMEX HG=F)';
+    ind.status=cu.pct>0.008?'green':cu.pct<-0.008?'red':'yellow';
+    ind.lastFetched=new Date().toISOString();
+  }
+  // ETF COPM come proxy
+  const q=quotes['COPM'];
+  if(q?.price!=null){
+    ind.proxy={
+      name:'COPM.MI',
+      v:q.price.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2})+' EUR',
+      chg:q.pct!=null?(q.pct*100).toFixed(2):null
+    };
+  }
+}
+
 function sm_onTabOpen(){
   const todayFmt=new Date().toLocaleDateString(LANG==='it'?'it-IT':'en-GB',{day:'2-digit',month:'long',year:'numeric'});
   document.getElementById('sm-todayDate').textContent=(LANG==='it'?'Oggi: ':'Today: ')+todayFmt;
   document.getElementById('sm-lastUpdate').textContent=smState.lastUpdate?sm_fmtDate(smState.lastUpdate):(LANG==='it'?'mai (dati seed)':'never (seed data)');
+  sm_updateCopperCard();
   sm_renderAll();
   if(!sm_initialized){
     sm_initialized=true;
