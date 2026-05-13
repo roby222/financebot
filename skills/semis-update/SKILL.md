@@ -137,26 +137,76 @@ aggiorna anche:
 - Il badge nel file markdown (`**Status:** ACCUMULATE (with conditions)`)
 - La sezione **§9 VERDICT** del file markdown con il razionale aggiornato
 
-### Step 7 — Aggiorna CALENDAR.txt
+### Step 7 — Ricerca nuovi eventi futuri
+
+Cerca online le prossime date annunciate per le aziende nel monitor e aggiungi
+al calendario tutti gli eventi non ancora presenti.
+
+**Query di ricerca da eseguire** (usa WebSearch):
+
+```
+"NVDA earnings date 2026"          → prossimo quarterly NVDA non ancora in calendario
+"TSMC earnings date Q3 Q4 2026"    → quarterly TSMC
+"AMD earnings date 2026"           → quarterly AMD
+"Micron earnings date 2026"        → quarterly Micron
+"SK Hynix earnings date 2026"      → quarterly SK Hynix
+"ASML earnings date 2026"          → quarterly ASML
+"Applied Materials earnings 2026"  → quarterly AMAT
+"KLA Corp earnings date 2026"      → quarterly KLAC
+"Microsoft earnings date FY27"     → quarterly MSFT
+"Google earnings date Q3 2026"     → quarterly GOOGL
+```
+
+Per ogni data trovata:
+1. Verifica che non sia già presente in `CALENDAR.txt` e in `sm_DEFAULTS.calendar`
+2. Se è nuova, aggiungila in ordine cronologico in entrambi i file
+3. Usa il formato standard:
+   - CALENDAR.txt: `  [ ] GG mmm AAAA  [TICKER] [descrizione]`
+   - sm_DEFAULTS.calendar: `{date:"GG mmm AAAA", ticker:"[TICKER]", what:"[Q] earnings", matters:"[perché conta per il monitor]", url:"[IR page]"}`
+
+**Aziende da monitorare** e relative IR page:
+
+| Ticker | IR URL |
+|---|---|
+| NVDA | https://investor.nvidia.com |
+| TSMC | https://investor.tsmc.com/english/quarterly-results |
+| AMD | https://ir.amd.com |
+| MU | https://investors.micron.com |
+| SK Hynix | https://www.skhynix.com/eng/ir/financial.do |
+| ASML | https://www.asml.com/en/investors |
+| AMAT | https://ir.appliedmaterials.com |
+| KLAC | https://ir.klac.com |
+| MSFT | https://www.microsoft.com/en-us/Investor |
+| GOOGL | https://abc.xyz/investor |
+| META | https://investor.atmeta.com |
+| AMZN | https://ir.aboutamazon.com |
+
+**Nota:** se una data non è ancora ufficialmente annunciata, non aggiungerla.
+Preferisci date confermate a stime. Indicare `(attesa)` solo per eventi strutturali
+noti (es. conferenze ricorrenti come Computex, CES, Hot Chips).
+
+### Step 8 — Aggiorna CALENDAR.txt
 
 Leggi `skills/semis-update/CALENDAR.txt` e:
 
-1. Marca l'evento appena processato: sostituisci `[ ]` con `[✓]` sulla riga corrispondente
-2. Se esiste un evento `[!]` precedente, rimuovi il `[!]` (era il precedente "prossimo")
-3. Individua il prossimo evento ancora `[ ]` in ordine cronologico e marcalo con `[!]`
-4. Aggiorna la riga `Aggiornato:` in testa al file con la data odierna (formato YYYY-MM-DD)
-5. Se l'evento ha prodotto un segnale importante (es. RED su un indicatore), aggiungi
-   una nota indentata sotto la riga `[✓]`:
+1. Marca l'evento appena processato: sostituisci `[ ]` o `[!]` con `[✓]` sulla riga corrispondente
+2. Aggiungi sotto la riga `[✓]` una nota indentata con il risultato chiave:
    ```
    [✓] 28 mag  NVDA FY27 Q1 earnings
                → inv_days: 62 (GREEN) · nessun digestion signal
    ```
+3. Aggiungi in ordine cronologico tutti i nuovi eventi trovati nello Step 7 (con `[ ]`)
+4. Individua il prossimo evento ancora `[ ]` in ordine cronologico e marcalo `[!]`
+5. Aggiorna la riga `Aggiornato:` in testa al file con la data odierna (formato YYYY-MM-DD)
 
-### Step 8 — Commit
+### Step 9 — Commit
 
 ```bash
 git add static/index.html theses/SEMI_thesis.md skills/semis-update/CALENDAR.txt
-git commit -m "update: semis monitor post-[TICKER] [PERIOD] — [headline 1 frase]"
+git commit -m "update: semis monitor post-[TICKER] [PERIOD] — [headline 1 frase]
+
+- [indicatori aggiornati e nuovi valori]
+- [nuovi eventi aggiunti al calendario, se presenti]"
 git push origin main
 ```
 
