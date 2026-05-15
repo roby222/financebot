@@ -811,6 +811,16 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
   --sc-radius:10px;--sc-shadow:0 1px 4px rgba(0,0,0,.4);
   background:var(--sc-bg);padding:8px 0 40px;
 }
+/* ── threshold gauge widget ── */
+.mc-gauge{margin:6px 0 2px;user-select:none}
+.mc-gauge-track{height:10px;border-radius:5px;position:relative}
+.mc-gauge-marker{position:absolute;top:-4px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;pointer-events:none}
+.mc-gauge-needle{width:3px;height:18px;background:var(--sc-text);border-radius:2px;box-shadow:0 0 4px rgba(0,0,0,.6)}
+.mc-gauge-val{font-size:.66rem;font-weight:700;color:var(--sc-text);white-space:nowrap;margin-top:3px;background:var(--sc-surf2);padding:1px 5px;border-radius:3px;border:1px solid var(--sc-border)}
+.mc-gauge-scale{position:relative;height:16px;margin-top:2px}
+.mc-gauge-scale span{position:absolute;font-size:.6rem;color:var(--sc-mute);transform:translateX(-50%)}
+.mc-gauge-scale span:first-child{transform:none}
+.mc-gauge-scale span:last-child{transform:none;right:0;left:auto}
 </style>
 
 <div class="sm-wrap">
@@ -3889,6 +3899,8 @@ const mc_DEFAULTS = {
       signal:"Setup pluriennale bullish: <b>domanda AI + elettrificazione</b> +5–7%/anno vs storico +1–2%. Supply rigida: Cobre Panamá −350kt/anno, grade ore Cile in calo, permitting 10–15 anni. Goldman/Citi/JPM target $11k–13k/t 2026–27. <b>COPM ha beta ~2–3× al prezzo rame</b> — amplifica sia l'upside che il drawdown vs ETF puri. Soglie status: GREEN ≥$10k · YELLOW $8–10k · RED &lt;$8k.",
       next:"Guidance Freeport Q2: ~23 lug 2026 · Antofagasta Q2 prod: ~24 lug 2026",
       autoMode:"news+proxy",
+      gaugeMin:6000, gaugeMax:16000,
+      gaugeBreaks:[{value:8000,label:'$8k'},{value:10000,label:'$10k'}],
       newsQuery:"copper LME price AI datacenter supply deficit mining",
       proxyTicker:"COPM.MI", proxyLabel:"COPM.MI",
       sources:[{name:"LME Copper",url:"https://www.lme.com/Metals/Non-ferrous/LME-Copper"},{name:"Freeport IR",url:"https://fcx.com/investor-relations/"},{name:"Antofagasta IR",url:"https://www.antofagasta.co.uk/investors/"}],
@@ -3948,6 +3960,44 @@ function mc_updateCopperCard(){
   }
 }
 
+// ── threshold gauge ──
+function mc_renderGauge(ind){
+  if(!ind.gaugeMin&&ind.gaugeMin!==0)return'';
+  const min=ind.gaugeMin,max=ind.gaugeMax,breaks=ind.gaugeBreaks||[];
+  const range=max-min;
+  const colors={red:'#f85149',yellow:'#d29922',green:'#3fb950'};
+  // build gradient stops: red until first break, yellow until second, green after
+  const statuses=['red',...breaks.map(b=>b.status||'yellow'),'green'];
+  // derive segment statuses from threshold logic
+  const segs=[];
+  let cur='red';
+  const bpPcts=breaks.map(b=>((b.value-min)/range*100).toFixed(2));
+  let stops=[`${colors.red} 0%`];
+  breaks.forEach((b,i)=>{
+    const pct=bpPcts[i];
+    stops.push(`${colors[cur]} ${pct}%`);
+    cur=i===0?'yellow':'green';
+    stops.push(`${colors[cur]} ${pct}%`);
+  });
+  stops.push(`${colors[cur]} 100%`);
+  const gradient=`linear-gradient(to right,${stops.join(',')})`;
+  // marker
+  const markerPct=Math.max(1,Math.min(99,(ind.value-min)/range*100)).toFixed(2);
+  const fmtV=v=>v>=1000?`$${(v/1000).toFixed(0)}k`:`$${v}`;
+  const valLabel=ind.value>=1000?`$${(ind.value/1000).toFixed(1)}k`:`$${ind.value}`;
+  // scale labels
+  const scaleLbls=breaks.map((b,i)=>`<span style="left:${bpPcts[i]}%">${b.label}</span>`).join('');
+  return`<div class="mc-gauge">
+    <div class="mc-gauge-track" style="background:${gradient}">
+      <div class="mc-gauge-marker" style="left:${markerPct}%">
+        <div class="mc-gauge-needle"></div>
+        <div class="mc-gauge-val">${valLabel}</div>
+      </div>
+    </div>
+    <div class="mc-gauge-scale"><span>${fmtV(min)}</span>${scaleLbls}<span>${fmtV(max)}</span></div>
+  </div>`;
+}
+
 // ── render cards ──
 function mc_renderCards(){
   const grid=document.getElementById('mc-cardGrid');grid.innerHTML='';
@@ -3986,6 +4036,7 @@ function mc_renderCards(){
         <span class="delta ${dc}">${dt}</span>
       </div>
       ${proxyHtml}
+      ${mc_renderGauge(ind)}
       <div class="sm-spark"><canvas id="mc-spark-${ind.id}"></canvas></div>
       <div class="sm-signal">${ind.signal}</div>
       ${headlinesHtml}${errHtml}
