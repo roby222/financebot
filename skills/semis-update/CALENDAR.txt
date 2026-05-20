@@ -1,11 +1,11 @@
 SEMIS MONITOR — CATALYST CALENDAR 2026
 Quando lanciare la skill semis-update
-Aggiornato: 2026-05-13
+Aggiornato: 2026-05-20
 ======================================
 [ ] = da fare   [✓] = completato   [!] = prossimo
 
 MAGGIO
-  [!] 28 mag  NVDA FY27 Q1 earnings
+  [!] 20 mag  NVDA FY27 Q1 earnings
               → "NVDA ha riportato"
 
 GIUGNO

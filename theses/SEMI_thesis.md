@@ -127,7 +127,7 @@ _Monitor quarterly on earnings cadence; check SOX/SMA weekly._
 
 | Date (approx.) | Event | Thesis relevance |
 |---|---|---|
-| **2026-05-28** | NVDA FY27 Q1 earnings | Single most important near-term event. Base case: "good not great." Bull: +8–15% NVDA, lifts SEMI. Bear: -10–20% NVDA on inventory or demand softness. |
+| **2026-05-20** | NVDA FY27 Q1 earnings | Single most important near-term event. Base case: "good not great." Bull: +8–15% NVDA, lifts SEMI. Bear: -10–20% NVDA on inventory or demand softness. |
 | **2026-06 (mid)** | TSMC May revenue (MoM) | Leading read on foundry demand; CoWoS utilization proxy |
 | **2026-06 (late)** | Computex Taipei | AMD/NVDA product roadmap announcements; ASIC competition signals |
 | **2026-07** | TSMC Q2 2026 earnings + guidance | Definitive CoWoS utilization and 2026 capex guidance update |
@@ -150,7 +150,7 @@ _Monitor quarterly on earnings cadence; check SOX/SMA weekly._
 
 | Condition | Action |
 |---|---|
-| All 8 dashboard metrics GREEN + NVDA earnings beat (May 28) | Full position — up to your maximum semi allocation |
+| All 8 dashboard metrics GREEN + NVDA earnings beat (May 20) | Full position — up to your maximum semi allocation |
 | 6–7 metrics GREEN, NVDA in-line ("good not great"), CoWoS >85% | Half position — build remainder on next GREEN confirmation |
 | NVDA disappoints but metrics otherwise GREEN (SOX holds SMA50) | Half position — treat the dip as entry; add if SMA50 holds |
 | 2+ YELLOW readings concurrently | Wait — do not initiate; reassess after next earnings cycle |
@@ -180,7 +180,7 @@ Do not hold through thesis-invalidation events waiting for "recovery." The thesi
 
 | Version | Date | Summary |
 |---|---|---|
-| v1.0 | 2026-05-13 | Initial thesis. Late Expansion cycle phase. Pre-NVDA FY27 Q1 earnings (May 28). Cycle metrics Green/Yellow. ACCUMULATE with conditions. |
+| v1.0 | 2026-05-13 | Initial thesis. Late Expansion cycle phase. Pre-NVDA FY27 Q1 earnings (May 20). Cycle metrics Green/Yellow. ACCUMULATE with conditions. |
 
 _Update this log after each material catalyst event from §6._
 
@@ -192,9 +192,9 @@ _Update this log after each material catalyst event from §6._
 
 The structural case for owning global semiconductor exposure is intact: $350B+ in committed hyperscaler capex, sovereign AI buildouts not yet reflected in consensus, and an equipment sub-sector (ASML/AMAT/KLAC ~16–20% of ETF) with 12–18 month order visibility that is structurally more defensible than pure chip designers. The cycle is not in confirmed downturn — it is at a Late Expansion / Pre-Digestion boundary where yellow flags exist but no RED has fired.
 
-The tactical case depends heavily on NVDA's May 28 earnings. A beat-and-raise locks in the bull case for at least two more quarters of momentum. An in-line result with conservative inventory language ("good not great") is manageable — buy the initial dip if SOX holds SMA50. A miss with rising inventory days would flash the first RED on the thesis dashboard and argues for waiting.
+The tactical case depends heavily on NVDA's May 20 earnings. A beat-and-raise locks in the bull case for at least two more quarters of momentum. An in-line result with conservative inventory language ("good not great") is manageable — buy the initial dip if SOX holds SMA50. A miss with rising inventory days would flash the first RED on the thesis dashboard and argues for waiting.
 
-For a European retail investor with a 12–18 month horizon: initiate a half position before May 28 (buy the setup, not the event), and condition the second half on NVDA earnings outcome plus hyperscaler Q2 capex language in July. The thesis expires or requires full reassessment in December 2026 — do not hold passively through the catalyst calendar without actively checking the dashboard.
+For a European retail investor with a 12–18 month horizon: initiate a half position before May 20 (buy the setup, not the event), and condition the second half on NVDA earnings outcome plus hyperscaler Q2 capex language in July. The thesis expires or requires full reassessment in December 2026 — do not hold passively through the catalyst calendar without actively checking the dashboard.
 
 The main risk is not being wrong about AI — it is being right about AI but early on the digestion cycle. Manage that with thesis-based (not price-based) stop conditions.
 
