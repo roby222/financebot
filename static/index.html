@@ -606,6 +606,10 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 .sm-tick .chg.up{color:var(--sc-green)}
 .sm-tick .chg.dn{color:var(--sc-red)}
 .sm-tick .chg.flat{color:var(--sc-mute)}
+.sm-tick .chg-ref{font-size:.62rem;font-weight:600;padding:1px 5px;border-radius:3px;margin-left:1px;opacity:.82}
+.sm-tick .chg-ref.up{background:rgba(63,185,80,.12);color:var(--sc-green)}
+.sm-tick .chg-ref.dn{background:rgba(248,81,73,.12);color:var(--sc-red)}
+.sm-tick .chg-ref.flat{background:rgba(139,148,158,.1);color:var(--sc-mute)}
 /* composite */
 .sm-composite{display:grid;grid-template-columns:180px 1fr auto;gap:16px;background:var(--sc-surf);padding:16px 20px;border-radius:var(--sc-radius);box-shadow:var(--sc-shadow);margin-bottom:20px;align-items:center;border:1px solid var(--sc-border)}
 .sm-score-circle{width:100px;height:100px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-weight:600}
@@ -738,7 +742,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
   </div>
 
   <div class="sm-ticker" id="sm-tickerBar">
-    <span class="sm-tlbl">Live</span>
+    <span class="sm-tlbl">Live &nbsp;<span style="opacity:.5;font-weight:400;font-size:.6rem">vs 3 apr</span></span>
     <div class="sm-tlist" id="sm-tickers"><span style="color:var(--muted);font-size:.72rem" data-i18n="sm_loading">Carico prezzi…</span></div>
   </div>
 
@@ -3580,7 +3584,42 @@ async function sm_fetchNews(query){
   }));
 }
 
-// ── ticker bar ──
+// ── ticker bar — reference date performance ──
+const sm_REF_TS   = Math.floor(new Date('2026-04-03T00:00:00Z').getTime()/1000);
+const sm_REF_LBL  = '3 apr';
+const sm_REF_KEY  = 'sm_ref_apr3_v1';
+
+async function sm_fetchClose(sym, ts){
+  // fetch 5-day window starting 1 day before target to catch the right session
+  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?period1=${ts-86400}&period2=${ts+86400*4}&interval=1d`;
+  const r=await sm_fetchTimeout(sm_proxied(url));
+  if(!r.ok)throw new Error(r.status);
+  const j=await r.json();
+  const result=j.chart?.result?.[0];
+  if(!result)throw new Error('no result');
+  const timestamps=result.timestamp||[];
+  const closes=result.indicators?.quote?.[0]?.close||[];
+  // first session on or after ts
+  let idx=timestamps.findIndex(t=>t>=ts);
+  if(idx===-1)idx=closes.length-1;
+  const c=closes[idx];
+  if(c==null)throw new Error('null close');
+  return c;
+}
+
+async function sm_loadRefPrices(tickers){
+  const cached=localStorage.getItem(sm_REF_KEY);
+  if(cached){try{const p=JSON.parse(cached);if(p&&Object.keys(p).length>=tickers.length)return p;}catch(e){}}
+  // fetch all ref closes in parallel
+  const results=await Promise.allSettled(tickers.map(t=>sm_fetchClose(t.yahoo,sm_REF_TS)));
+  const prices={};
+  tickers.forEach((t,i)=>{
+    if(results[i].status==='fulfilled')prices[t.yahoo]=results[i].value;
+  });
+  if(Object.keys(prices).length>0)localStorage.setItem(sm_REF_KEY,JSON.stringify(prices));
+  return prices;
+}
+
 async function sm_refreshTickers(){
   const tickers=[
     {sym:'NVDA',yahoo:'NVDA'},{sym:'AMD',yahoo:'AMD'},{sym:'TSM',yahoo:'TSM'},
@@ -3588,15 +3627,29 @@ async function sm_refreshTickers(){
     {sym:'SK Hynix',yahoo:'000660.KS'},{sym:'Samsung',yahoo:'005930.KS'}
   ];
   const host=document.getElementById('sm-tickers');
-  const res=await Promise.allSettled(tickers.map(t=>sm_fetchYahoo(t.yahoo)));
+  // fetch live prices and ref prices in parallel
+  const [liveResults, refPrices]=await Promise.all([
+    Promise.allSettled(tickers.map(t=>sm_fetchYahoo(t.yahoo))),
+    sm_loadRefPrices(tickers).catch(()=>({}))
+  ]);
   host.innerHTML='';
   tickers.forEach((t,i)=>{
-    const r=res[i];const div=document.createElement('div');div.className='sm-tick';
+    const r=liveResults[i];const div=document.createElement('div');div.className='sm-tick';
     if(r.status==='fulfilled'){
-      const{price,prev}=r.value;const chg=((price-prev)/prev)*100;
+      const{price,prev}=r.value;
+      const chg=((price-prev)/prev)*100;
       const cls=chg>0.1?'up':chg<-0.1?'dn':'flat';
       const sign=chg>=0?'+':'';
-      div.innerHTML=`<span class="sym">${t.sym}</span><span class="px">${price.toFixed(2)}</span><span class="chg ${cls}">${sign}${chg.toFixed(2)}%</span>`;
+      // ref performance
+      let refHtml='';
+      const ref=refPrices[t.yahoo];
+      if(ref){
+        const rchg=((price-ref)/ref)*100;
+        const rcls=rchg>0.1?'up':rchg<-0.1?'dn':'flat';
+        const rsign=rchg>=0?'+':'';
+        refHtml=`<span class="chg-ref ${rcls}" title="dal ${sm_REF_LBL}">${rsign}${rchg.toFixed(1)}%</span>`;
+      }
+      div.innerHTML=`<span class="sym">${t.sym}</span><span class="px">${price.toFixed(2)}</span><span class="chg ${cls}">${sign}${chg.toFixed(2)}%</span>${refHtml}`;
     }else{
       div.innerHTML=`<span class="sym">${t.sym}</span><span class="px" style="opacity:.4">—</span>`;
     }
