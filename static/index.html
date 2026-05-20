@@ -3422,6 +3422,7 @@ let   sm_initialized = false;
 const sm_charts     = {};   // canvas id → Chart instance
 
 const sm_DEFAULTS = {
+  _v: 2,
   indicators: [
     { id:"hbm3e", number:"01", title:"HBM3E contract pricing",
       subtitle:"Il canarino. Prima discesa sequenziale = supply raggiunge demand.",
@@ -3514,10 +3515,19 @@ function sm_loadState(){
     const s=localStorage.getItem(sm_STORAGE);
     if(s){
       const p=JSON.parse(s);
-      p.indicators=p.indicators.filter(i=>sm_DEFAULTS.indicators.find(x=>x.id===i.id)).map(i=>{const d=sm_DEFAULTS.indicators.find(x=>x.id===i.id);return Object.assign({},d,i);});
+      const stale=(p._v||0)<(sm_DEFAULTS._v||0);
+      p.indicators=p.indicators.filter(i=>sm_DEFAULTS.indicators.find(x=>x.id===i.id)).map(i=>{
+        const d=sm_DEFAULTS.indicators.find(x=>x.id===i.id);
+        // Se i defaults sono più nuovi, usa i valori aggiornati dal codice; preserva solo la nota utente
+        if(stale) return Object.assign({},d,{note:i.note||''});
+        return Object.assign({},d,i);
+      });
       // Aggiunge indicatori nuovi dai defaults non ancora in localStorage
       const seen=new Set(p.indicators.map(i=>i.id));
       sm_DEFAULTS.indicators.forEach(d=>{if(!seen.has(d.id))p.indicators.push(JSON.parse(JSON.stringify(d)));});
+      // Il calendario viene sempre dal codice, non da localStorage
+      p.calendar=sm_DEFAULTS.calendar;
+      p._v=sm_DEFAULTS._v;
       return p;
     }
   }catch(e){}
