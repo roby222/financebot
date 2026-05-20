@@ -1,15 +1,16 @@
 SEMIS MONITOR — CATALYST CALENDAR 2026
 Quando lanciare la skill semis-update
-Aggiornato: 2026-05-20
+Aggiornato: 2026-05-20 (post-NVDA Q1 FY27)
 ======================================
 [ ] = da fare   [✓] = completato   [!] = prossimo
 
 MAGGIO
-  [!] 20 mag  NVDA FY27 Q1 earnings
-              → "NVDA ha riportato"
+  [✓] 20 mag  NVDA FY27 Q1 earnings
+              → inv_days: 113 (RED meccanico — Vera Rubin pre-build, no digestion)
+                 rev $81.6B beat, DC $75.2B, Q2 guide $91B vs $87B est. Verdict: HOLD
 
 GIUGNO
-  [ ] 10 giu  TSMC May monthly revenue
+  [!] 10 giu  TSMC May monthly revenue
               → "TSMC mensile"
   [ ] 12 giu  AMD Advancing AI 2026
               → "AMD Advancing AI"
@@ -17,6 +18,8 @@ GIUGNO
               → "aggiorna dopo Computex"
 
 LUGLIO
+  [ ] 15 lug  ASML Q2 2026 earnings
+              → "ASML ha riportato"
   [ ] 17 lug  TSMC Q2 2026 earnings
               → "TSMC ha riportato"
   [ ] 23 lug  GOOGL Q2 earnings

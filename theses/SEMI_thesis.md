@@ -3,7 +3,7 @@
 **Ticker:** SEMI (Euronext Amsterdam / London Stock Exchange)
 **Thesis version:** v1.0 — 2026-05-13
 **Audience:** European retail investor, 12–18 month horizon, moderate risk tolerance
-**Status:** ACCUMULATE (with conditions — see §9)
+**Status:** HOLD (1 RED: nvda_inv 113 days — Vera Rubin pre-build, no digestion signal)
 
 ---
 
@@ -181,6 +181,7 @@ Do not hold through thesis-invalidation events waiting for "recovery." The thesi
 | Version | Date | Summary |
 |---|---|---|
 | v1.0 | 2026-05-13 | Initial thesis. Late Expansion cycle phase. Pre-NVDA FY27 Q1 earnings (May 20). Cycle metrics Green/Yellow. ACCUMULATE with conditions. |
+| v1.1 | 2026-05-20 | Post NVDA FY27 Q1. Rev $81.6B (+85% YoY), DC $75.2B, beat consensus. Inventory $25.8B → 113 days (RED, mechanical). Q2 guide $91B vs $87B est. No digestion signal — RED driven by Vera Rubin supply pre-build. nvda_inv updated RED. Verdict → HOLD (1 RED, 2 YELLOW). |
 
 _Update this log after each material catalyst event from §6._
 
@@ -188,15 +189,22 @@ _Update this log after each material catalyst event from §6._
 
 ## 9. VERDICT
 
-**ACCUMULATE — with size discipline, pre-NVDA earnings**
+**HOLD — post-NVDA FY27 Q1, 1 RED (nvda_inv), 2 YELLOW (hbm3e, amd_rocm)**
 
-The structural case for owning global semiconductor exposure is intact: $350B+ in committed hyperscaler capex, sovereign AI buildouts not yet reflected in consensus, and an equipment sub-sector (ASML/AMAT/KLAC ~16–20% of ETF) with 12–18 month order visibility that is structurally more defensible than pure chip designers. The cycle is not in confirmed downturn — it is at a Late Expansion / Pre-Digestion boundary where yellow flags exist but no RED has fired.
+_Updated 2026-05-20 — v1.1_
 
-The tactical case depends heavily on NVDA's May 20 earnings. A beat-and-raise locks in the bull case for at least two more quarters of momentum. An in-line result with conservative inventory language ("good not great") is manageable — buy the initial dip if SOX holds SMA50. A miss with rising inventory days would flash the first RED on the thesis dashboard and argues for waiting.
+NVDA Q1 FY27 was a **massive beat-and-raise**: revenue $81.6B (+85% YoY) vs guidance $78B; Data Center $75.2B (+92% YoY); Q2 FY27 guide $91.0B vs consensus $87.4B. No digestion language, no channel pushouts. Blackwell underpins >70% of DC compute; Vera Rubin samples are in customer hands.
 
-For a European retail investor with a 12–18 month horizon: initiate a half position before May 20 (buy the setup, not the event), and condition the second half on NVDA earnings outcome plus hyperscaler Q2 capex language in July. The thesis expires or requires full reassessment in December 2026 — do not hold passively through the catalyst calendar without actively checking the dashboard.
+The mechanical RED on `nvda_inv` (inventory $25.8B → 113 days) is driven by supply-chain pre-build for the Vera Rubin ramp in H2 2026, not by demand destruction. The Q2 $91B guidance explicitly confirms no inventory overhang. This RED is **contextually qualified** — treat as an elevated watch, not a stop-loss signal.
 
-The main risk is not being wrong about AI — it is being right about AI but early on the digestion cycle. Manage that with thesis-based (not price-based) stop conditions.
+**Why HOLD (not ACCUMULATE):** Per dashboard rules, 1 RED → HOLD regardless of context. Discipline matters: acknowledge the mechanical flag, hold existing positions, do not average up until nvda_inv confirms below 90 days (expected with Vera Rubin ramp absorption in Q2–Q3 FY27).
+
+**Do not exit.** The structural bull case is intact: $91B Q2 guide, hyperscaler capex language still GREEN, CoWoS still fully utilized, memory capex cycle still expanding. The next reassessment triggers are:
+1. TSMC May monthly revenue (~10 Jun) — CoWoS utilization proxy
+2. Hyperscaler Q2 earnings (Jul 23–31) — definitive capex language for 2027
+3. NVDA FY27 Q2 earnings (Aug 28) — inventory days check #2 (should normalize if Vera Rubin ships)
+
+The thesis expires or requires full reassessment in December 2026. Track the dashboard weekly for any additional RED signals.
 
 ---
 

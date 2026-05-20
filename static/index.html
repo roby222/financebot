@@ -771,7 +771,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
         <div class="sm-thesis-sub" data-i18n="sm_th_oneliner">Esposizione diversificata al ciclo semis AI — $350B+ capex hyperscaler in arrivo nell'hardware stack.</div>
       </div>
       <div class="sm-thesis-meta">
-        <span class="sm-verdict accumulate" id="sm-thVerdict" data-i18n="sm_th_verdict">ACCUMULA</span>
+        <span class="sm-verdict hold" id="sm-thVerdict" data-i18n="sm_th_verdict">HOLD</span>
         <span class="sm-thesis-ver" id="sm-thVer">v1.0 · 13 mag 2026</span>
       </div>
     </div>
@@ -1223,7 +1223,7 @@ const STRINGS = {
     sm_narr_latecycle:'Indicatori misti. Attenzione a double-ordering e capacity adds sincronizzati.',
     sm_narr_digestion:'Pattern coerente con svolta nei prossimi 2-3 trimestri. Rivalutare esposizione memoria e merchant accelerator.',
     sm_th_oneliner:'Esposizione diversificata al ciclo semis AI — $350B+ capex hyperscaler in arrivo nell\'hardware stack.',
-    sm_th_verdict:'ACCUMULA',
+    sm_th_verdict:'HOLD',
     sm_th_stop:'⚠️ Stop-loss thesis: (1) HBM3E pricing < −15% HoH · (2) Capex hyperscaler flat/down per 2027 · (3) SOX < SMA200 per 3+ settimane · (4) Export controls impattano TSMC / ASML',
     sm_col_green:'Green', sm_col_yellow:'Yellow', sm_col_red:'Red',
     sm_fetch_btn:'↻ Fetch', sm_ir_link:'IR →',
@@ -1410,7 +1410,7 @@ const STRINGS = {
     sm_narr_latecycle:'Mixed indicators. Watch for double-ordering and synchronised capacity adds.',
     sm_narr_digestion:'Pattern consistent with a turn in the next 2-3 quarters. Reassess memory and merchant accelerator exposure.',
     sm_th_oneliner:'Diversified exposure to the AI semis cycle — $350B+ hyperscaler capex landing in the hardware stack.',
-    sm_th_verdict:'ACCUMULATE',
+    sm_th_verdict:'HOLD',
     sm_th_stop:'⚠️ Thesis stop-loss: (1) HBM3E pricing < −15% HoH · (2) Hyperscaler capex flat/down for 2027 · (3) SOX < SMA200 for 3+ weeks · (4) Export controls impairing TSMC / ASML',
     sm_col_green:'Green', sm_col_yellow:'Yellow', sm_col_red:'Red',
     sm_fetch_btn:'↻ Fetch', sm_ir_link:'IR →',
@@ -3403,7 +3403,7 @@ const sm_CORS       = localStorage.getItem('fpb_proxy') || "https://corsproxy.io
 
 /* ── THESIS CONFIG (SEMI ETF) ─────────────────────────── */
 const sm_THESIS = {
-  ticker:'SEMI', verdict:'accumulate', version:'v1.0', date:'13 mag 2026',
+  ticker:'SEMI', verdict:'hold', version:'v1.1', date:'20 mag 2026',
   dashboard:[
     {label:'HBM3E pricing',      redIf:'< −15% HoH',              indId:'hbm3e'},
     {label:'CoWoS utilization',  redIf:'< 75%',                    indId:'cowos'},
@@ -3455,11 +3455,11 @@ const sm_DEFAULTS = {
       headlines:[],proxy:null,lastFetched:null,fetchError:null,note:"" },
     { id:"nvda_inv", number:"04", title:"Nvidia data center inventory days",
       subtitle:"Anticipa il ciclo di 2 trimestri. AUTO da SEC EDGAR.",
-      value:55, unit:"giorni (Inv / COGS × 90)",
-      history:[48,50,52,50,53,55], labels:["Q4 24","Q1 25","Q2 25","Q3 25","Q4 25","Q1 26"],
-      direction:"higher_is_signal", status:"yellow",
-      signal:"Threshold warning: <b>&gt;70 giorni</b>. Lieve uptick ultimi due trimestri.",
-      next:"Nvidia FY27 Q1: 20 mag 2026", autoMode:"sec_edgar", secCik:1045810,
+      value:113, unit:"giorni (Inv / COGS × 90)",
+      history:[50,52,50,53,55,113], labels:["Q1 25","Q2 25","Q3 25","Q4 25","Q1 26","Q2 26"],
+      direction:"higher_is_signal", status:"red",
+      signal:"Q1 FY27: inventario $25.8B → <b>~113 gg</b> (RED meccanico). Q2 guide $91B vs consensus $87B. <b>No digestion signal</b>: build-up Vera Rubin H2 2026, non eccesso canale.",
+      next:"Nvidia FY27 Q2: 28 ago 2026", autoMode:"sec_edgar", secCik:1045810,
       newsQuery:"Nvidia inventory data center", proxyTicker:"NVDA", proxyLabel:"NVDA",
       sources:[{name:"Nvidia IR",url:"https://investor.nvidia.com"},{name:"Nvidia 10-Q",url:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001045810&type=10-Q"}],
       headlines:[],proxy:null,lastFetched:null,fetchError:null,note:"" },
@@ -3486,10 +3486,11 @@ const sm_DEFAULTS = {
       headlines:[],proxy:null,lastFetched:null,fetchError:null,note:"" }
   ],
   calendar:[
-    {date:"20 mag 2026",ticker:"NVDA",what:"FY27 Q1 earnings",matters:"Inventory days, channel commentary, Rubin update — catalizzatore #1 della thesis SEMI",url:"https://investor.nvidia.com"},
+    {date:"20 mag 2026",ticker:"NVDA",what:"FY27 Q1 earnings",matters:"✓ Rev $81.6B (+85% YoY), DC $75.2B. Inv 113gg (RED, build Vera Rubin). Q2 guide $91B vs $87B est. No digestion.",url:"https://investor.nvidia.com"},
     {date:"10 giu 2026",ticker:"TSMC",what:"May monthly revenue",matters:"Conferma trend CoWoS; proxy utilization",url:"https://investor.tsmc.com/english/monthly-revenue"},
     {date:"12 giu 2026",ticker:"AMD",what:"Advancing AI 2026",matters:"Roadmap MI400, ROCm metrics, design wins",url:"https://ir.amd.com"},
     {date:"27 giu 2026",ticker:"Computex",what:"Computex Taipei",matters:"Annunci roadmap NVDA/AMD; segnali ASIC custom competition",url:"https://www.computextaipei.com.tw"},
+    {date:"15 lug 2026",ticker:"ASML",what:"Q2 2026 earnings",matters:"Order backlog, EUV ship schedules, export control impact; proxy per equipment demand 2027",url:"https://www.asml.com/en/investors"},
     {date:"17 lug 2026",ticker:"TSMC",what:"Q2 2026 earnings",matters:"CoWoS utilization update; N2 ramp; guida 2H 2026",url:"https://investor.tsmc.com/english/quarterly-results"},
     {date:"23 lug 2026",ticker:"GOOGL",what:"Q2 earnings",matters:"Capex 2026 update + 2027 framing",url:"https://abc.xyz/investor"},
     {date:"24 lug 2026",ticker:"MSFT",what:"FY26 Q4 earnings",matters:"Capex guidance FY27; primi 'shift to opex'?",url:"https://www.microsoft.com/en-us/Investor"},
