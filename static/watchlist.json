@@ -7,6 +7,7 @@
   { "id": "QNTM",  "name": "VanEck Quantum Computing",           "yf": "QNTM.MI",   "driver": "TECH",    "dEmoji": "💻", "regime": "risk-on"  },
   { "id": "GLUG",  "name": "L&G Clean Water",                    "yf": "GLUG.MI",   "driver": "INFRA",   "dEmoji": "🏗️", "regime": "neutro"   },
   { "id": "RENW",  "name": "L&G Clean Energy",                   "yf": "RENW.MI",   "driver": "ENERGIA", "dEmoji": "⚡", "regime": "risk-on"  },
+  { "id": "QCLN",  "name": "First Trust NASDAQ Clean Edge Green Energy", "yf": "QCLN", "driver": "ENERGIA", "dEmoji": "⚡", "regime": "risk-on"  },
   { "id": "BATT",  "name": "L&G Battery Value-Chain",            "yf": "BATT.MI",   "driver": "METALLI", "dEmoji": "🥈", "regime": "risk-on"  },
   { "id": "SEME",  "name": "iShares MSCI Global Semiconductors", "yf": "SEME.MI",   "driver": "TECH",    "dEmoji": "💻", "regime": "risk-on"  },
   { "id": "IWQU",  "name": "iShares MSCI World Quality Factor",  "yf": "IWQU.MI",   "driver": "EQUITY",  "dEmoji": "📈", "regime": "risk-on"  },
