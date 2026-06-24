@@ -421,6 +421,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
       <button class="tab-btn active" onclick="switchTab('signals')" data-i18n="tab_signals">📈 Segnali</button>
       <button class="tab-btn" onclick="switchTab('semis')" data-i18n="tab_semis">🔬 Semis</button>
       <button class="tab-btn" onclick="switchTab('macro')" data-i18n="tab_macro">🌍 Macro</button>
+      <button class="tab-btn" onclick="switchTab('bond')" data-i18n="tab_bond">💰 Bond/Equity</button>
     </div>
     <div class="status-info">
       <div class="dot"></div>
@@ -857,6 +858,85 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 </div>
 </div>
 
+<!-- ════════════════════ BOND/EQUITY VIEW ════════════════════ -->
+<div id="view-bond" class="view">
+<style>
+#view-bond{
+  --bv-bond:#388bfd;--bv-equity:#3fb950;--bv-neutro:var(--muted);
+  background:var(--bg);padding:8px 0 40px;
+}
+.bv-global-bar{display:flex;gap:20px;background:var(--surface);border-radius:10px;padding:14px 20px;margin-bottom:18px;flex-wrap:wrap;border:1px solid var(--border)}
+.bv-glob-item{display:flex;flex-direction:column;gap:2px;min-width:110px}
+.bv-glob-lbl{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.bv-glob-val{font-size:1.05rem;font-weight:700;color:var(--text)}
+.bv-glob-sub{font-size:.6rem;color:var(--muted)}
+.bv-country-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:22px}
+.bv-country-card{background:var(--surface);border-radius:10px;padding:12px 14px;border:1px solid var(--border)}
+.bv-cc-head{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.bv-flag{font-size:1.15rem}
+.bv-cc-name{font-weight:700;font-size:.8rem;flex:1;color:var(--text)}
+.bv-cc-rows{display:flex;flex-direction:column;gap:5px}
+.bv-cc-row{display:flex;justify-content:space-between;font-size:.74rem}
+.bv-cc-row span{color:var(--muted)}
+.bv-cc-row b{font-weight:600;color:var(--text)}
+.bv-chip{display:inline-block;padding:2px 7px;border-radius:4px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.bv-chip.bond{color:#388bfd;background:rgba(56,139,253,.15)}
+.bv-chip.neutro{color:var(--muted);background:var(--surface2)}
+.bv-chip.equity{color:#3fb950;background:rgba(63,185,80,.15)}
+.bv-loading{color:var(--muted);font-style:italic;font-weight:400;font-size:.72rem}
+.bv-italy-card{background:var(--surface);border-radius:10px;border:1px solid rgba(56,139,253,.35);padding:18px 20px;margin-bottom:16px}
+.bv-italy-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.bv-flag-lg{font-size:1.5rem;margin-right:8px;vertical-align:middle}
+.bv-italy-title{font-weight:700;font-size:.9rem;color:var(--text)}
+.bv-italy-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:7px 18px;margin-bottom:10px}
+.bv-kv{display:flex;align-items:center;gap:5px;font-size:.77rem;padding:4px 0;border-bottom:1px solid var(--border)}
+.bv-kv span{color:var(--muted);flex:1}
+.bv-kv b{font-weight:700;color:var(--text)}
+.bv-edit-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.72rem;padding:0 3px;opacity:.5;line-height:1}
+.bv-edit-btn:hover{opacity:1;color:var(--accent)}
+.bv-edit-panel{margin-top:10px;padding:10px 12px;background:var(--surface2);border-radius:7px}
+.bv-section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:0 0 10px}
+</style>
+
+<div class="sm-wrap">
+  <div class="sm-hdr">
+    <div>
+      <h2>💰 Bond / Equity</h2>
+      <div style="font-size:.72rem;color:var(--muted)">Convenienza relativa obbligazioni vs azionario per paese — rendimento reale e bond premium</div>
+    </div>
+    <div class="sm-meta">
+      <div>Ultimo update: <span id="bv-lastUpdate">—</span></div>
+    </div>
+  </div>
+
+  <!-- Global bar -->
+  <div class="bv-global-bar" id="bv-global-bar">
+    <div class="bv-glob-item"><span class="bv-glob-lbl">DXY</span><span class="bv-glob-val">—</span><span class="bv-glob-sub">USD Index</span></div>
+    <div class="bv-glob-item"><span class="bv-glob-lbl">Real Rate USA</span><span class="bv-glob-val">—</span><span class="bv-glob-sub">10Y − CPI</span></div>
+    <div class="bv-glob-item"><span class="bv-glob-lbl">Gold</span><span class="bv-glob-val">—</span><span class="bv-glob-sub">$/oz</span></div>
+  </div>
+
+  <!-- Country grid title -->
+  <div class="bv-section-title">Paesi — segnale direzionale</div>
+  <div class="bv-country-grid" id="bv-country-grid">
+    <div style="color:var(--muted);font-size:.8rem">Caricamento…</div>
+  </div>
+
+  <!-- Italy focus -->
+  <div class="bv-section-title">🇮🇹 Italia — analisi dettagliata</div>
+  <div id="bv-italy-wrap"></div>
+
+  <div style="display:flex;gap:8px;margin-top:8px">
+    <button class="sm-btn" id="bv-refreshBtn" onclick="bv_fetchAll()">Aggiorna ora</button>
+  </div>
+
+  <div class="sm-foot" style="margin-top:24px">
+    <div>Auto-fetch 10Y yields via Yahoo Finance (proxy: Cloudflare Worker). CB rate, CPI, P/E e Debito/PIL aggiornati manualmente.</div>
+    <div>Stato salvato in localStorage — nessun dato sul server.</div>
+  </div>
+</div>
+</div>
+
 <!-- ════════════════════ HELP MODAL ════════════════════ -->
 <div class="help-overlay hidden" id="help-overlay" onclick="closeHelpIfBg(event)">
   <div class="help-modal">
@@ -1192,7 +1272,7 @@ let LANG = (() => { try { return localStorage.getItem('fpb_lang') || BROWSER_LAN
 
 const STRINGS = {
   it: {
-    tab_live:'📊 Live', tab_signals:'📈 Segnali', tab_semis:'🔬 Semis', tab_macro:'🌍 Macro',
+    tab_live:'📊 Live', tab_signals:'📈 Segnali', tab_semis:'🔬 Semis', tab_macro:'🌍 Macro', tab_bond:'💰 Bond/Equity',
     // macro monitor
     mc_title:'🌍 Macro Indicators', mc_subtitle:'Commodity e macro — contesto globale per le thesis',
     mc_desc:'Indicatori commodity indipendenti dalla tesi semis. Il rame è un proxy della domanda AI infra a livello fisico.',
@@ -1379,7 +1459,7 @@ const STRINGS = {
 <div class="help-callout"><strong>⚠️ Avvertenze:</strong> I dati vengono da Yahoo Finance tramite proxy — possibili ritardi fino a 15 minuti. I segnali sono <strong>puramente indicativi</strong> e non costituiscono consulenza finanziaria.</div>`,
   },
   en: {
-    tab_live:'📊 Live', tab_signals:'📈 Signals', tab_semis:'🔬 Semis', tab_macro:'🌍 Macro',
+    tab_live:'📊 Live', tab_signals:'📈 Signals', tab_semis:'🔬 Semis', tab_macro:'🌍 Macro', tab_bond:'💰 Bond/Equity',
     // macro monitor
     mc_title:'🌍 Macro Indicators', mc_subtitle:'Commodity & macro — global context for theses',
     mc_desc:'Commodity indicators independent from the semis thesis. Copper is a physical-layer proxy for AI infra demand.',
@@ -2565,7 +2645,7 @@ function render() {
 
 function switchTab(tab) {
   currentTab = tab;
-  const tabs = ['cards','signals','semis','macro'];
+  const tabs = ['cards','signals','semis','macro','bond'];
   document.querySelectorAll('.tab-btn').forEach((b,i)=>{
     b.classList.toggle('active', tabs[i]===tab);
   });
@@ -2575,6 +2655,7 @@ function switchTab(tab) {
   if (tab==='signals' && !sigLoaded && !sigFetching) refreshSignals();
   else if (tab==='semis') sm_onTabOpen();
   else if (tab==='macro') mc_onTabOpen();
+  else if (tab==='bond') bv_onTabOpen();
   else render();
 }
 
@@ -4208,6 +4289,194 @@ async function mc_refreshAll(){
   btn.disabled=false;btn.innerHTML=t('sm_refresh_btn');
 }
 
+/* ═══════════════════════════════════════════════════════════
+   BOND / EQUITY MONITOR  (namespace bv_*)
+═══════════════════════════════════════════════════════════ */
+const bv_STORAGE = 'bond_equity_v1';
+const bv_DEFAULTS = {
+  _v:1, lastFetched:null, dxy:null, gold:null,
+  countries:[
+    {id:'usa',flag:'🇺🇸',name:'USA',      cbRate:4.50,yf:'^TNX',       cpi:2.7,yield10y:null},
+    {id:'de', flag:'🇩🇪',name:'Germania', cbRate:2.25,yf:'^DE10YT=RR', cpi:2.3,yield10y:null},
+    {id:'fr', flag:'🇫🇷',name:'Francia',  cbRate:2.25,yf:'^FR10YT=RR', cpi:1.8,yield10y:null},
+    {id:'es', flag:'🇪🇸',name:'Spagna',   cbRate:2.25,yf:'^ES10YT=RR', cpi:2.2,yield10y:null},
+    {id:'cn', flag:'🇨🇳',name:'Cina',     cbRate:3.10,yf:'CNGB10YR=X', cpi:0.1,yield10y:null},
+    {id:'jp', flag:'🇯🇵',name:'Giappone', cbRate:0.50,yf:'^JP10YT=RR', cpi:3.5,yield10y:null},
+  ],
+  italy:{cbRate:2.25,cpi:1.2,pe:13.5,debtGdp:137,yield10y:null,note:''},
+};
+let bvState=null, bv_fetching=false, bv_loaded=false;
+
+function bv_loadState(){
+  try{
+    const s=localStorage.getItem(bv_STORAGE);
+    if(s){const p=JSON.parse(s);if((p._v||0)>=(bv_DEFAULTS._v||0))return p;}
+  }catch(e){}
+  return JSON.parse(JSON.stringify(bv_DEFAULTS));
+}
+function bv_saveState(){localStorage.setItem(bv_STORAGE,JSON.stringify(bvState));}
+
+function bv_verdict(y10,cpi,pe){
+  if(y10==null)return'neutro';
+  const real=y10-cpi;
+  if(pe!=null&&pe>0){
+    const ey=100/pe, bp=y10-ey;
+    if(real>1&&bp>0)return'bond';
+    if(real<0||bp<-1)return'equity';
+    return'neutro';
+  }
+  if(real>1.5)return'bond';
+  if(real<-0.5)return'equity';
+  return'neutro';
+}
+function bv_chip(v){
+  const L={bond:'BOND',neutro:'NEUTRO',equity:'EQUITY'};
+  return`<span class="bv-chip ${v}">${L[v]||v}</span>`;
+}
+function bv_pct(v,d=2){return v==null?'—':v.toFixed(d)+'%';}
+function bv_num(v,d=2){return v==null?'—':v.toFixed(d);}
+
+function bv_renderGlobal(){
+  const s=bvState;
+  const usC=s.countries.find(c=>c.id==='usa');
+  const real=usC&&usC.yield10y!=null?usC.yield10y-usC.cpi:null;
+  const realColor=real!=null?(real>1?'color:#388bfd':real<0?'color:#3fb950':''):'';
+  document.getElementById('bv-global-bar').innerHTML=`
+    <div class="bv-glob-item">
+      <span class="bv-glob-lbl">DXY</span>
+      <span class="bv-glob-val">${s.dxy!=null?s.dxy.toFixed(2):'—'}</span>
+      <span class="bv-glob-sub">USD Index${s.dxy!=null&&s.dxy>104?' · forte ↑':s.dxy!=null&&s.dxy<100?' · debole ↓':''}</span>
+    </div>
+    <div class="bv-glob-item">
+      <span class="bv-glob-lbl">Real Rate USA</span>
+      <span class="bv-glob-val" style="${realColor}">${real!=null?real.toFixed(2)+'%':'—'}</span>
+      <span class="bv-glob-sub">10Y − CPI${real!=null?(real>1?' → bond attrattivi':real<0?' → bond perdono potere':''):''}</span>
+    </div>
+    <div class="bv-glob-item">
+      <span class="bv-glob-lbl">Gold</span>
+      <span class="bv-glob-val">${s.gold!=null?'$'+(s.gold|0).toLocaleString('it-IT'):'—'}</span>
+      <span class="bv-glob-sub">$/oz</span>
+    </div>`;
+}
+
+function bv_renderCountries(){
+  const s=bvState;
+  const html=s.countries.map(c=>{
+    const v=bv_verdict(c.yield10y,c.cpi,null);
+    const real=c.yield10y!=null?c.yield10y-c.cpi:null;
+    const realColor=real!=null?(real>1.5?'color:#388bfd':real<-0.5?'color:#3fb950':''):'';
+    return`<div class="bv-country-card">
+      <div class="bv-cc-head"><span class="bv-flag">${c.flag}</span><span class="bv-cc-name">${c.name}</span>${bv_chip(v)}</div>
+      <div class="bv-cc-rows">
+        <div class="bv-cc-row"><span>Tasso CB</span><b>${bv_pct(c.cbRate)}</b></div>
+        <div class="bv-cc-row"><span>10Y yield</span><b>${c.yield10y!=null?bv_pct(c.yield10y):'<span class="bv-loading">…</span>'}</b></div>
+        <div class="bv-cc-row"><span>Inflazione</span><b>${bv_pct(c.cpi)}</b></div>
+        <div class="bv-cc-row"><span>Real yield</span><b style="${realColor}">${real!=null?bv_pct(real):'—'}</b></div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('bv-country-grid').innerHTML=html;
+}
+
+function bv_renderItaly(){
+  const it=bvState.italy;
+  const deC=bvState.countries.find(c=>c.id==='de');
+  const de10y=deC?deC.yield10y:null;
+  const spread=it.yield10y!=null&&de10y!=null?it.yield10y-de10y:null;
+  const real=it.yield10y!=null?it.yield10y-it.cpi:null;
+  const ey=it.pe>0?100/it.pe:null;
+  const bp=it.yield10y!=null&&ey!=null?it.yield10y-ey:null;
+  const v=bv_verdict(it.yield10y,it.cpi,it.pe);
+  const spreadColor=spread!=null?(spread>2?'color:#f85149':spread<1?'color:#3fb950':''):'';
+  const realColor=real!=null?(real>1?'color:#388bfd':real<0?'color:#f85149':''):'';
+  const bpColor=bp!=null?(bp>0?'color:#388bfd':bp<-1?'color:#3fb950':''):'';
+  document.getElementById('bv-italy-wrap').innerHTML=`
+    <div class="bv-italy-card">
+      <div class="bv-italy-head">
+        <div><span class="bv-flag-lg">🇮🇹</span><span class="bv-italy-title">Italia — analisi dettagliata</span></div>
+        ${bv_chip(v)}
+      </div>
+      <div class="bv-italy-grid">
+        <div class="bv-kv"><span>Tasso BCE</span><b>${bv_pct(it.cbRate)}</b></div>
+        <div class="bv-kv"><span>BTP 10Y</span><b>${it.yield10y!=null?bv_pct(it.yield10y):'<span class="bv-loading">…</span>'}</b></div>
+        <div class="bv-kv"><span>Spread BTP-Bund</span><b style="${spreadColor}">${spread!=null?bv_num(spread)+'pp':'—'}</b></div>
+        <div class="bv-kv"><span>Inflazione CPI</span><b>${bv_pct(it.cpi)}</b><button class="bv-edit-btn" onclick="bv_openEdit('cpi','Inflazione CPI (%)',0.1)">✎</button></div>
+        <div class="bv-kv"><span>Real yield</span><b style="${realColor}">${real!=null?bv_pct(real):'—'}</b></div>
+        <div class="bv-kv"><span>FTSE MIB P/E</span><b>${bv_num(it.pe,1)}×</b><button class="bv-edit-btn" onclick="bv_openEdit('pe','FTSE MIB P/E',0.1)">✎</button></div>
+        <div class="bv-kv"><span>Earnings yield</span><b>${ey!=null?bv_pct(ey):'—'}</b></div>
+        <div class="bv-kv"><span>Bond Premium</span><b style="${bpColor}">${bp!=null?bv_num(bp)+'pp':'—'}</b></div>
+        <div class="bv-kv"><span>Debito/PIL</span><b>${bv_num(it.debtGdp,0)}%</b><button class="bv-edit-btn" onclick="bv_openEdit('debtGdp','Debito/PIL (%)',1)">✎</button></div>
+      </div>
+      <div id="bv-italy-edit" class="bv-edit-panel" style="display:none"></div>
+      ${it.note?`<div class="bv-note" style="font-size:.74rem;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">${it.note}</div>`:''}
+    </div>`;
+}
+
+function bv_openEdit(field,label,step){
+  const it=bvState.italy;
+  const panel=document.getElementById('bv-italy-edit');
+  panel.style.display='block';
+  panel.innerHTML=`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <label style="font-size:.74rem;color:var(--muted)">${label}</label>
+    <input id="bv-edit-inp" type="number" step="${step}" value="${it[field]}"
+      style="width:90px;padding:4px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.82rem">
+    <button class="sm-btn" onclick="bv_saveEdit('${field}')">Salva</button>
+    <button class="sm-btn sec" onclick="document.getElementById('bv-italy-edit').style.display='none'">✕</button>
+  </div>`;
+  setTimeout(()=>{const i=document.getElementById('bv-edit-inp');if(i)i.focus();},50);
+}
+function bv_saveEdit(field){
+  const v=parseFloat(document.getElementById('bv-edit-inp').value);
+  if(isNaN(v))return;
+  bvState.italy[field]=v;
+  bv_saveState();
+  bv_renderItaly();
+}
+
+async function bv_fetchOne(ticker){
+  const url=`https://query1.finance.yahoo.com/v8/finance/quote?symbols=${encodeURIComponent(ticker)}&fields=regularMarketPrice`;
+  const r=await sm_fetchTimeout(sm_proxied(url),10000);
+  if(!r.ok)throw new Error(r.status);
+  const j=await r.json();
+  const p=j?.quoteResponse?.result?.[0]?.regularMarketPrice;
+  if(p==null)throw new Error('no price');
+  return p;
+}
+
+async function bv_fetchAll(){
+  if(bv_fetching)return;
+  bv_fetching=true;
+  const btn=document.getElementById('bv-refreshBtn');
+  if(btn)btn.textContent='⟳ …';
+  const tickers=[...bvState.countries.map(c=>c.yf),'^IT10YT=RR','DX-Y.NYB','GC=F'];
+  const res=await Promise.allSettled(tickers.map(t=>bv_fetchOne(t)));
+  bvState.countries.forEach((c,i)=>{if(res[i].status==='fulfilled')c.yield10y=res[i].value;});
+  const n=bvState.countries.length;
+  if(res[n].status==='fulfilled')   bvState.italy.yield10y=res[n].value;
+  if(res[n+1].status==='fulfilled') bvState.dxy=res[n+1].value;
+  if(res[n+2].status==='fulfilled') bvState.gold=res[n+2].value;
+  bvState.lastFetched=new Date().toISOString();
+  bv_saveState();
+  bv_render();
+  if(btn)btn.textContent='Aggiorna ora';
+  bv_fetching=false;
+  bv_loaded=true;
+}
+
+function bv_render(){
+  bv_renderGlobal();
+  bv_renderCountries();
+  bv_renderItaly();
+  const el=document.getElementById('bv-lastUpdate');
+  if(el&&bvState.lastFetched)el.textContent=new Date(bvState.lastFetched).toLocaleTimeString('it-IT');
+}
+function bv_onTabOpen(){
+  if(!bvState)bvState=bv_loadState();
+  bv_render();
+  if(!bv_loaded)bv_fetchAll();
+}
+
+/* ═══════════════════════════════════════════════════════════ */
 function mc_onTabOpen(){
   const todayFmt=new Date().toLocaleDateString(LANG==='it'?'it-IT':'en-GB',{day:'2-digit',month:'long',year:'numeric'});
   document.getElementById('mc-todayDate').textContent=(LANG==='it'?'Oggi: ':'Today: ')+todayFmt;
