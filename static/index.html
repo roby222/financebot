@@ -959,6 +959,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 .btp-tbl td.r{text-align:right;font-variant-numeric:tabular-nums}
 .btp-tbl tr.btp-data-row:hover td{background:rgba(255,255,255,.03)}
 .btp-name{font-weight:600;font-size:.78rem}
+.btp-isin{font-size:.62rem;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.3px;margin-top:1px}
 .btp-badge{display:inline-block;padding:1px 5px;border-radius:3px;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-left:5px;vertical-align:middle}
 .btp-badge.idx{color:#f0883e;background:rgba(240,136,62,.13)}
 .btp-badge.step{color:#a371f7;background:rgba(163,113,247,.13)}
@@ -4814,7 +4815,7 @@ function btp_renderTable(){
       ?`<button class="sm-btn sec" style="font-size:.62rem;padding:2px 6px" onclick="btp_clearAp(${idx})">✕ P.acq</button>`:'';
 
     return`<tr class="btp-data-row">
-      <td><span class="btp-name">${b.name}</span>${badgeHtml}</td>
+      <td><span class="btp-name">${b.name}</span>${badgeHtml}${b.special==='etf'?'':`<div class="btp-isin">${b.id}</div>`}</td>
       <td class="r">${b.coupon!=null?b.coupon.toFixed(2)+'%':'—'}</td>
       <td>${btp_fmtMat(b.mat)}</td>
       <td class="r">${priceStr}${manBadge}<button class="btp-edit-btn" onclick="btp_openEdit(${idx})" title="Prezzo acquisto / manuale">✎</button></td>
