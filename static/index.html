@@ -422,6 +422,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
       <button class="tab-btn" onclick="switchTab('semis')" data-i18n="tab_semis">🔬 Semis</button>
       <button class="tab-btn" onclick="switchTab('macro')" data-i18n="tab_macro">🌍 Macro</button>
       <button class="tab-btn" onclick="switchTab('bond')" data-i18n="tab_bond">💰 Bond/Equity</button>
+      <button class="tab-btn" onclick="switchTab('btp')" data-i18n="tab_btp">🏛️ BTP</button>
     </div>
     <div class="status-info">
       <div class="dot"></div>
@@ -937,6 +938,99 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 </div>
 </div>
 
+<!-- ════════════════════ BTP ITALIA VIEW ════════════════════ -->
+<div id="view-btp" class="view">
+<style>
+#view-btp{background:var(--bg);padding:8px 0 40px}
+.btp-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.btp-hdr h2{margin:0;font-size:1rem;font-weight:700;color:var(--text)}
+.btp-hdr-sub{font-size:.72rem;color:var(--muted);margin-top:3px}
+.btp-meta{display:flex;align-items:center;gap:10px;font-size:.72rem;color:var(--muted);flex-shrink:0}
+.btp-info-bar{display:flex;gap:24px;background:var(--surface);border-radius:9px;padding:13px 18px;margin-bottom:16px;flex-wrap:wrap;border:1px solid var(--border)}
+.btp-info-item{display:flex;flex-direction:column;gap:2px}
+.btp-info-lbl{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.btp-info-val{font-size:.98rem;font-weight:700;color:var(--text)}
+.btp-info-sub{font-size:.6rem;color:var(--muted)}
+.btp-tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border)}
+.btp-tbl{width:100%;border-collapse:collapse;font-size:.76rem}
+.btp-tbl th{background:var(--surface2);color:var(--muted);text-transform:uppercase;font-size:.62rem;letter-spacing:.5px;padding:8px 10px;font-weight:600;text-align:left;white-space:nowrap}
+.btp-tbl th.r{text-align:right}
+.btp-tbl td{padding:9px 10px;border-top:1px solid var(--border);color:var(--text);white-space:nowrap}
+.btp-tbl td.r{text-align:right;font-variant-numeric:tabular-nums}
+.btp-tbl tr.btp-data-row:hover td{background:rgba(255,255,255,.03)}
+.btp-name{font-weight:600;font-size:.78rem}
+.btp-badge{display:inline-block;padding:1px 5px;border-radius:3px;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-left:5px;vertical-align:middle}
+.btp-badge.idx{color:#f0883e;background:rgba(240,136,62,.13)}
+.btp-badge.step{color:#a371f7;background:rgba(163,113,247,.13)}
+.btp-badge.etf{color:#3fb950;background:rgba(63,185,80,.13)}
+.btp-pct-up{color:#3fb950;font-weight:600}
+.btp-pct-dn{color:#f85149;font-weight:600}
+.btp-ytm-val{color:#388bfd;font-weight:600}
+.btp-ytm-nd{color:var(--muted);font-style:italic;font-size:.68rem}
+.btp-spread-pos{color:#f85149}
+.btp-spread-neg{color:#3fb950}
+.btp-edit-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:.74rem;padding:0 3px;margin-left:2px;vertical-align:middle;line-height:1}
+.btp-edit-btn:hover{color:var(--text)}
+.btp-manual-badge{font-size:.58rem;color:#f0883e;background:rgba(240,136,62,.13);border-radius:3px;padding:1px 4px;margin-left:3px;vertical-align:middle}
+.btp-edit-row td{padding:6px 12px!important;background:var(--surface)!important;border-top:none!important}
+.btp-edit-inp{width:88px;padding:4px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.76rem}
+.btp-foot{margin-top:16px;padding-top:12px;border-top:1px solid var(--border);font-size:.63rem;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;line-height:1.5}
+@media(max-width:620px){.btp-info-bar{gap:14px}.btp-tbl{font-size:.7rem}}
+</style>
+
+<div class="btp-hdr">
+  <div>
+    <h2>🏛️ BTP Italia — Monitoraggio portafoglio</h2>
+    <div class="btp-hdr-sub">13 titoli · prezzi live via Yahoo Finance · YTM approssimato (formula lineare)</div>
+  </div>
+  <div class="btp-meta">
+    <span>Agg: <span id="btp-lastUpdate">—</span></span>
+    <button class="sm-btn" id="btp-refreshBtn" onclick="btp_fetchAll()">Aggiorna ora</button>
+  </div>
+</div>
+
+<div class="btp-info-bar">
+  <div class="btp-info-item">
+    <span class="btp-info-lbl">BTP 10Y yield</span>
+    <span class="btp-info-val" id="btp-bench-val">—</span>
+    <span class="btp-info-sub">benchmark rendimento</span>
+  </div>
+  <div class="btp-info-item">
+    <span class="btp-info-lbl">Spread BTP-Bund</span>
+    <span class="btp-info-val" id="btp-spread-bund">—</span>
+    <span class="btp-info-sub">IT10Y − DE10Y (bps)</span>
+  </div>
+  <div class="btp-info-item">
+    <span class="btp-info-lbl">CPI Italia</span>
+    <span class="btp-info-val" id="btp-cpi-val">—</span>
+    <span class="btp-info-sub">inflazione (fonte: Bond/Equity)</span>
+  </div>
+</div>
+
+<div class="btp-tbl-wrap">
+  <table class="btp-tbl">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th class="r">Cedola</th>
+        <th>Scadenza</th>
+        <th class="r">Prezzo</th>
+        <th class="r">Var%</th>
+        <th class="r">YTM</th>
+        <th class="r">Spread vs 10Y</th>
+      </tr>
+    </thead>
+    <tbody id="btp-tbody"></tbody>
+  </table>
+</div>
+
+<div class="btp-foot">
+  <div>Prezzi: Yahoo Finance via proxy Cloudflare Worker (ticker formato ISIN.TI). YTM = (cedola + (100−P)/anni) / ((100+P)/2) — approssimazione lineare, senza tassazione. IDX = indicizzato CPI, STEP = step-up: YTM non calcolabile con formula fissa. M = prezzo inserito manualmente.</div>
+  <div>Stato salvato in localStorage — nessun dato sul server.</div>
+</div>
+</div>
+</div>
+
 <!-- ════════════════════ HELP MODAL ════════════════════ -->
 <div class="help-overlay hidden" id="help-overlay" onclick="closeHelpIfBg(event)">
   <div class="help-modal">
@@ -1272,7 +1366,7 @@ let LANG = (() => { try { return localStorage.getItem('fpb_lang') || BROWSER_LAN
 
 const STRINGS = {
   it: {
-    tab_live:'📊 Live', tab_signals:'📈 Segnali', tab_semis:'🔬 Semis', tab_macro:'🌍 Macro', tab_bond:'💰 Bond/Equity',
+    tab_live:'📊 Live', tab_signals:'📈 Segnali', tab_semis:'🔬 Semis', tab_macro:'🌍 Macro', tab_bond:'💰 Bond/Equity', tab_btp:'🏛️ BTP',
     // macro monitor
     mc_title:'🌍 Macro Indicators', mc_subtitle:'Commodity e macro — contesto globale per le thesis',
     mc_desc:'Indicatori commodity indipendenti dalla tesi semis. Il rame è un proxy della domanda AI infra a livello fisico.',
@@ -1459,7 +1553,7 @@ const STRINGS = {
 <div class="help-callout"><strong>⚠️ Avvertenze:</strong> I dati vengono da Yahoo Finance tramite proxy — possibili ritardi fino a 15 minuti. I segnali sono <strong>puramente indicativi</strong> e non costituiscono consulenza finanziaria.</div>`,
   },
   en: {
-    tab_live:'📊 Live', tab_signals:'📈 Signals', tab_semis:'🔬 Semis', tab_macro:'🌍 Macro', tab_bond:'💰 Bond/Equity',
+    tab_live:'📊 Live', tab_signals:'📈 Signals', tab_semis:'🔬 Semis', tab_macro:'🌍 Macro', tab_bond:'💰 Bond/Equity', tab_btp:'🏛️ BTP',
     // macro monitor
     mc_title:'🌍 Macro Indicators', mc_subtitle:'Commodity & macro — global context for theses',
     mc_desc:'Commodity indicators independent from the semis thesis. Copper is a physical-layer proxy for AI infra demand.',
@@ -2645,7 +2739,7 @@ function render() {
 
 function switchTab(tab) {
   currentTab = tab;
-  const tabs = ['cards','signals','semis','macro','bond'];
+  const tabs = ['cards','signals','semis','macro','bond','btp'];
   document.querySelectorAll('.tab-btn').forEach((b,i)=>{
     b.classList.toggle('active', tabs[i]===tab);
   });
@@ -2656,6 +2750,7 @@ function switchTab(tab) {
   else if (tab==='semis') sm_onTabOpen();
   else if (tab==='macro') mc_onTabOpen();
   else if (tab==='bond') bv_onTabOpen();
+  else if (tab==='btp') btp_onTabOpen();
   else render();
 }
 
@@ -4474,6 +4569,221 @@ function bv_onTabOpen(){
   if(!bvState)bvState=bv_loadState();
   bv_render();
   if(!bv_loaded)bv_fetchAll();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BTP ITALIA TAB
+═══════════════════════════════════════════════════════════ */
+const btp_STORAGE='btp_italia_v1';
+const btp_DEFAULTS={
+  _v:1,lastFetched:null,bench10y:null,
+  bonds:[
+    {id:'IT0005668238',name:'BTP 4.65% Ott55', coupon:4.65,mat:'2055-10-01',yf:'IT0005668238.TI',price:null,pct:null,mp:null},
+    {id:'IT0005648255',name:'BTP Italia Giu32', coupon:null,mat:'2032-06-04',yf:'IT0005648255.TI',price:null,pct:null,mp:null,special:'idx'},
+    {id:'IT0005647265',name:'BTP 3.25% Lug32',  coupon:3.25,mat:'2032-07-15',yf:'IT0005647265.TI',price:null,pct:null,mp:null},
+    {id:'IT0005534141',name:'BTP 4.5% Ott53',   coupon:4.50,mat:'2053-10-01',yf:'IT0005534141.TI',price:null,pct:null,mp:null},
+    {id:'IT0005611741',name:'BTP 4.3% Ott54',   coupon:4.30,mat:'2054-10-01',yf:'IT0005611741.TI',price:null,pct:null,mp:null},
+    {id:'C3M',         name:'Amundi Cash 3M',    coupon:null,mat:null,        yf:'C3M.MI',         price:null,pct:null,mp:null,special:'etf'},
+    {id:'IT0005497000',name:'BTP Italia Giu30',  coupon:null,mat:'2030-06-28',yf:'IT0005497000.TI',price:null,pct:null,mp:null,special:'idx'},
+    {id:'IT0005672024',name:'BTP Valore Ott32',  coupon:null,mat:'2032-10-28',yf:'IT0005672024.TI',price:null,pct:null,mp:null,special:'step'},
+    {id:'IT0005518128',name:'BTP 4.4% Mag33',    coupon:4.40,mat:'2033-05-01',yf:'IT0005518128.TI',price:null,pct:null,mp:null},
+    {id:'IT0005696338',name:'BTP Valore Mar32',  coupon:null,mat:'2032-03-10',yf:'IT0005696338.TI',price:null,pct:null,mp:null,special:'step'},
+    {id:'IT0003256820',name:'BTP 5.75% Feb33',   coupon:5.75,mat:'2033-02-01',yf:'IT0003256820.TI',price:null,pct:null,mp:null},
+    {id:'IT0005560948',name:'BTP 4.2% Mar34',    coupon:4.20,mat:'2034-03-01',yf:'IT0005560948.TI',price:null,pct:null,mp:null},
+    {id:'IT0005445306',name:'BTP 0.5% Lug28',    coupon:0.50,mat:'2028-07-15',yf:'IT0005445306.TI',price:null,pct:null,mp:null},
+  ]
+};
+let btpState=null,btp_fetching=false,btp_loaded=false;
+
+function btp_loadState(){
+  try{
+    const s=localStorage.getItem(btp_STORAGE);
+    if(s){
+      const p=JSON.parse(s);
+      if((p._v||0)>=(btp_DEFAULTS._v||0)){
+        p.bonds=btp_DEFAULTS.bonds.map(d=>{
+          const stored=(p.bonds||[]).find(b=>b.id===d.id);
+          return stored?{...d,price:stored.price,pct:stored.pct,mp:stored.mp}:{...d};
+        });
+        return p;
+      }
+    }
+  }catch(e){}
+  return JSON.parse(JSON.stringify(btp_DEFAULTS));
+}
+function btp_saveState(){localStorage.setItem(btp_STORAGE,JSON.stringify(btpState));}
+
+function btp_ytm(bond){
+  const price=bond.mp!=null?bond.mp:bond.price;
+  if(price==null||!bond.coupon||!bond.mat||bond.special)return null;
+  const years=(new Date(bond.mat)-new Date())/(1000*60*60*24*365.25);
+  if(years<0.5)return null;
+  return((bond.coupon+(100-price)/years)/((100+price)/2))*100;
+}
+
+function btp_fmtMat(mat){
+  if(!mat)return'—';
+  return new Date(mat).toLocaleDateString('it-IT',{month:'short',year:'numeric'});
+}
+
+function btp_renderInfoBar(){
+  let bench10y=null,spread=null,cpi=null;
+  if(typeof bvState!=='undefined'&&bvState){
+    bench10y=bvState.italy?.yield10y;
+    cpi=bvState.italy?.cpi;
+    const de=bvState.countries?.find(c=>c.id==='de');
+    if(bench10y!=null&&de?.yield10y!=null)spread=(bench10y-de.yield10y)*100;
+  }
+  if(bench10y==null)bench10y=btpState.bench10y;
+
+  const benchEl=document.getElementById('btp-bench-val');
+  if(benchEl)benchEl.textContent=bench10y!=null?bench10y.toFixed(2)+'%':'—';
+
+  const spreadEl=document.getElementById('btp-spread-bund');
+  if(spreadEl){
+    if(spread!=null){
+      spreadEl.textContent=Math.round(spread)+' bps';
+      spreadEl.style.color=spread>200?'#f85149':spread<130?'#3fb950':'';
+    } else {spreadEl.textContent='—';spreadEl.style.color='';}
+  }
+
+  const cpiEl=document.getElementById('btp-cpi-val');
+  if(cpiEl)cpiEl.textContent=cpi!=null?cpi.toFixed(1)+'%':'—';
+}
+
+function btp_renderTable(){
+  let bench10y=null;
+  if(typeof bvState!=='undefined'&&bvState)bench10y=bvState.italy?.yield10y;
+  if(bench10y==null)bench10y=btpState.bench10y;
+
+  const rows=btpState.bonds.map((b,idx)=>{
+    const price=b.mp!=null?b.mp:b.price;
+    const priceStr=price!=null
+      ?`${price.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2})}`
+      :'<span style="color:var(--muted);font-style:italic;font-size:.7rem">…</span>';
+    const manBadge=b.mp!=null?'<span class="btp-manual-badge">M</span>':'';
+    const pctStr=b.pct!=null
+      ?`<span class="${b.pct>=0?'btp-pct-up':'btp-pct-dn'}">${b.pct>=0?'+':''}${b.pct.toFixed(2)}%</span>`
+      :'—';
+
+    const ytm=btp_ytm(b);
+    let ytmStr;
+    if(b.special==='etf')       ytmStr='<span class="btp-ytm-nd">ETF</span>';
+    else if(b.special==='idx')  ytmStr='<span class="btp-ytm-nd">indicizzato</span>';
+    else if(b.special==='step') ytmStr='<span class="btp-ytm-nd">step-up</span>';
+    else if(ytm!=null)          ytmStr=`<span class="btp-ytm-val">${ytm.toFixed(2)}%</span>`;
+    else                        ytmStr='—';
+
+    let spreadStr='—';
+    if(ytm!=null&&bench10y!=null){
+      const spBps=(ytm-bench10y)*100;
+      spreadStr=`<span class="${spBps>=0?'btp-spread-pos':'btp-spread-neg'}">${spBps>=0?'+':''}${Math.round(spBps)} bps</span>`;
+    }
+
+    let badgeHtml='';
+    if(b.special==='idx')  badgeHtml='<span class="btp-badge idx">IDX</span>';
+    else if(b.special==='step') badgeHtml='<span class="btp-badge step">STEP</span>';
+    else if(b.special==='etf')  badgeHtml='<span class="btp-badge etf">ETF</span>';
+
+    const clearBtn=b.mp!=null
+      ?`<button class="sm-btn sec" style="font-size:.65rem;padding:2px 7px" onclick="btp_clearEdit(${idx})">✕ manuale</button>`
+      :'';
+
+    return`<tr class="btp-data-row">
+      <td><span class="btp-name">${b.name}</span>${badgeHtml}</td>
+      <td class="r">${b.coupon!=null?b.coupon.toFixed(2)+'%':'—'}</td>
+      <td>${btp_fmtMat(b.mat)}</td>
+      <td class="r">${priceStr}${manBadge}<button class="btp-edit-btn" onclick="btp_openEdit(${idx})" title="Prezzo manuale">✎</button></td>
+      <td class="r">${pctStr}</td>
+      <td class="r">${ytmStr}</td>
+      <td class="r">${spreadStr}</td>
+    </tr>
+    <tr id="btp-edit-row-${idx}" style="display:none"><td colspan="7" class="btp-edit-row">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:.72rem;color:var(--muted)">Prezzo manuale (clean price):</span>
+        <input id="btp-edit-inp-${idx}" type="number" step="0.01" min="50" max="150" class="btp-edit-inp"
+          value="${b.mp!=null?b.mp:price!=null?price:''}" placeholder="es. 98.50">
+        <button class="sm-btn" onclick="btp_saveEdit(${idx})">Salva</button>
+        ${clearBtn}
+        <button class="sm-btn sec" onclick="btp_closeEdit(${idx})">✕</button>
+      </div>
+    </td></tr>`;
+  }).join('');
+  document.getElementById('btp-tbody').innerHTML=rows;
+}
+
+function btp_openEdit(idx){
+  btpState.bonds.forEach((_,i)=>{
+    if(i!==idx){const r=document.getElementById(`btp-edit-row-${i}`);if(r)r.style.display='none';}
+  });
+  const row=document.getElementById(`btp-edit-row-${idx}`);
+  if(!row)return;
+  const isOpen=row.style.display!=='none';
+  row.style.display=isOpen?'none':'';
+  if(!isOpen)setTimeout(()=>{const i=document.getElementById(`btp-edit-inp-${idx}`);if(i)i.focus();},50);
+}
+function btp_saveEdit(idx){
+  const v=parseFloat(document.getElementById(`btp-edit-inp-${idx}`)?.value);
+  if(isNaN(v)||v<50||v>150)return;
+  btpState.bonds[idx].mp=v;
+  btp_saveState();btp_renderTable();
+}
+function btp_clearEdit(idx){
+  btpState.bonds[idx].mp=null;
+  btp_saveState();btp_renderTable();
+}
+function btp_closeEdit(idx){
+  const r=document.getElementById(`btp-edit-row-${idx}`);if(r)r.style.display='none';
+}
+
+async function btp_fetchOne(ticker){
+  const url=`https://query1.finance.yahoo.com/v8/finance/quote?symbols=${encodeURIComponent(ticker)}&fields=regularMarketPrice,regularMarketChangePercent`;
+  const r=await sm_fetchTimeout(sm_proxied(url),12000);
+  if(!r.ok)throw new Error(r.status);
+  const j=await r.json();
+  const q=j?.quoteResponse?.result?.[0];
+  if(q?.regularMarketPrice==null)throw new Error('no price');
+  return{price:q.regularMarketPrice,pct:q.regularMarketChangePercent??null};
+}
+
+async function btp_fetchAll(){
+  if(btp_fetching)return;
+  btp_fetching=true;
+  const btn=document.getElementById('btp-refreshBtn');
+  if(btn)btn.textContent='⟳ …';
+
+  const results=await Promise.allSettled(btpState.bonds.map(b=>btp_fetchOne(b.yf)));
+  results.forEach((r,i)=>{
+    if(r.status==='fulfilled'){
+      btpState.bonds[i].price=r.value.price;
+      btpState.bonds[i].pct=r.value.pct;
+    }
+  });
+
+  // Fetch BTP 10Y benchmark if Bond/Equity tab hasn't loaded it yet
+  if(typeof bvState==='undefined'||!bvState||bvState.italy?.yield10y==null){
+    try{const b=await btp_fetchOne('^IT10YT=RR');btpState.bench10y=b.price;}catch(e){}
+  }
+
+  btpState.lastFetched=new Date().toISOString();
+  btp_saveState();
+  btp_render();
+  if(btn)btn.textContent='Aggiorna ora';
+  btp_fetching=false;
+  btp_loaded=true;
+}
+
+function btp_render(){
+  btp_renderInfoBar();
+  btp_renderTable();
+  const el=document.getElementById('btp-lastUpdate');
+  if(el&&btpState.lastFetched)el.textContent=new Date(btpState.lastFetched).toLocaleTimeString('it-IT');
+}
+
+function btp_onTabOpen(){
+  if(!btpState)btpState=btp_loadState();
+  btp_render();
+  if(!btp_loaded)btp_fetchAll();
 }
 
 /* ═══════════════════════════════════════════════════════════ */
