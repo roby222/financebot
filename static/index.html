@@ -958,6 +958,8 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 .btp-tbl td{padding:9px 10px;border-top:1px solid var(--border);color:var(--text);white-space:nowrap}
 .btp-tbl td.r{text-align:right;font-variant-numeric:tabular-nums}
 .btp-tbl tr.btp-data-row:hover td{background:rgba(255,255,255,.03)}
+.btp-tbl tr.btp-owned td:first-child{box-shadow:inset 3px 0 0 #388bfd}
+.btp-tbl tr.btp-owned td{background:rgba(56,139,253,.045)}
 .btp-name{font-weight:600;font-size:.78rem;cursor:pointer;color:var(--text);border-bottom:1px dotted transparent}
 .btp-name:hover{color:#58a6ff;border-bottom-color:#58a6ff}
 .btp-isin{font-size:.62rem;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.3px;margin-top:1px}
@@ -1031,6 +1033,11 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
     <span class="btp-info-lbl">CPI Italia</span>
     <span class="btp-info-val" id="btp-cpi-val">—</span>
     <span class="btp-info-sub">inflazione (fonte: Bond/Equity)</span>
+  </div>
+  <div class="btp-info-item">
+    <span class="btp-info-lbl">Le mie posizioni</span>
+    <span class="btp-info-val" id="btp-pos-val">—</span>
+    <span class="btp-info-sub" id="btp-pos-sub">P&L medio vs acquisto</span>
   </div>
 </div>
 
@@ -4747,6 +4754,21 @@ function btp_renderInfoBar(){
 
   const cntEl=document.getElementById('btp-count');
   if(cntEl)cntEl.textContent=btpState.bonds.length;
+
+  // Riepilogo posizioni: titoli con prezzo di acquisto impostato + P&L medio mark-to-market
+  const owned=btpState.bonds.filter(b=>b.ap!=null&&b.price!=null);
+  const posValEl=document.getElementById('btp-pos-val');
+  const posSubEl=document.getElementById('btp-pos-sub');
+  if(posValEl){
+    if(owned.length){
+      const avgPnl=owned.reduce((s,b)=>s+(b.price-b.ap)/b.ap*100,0)/owned.length;
+      posValEl.innerHTML=`${owned.length} <span style="font-size:.72rem;font-weight:600;color:${avgPnl>=0?'#3fb950':'#f85149'}">${avgPnl>=0?'+':''}${avgPnl.toFixed(2)}%</span>`;
+      if(posSubEl)posSubEl.textContent='P&L medio vs acquisto';
+    } else {
+      posValEl.textContent='—';
+      if(posSubEl)posSubEl.textContent='imposta un prezzo di acquisto (✎)';
+    }
+  }
 }
 
 function btp_renderTable(){
@@ -4794,24 +4816,30 @@ function btp_renderTable(){
     }
 
     // Rendimento netto annuo in base al PREZZO DI ACQUISTO impostato dall'utente
+    // + P&L mark-to-market (quotazione attuale vs prezzo di acquisto)
     let acqStr='<span style="color:var(--muted);font-size:.66rem">✎ imposta P.acq.</span>';
     if(b.ap!=null){
-      if(b.special==='etf') acqStr='<span class="btp-ytm-nd">n.a.</span>';
-      else if(b.special==='idx'||b.special==='step') acqStr=`<span class="btp-ytm-nd">variabile</span><br><span style="font-size:.62rem;color:var(--muted)">acq. ${b.ap.toFixed(2)}</span>`;
-      else{
+      const pnl=price!=null?(price-b.ap)/b.ap*100:null;
+      const pnlStr=pnl!=null?` · <span style="color:${pnl>=0?'#3fb950':'#f85149'}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</span>`:'';
+      const subAcq=`<span style="font-size:.62rem;color:var(--muted)">acq. ${b.ap.toFixed(2)}${pnlStr}</span>`;
+      if(b.special==='etf'){
+        acqStr=(pnl!=null?`<span class="btp-net-val ${pnl>=0?'btp-pct-up':'btp-pct-dn'}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</span><br>`:'')
+          +`<span style="font-size:.62rem;color:var(--muted)">acq. ${b.ap.toFixed(2)}</span>`;
+      } else if(b.special==='idx'||b.special==='step'){
+        acqStr=`<span class="btp-ytm-nd">variabile</span><br>${subAcq}`;
+      } else {
         const ny=btp_netYield(b,b.ap);
         if(ny!=null){
           const cls=ny>=0?'btp-pct-up':'btp-pct-dn';
-          acqStr=`<span class="btp-net-val ${cls}">${ny.toFixed(2)}%/anno</span>`
-            +`<br><span style="font-size:.62rem;color:var(--muted)">acq. ${b.ap.toFixed(2)}</span>`;
-        } else acqStr='—';
+          acqStr=`<span class="btp-net-val ${cls}">${ny.toFixed(2)}%/anno</span><br>${subAcq}`;
+        } else acqStr=subAcq;
       }
     }
 
     const clearApBtn=b.ap!=null
       ?`<button class="sm-btn sec" style="font-size:.62rem;padding:2px 6px" onclick="btp_clearAp(${idx})">✕ Rimuovi</button>`:'';
 
-    return`<tr class="btp-data-row">
+    return`<tr class="btp-data-row${b.ap!=null?' btp-owned':''}">
       <td><span class="btp-name" onclick="btp_openChart(${idx})" title="Mostra andamento ${b.name}">${b.name}</span>${badgeHtml}${b.special==='etf'?'':`<div class="btp-isin">${b.id}</div>`}</td>
       <td class="r">${b.coupon!=null?b.coupon.toFixed(2)+'%':'—'}</td>
       <td>${btp_fmtMat(b.mat)}</td>
