@@ -973,7 +973,6 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 .btp-spread-neg{color:#3fb950}
 .btp-edit-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:.74rem;padding:0 3px;margin-left:2px;vertical-align:middle;line-height:1}
 .btp-edit-btn:hover{color:var(--text)}
-.btp-manual-badge{font-size:.58rem;color:#f0883e;background:rgba(240,136,62,.13);border-radius:3px;padding:1px 4px;margin-left:3px;vertical-align:middle}
 .btp-edit-row td{padding:6px 12px!important;background:var(--surface)!important;border-top:none!important}
 .btp-edit-inp{width:88px;padding:4px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.76rem}
 .btp-foot{margin-top:16px;padding-top:12px;border-top:1px solid var(--border);font-size:.63rem;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;line-height:1.5}
@@ -1056,7 +1055,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 </div>
 
 <div class="btp-foot">
-  <div>Prezzi BTP/BTP Italia/BTP Valore: Borsa Italiana MOT via proxy (allorigins/corsproxy). ETF cash: Yahoo Finance. <b>Rend. netto ora</b> = rendimento netto annuo a scadenza comprando oggi al prezzo di mercato (YTM × 0,875). <b>Rend. netto acq.</b> = rendimento netto annuo in base al tuo prezzo di acquisto (✎ per impostarlo). Imposta sostitutiva 12,5% sui titoli di Stato. Clicca un'intestazione per ordinare. IDX/STEP: rendimento non calcolabile con formula fissa. M = prezzo manuale.</div>
+  <div>Prezzi BTP/BTP Italia/BTP Valore: Borsa Italiana MOT via proxy (allorigins/corsproxy). ETF cash: Yahoo Finance. <b>Rend. netto ora</b> = rendimento netto annuo a scadenza comprando oggi al prezzo di mercato (YTM × 0,875). <b>Rend. netto acq.</b> = rendimento netto annuo in base al tuo prezzo di acquisto (✎ per impostarlo). Imposta sostitutiva 12,5% sui titoli di Stato. Clicca un'intestazione per ordinare. IDX/STEP: rendimento non calcolabile con formula fissa.</div>
   <div>Stato salvato in localStorage — nessun dato sul server.</div>
 </div>
 </div>
@@ -4615,19 +4614,19 @@ const btp_PROXIES=[
 const btp_DEFAULTS={
   _v:2,lastFetched:null,bench10y:null,spreadBund:null,
   bonds:[
-    {id:'IT0005668238',name:'BTP 4.65% Ott55', coupon:4.65,mat:'2055-10-01',yf:'IT0005668238.TI',price:null,pct:null,mp:null,ap:null},
-    {id:'IT0005648255',name:'BTP Italia Giu32', coupon:null,mat:'2032-06-04',yf:'IT0005648255.TI',price:null,pct:null,mp:null,ap:null,special:'idx'},
-    {id:'IT0005647265',name:'BTP 3.25% Lug32',  coupon:3.25,mat:'2032-07-15',yf:'IT0005647265.TI',price:null,pct:null,mp:null,ap:null},
-    {id:'IT0005534141',name:'BTP 4.5% Ott53',   coupon:4.50,mat:'2053-10-01',yf:'IT0005534141.TI',price:null,pct:null,mp:null,ap:null},
-    {id:'IT0005611741',name:'BTP 4.3% Ott54',   coupon:4.30,mat:'2054-10-01',yf:'IT0005611741.TI',price:null,pct:null,mp:null,ap:null},
-    {id:'C3M',         name:'Amundi Cash 3M',    coupon:null,mat:null,        yf:'C3M.MI',         price:null,pct:null,mp:null,ap:null,special:'etf'},
-    {id:'IT0005497000',name:'BTP Italia Giu30',  coupon:null,mat:'2030-06-28',yf:'IT0005497000.TI',price:null,pct:null,mp:null,ap:null,special:'idx'},
-    {id:'IT0005672024',name:'BTP Valore Ott32',  coupon:null,mat:'2032-10-28',yf:'IT0005672024.TI',price:null,pct:null,mp:null,ap:null,special:'step'},
-    {id:'IT0005518128',name:'BTP 4.4% Mag33',    coupon:4.40,mat:'2033-05-01',yf:'IT0005518128.TI',price:null,pct:null,mp:null,ap:null},
-    {id:'IT0005696338',name:'BTP Valore Mar32',  coupon:null,mat:'2032-03-10',yf:'IT0005696338.TI',price:null,pct:null,mp:null,ap:null,special:'step'},
-    {id:'IT0003256820',name:'BTP 5.75% Feb33',   coupon:5.75,mat:'2033-02-01',yf:'IT0003256820.TI',price:null,pct:null,mp:null,ap:null},
-    {id:'IT0005560948',name:'BTP 4.2% Mar34',    coupon:4.20,mat:'2034-03-01',yf:'IT0005560948.TI',price:null,pct:null,mp:null,ap:null},
-    {id:'IT0005445306',name:'BTP 0.5% Lug28',    coupon:0.50,mat:'2028-07-15',yf:'IT0005445306.TI',price:null,pct:null,mp:null,ap:null},
+    {id:'IT0005668238',name:'BTP 4.65% Ott55', coupon:4.65,mat:'2055-10-01',yf:'IT0005668238.TI',price:null,pct:null,ap:null},
+    {id:'IT0005648255',name:'BTP Italia Giu32', coupon:null,mat:'2032-06-04',yf:'IT0005648255.TI',price:null,pct:null,ap:null,special:'idx'},
+    {id:'IT0005647265',name:'BTP 3.25% Lug32',  coupon:3.25,mat:'2032-07-15',yf:'IT0005647265.TI',price:null,pct:null,ap:null},
+    {id:'IT0005534141',name:'BTP 4.5% Ott53',   coupon:4.50,mat:'2053-10-01',yf:'IT0005534141.TI',price:null,pct:null,ap:null},
+    {id:'IT0005611741',name:'BTP 4.3% Ott54',   coupon:4.30,mat:'2054-10-01',yf:'IT0005611741.TI',price:null,pct:null,ap:null},
+    {id:'C3M',         name:'Amundi Cash 3M',    coupon:null,mat:null,        yf:'C3M.MI',         price:null,pct:null,ap:null,special:'etf'},
+    {id:'IT0005497000',name:'BTP Italia Giu30',  coupon:null,mat:'2030-06-28',yf:'IT0005497000.TI',price:null,pct:null,ap:null,special:'idx'},
+    {id:'IT0005672024',name:'BTP Valore Ott32',  coupon:null,mat:'2032-10-28',yf:'IT0005672024.TI',price:null,pct:null,ap:null,special:'step'},
+    {id:'IT0005518128',name:'BTP 4.4% Mag33',    coupon:4.40,mat:'2033-05-01',yf:'IT0005518128.TI',price:null,pct:null,ap:null},
+    {id:'IT0005696338',name:'BTP Valore Mar32',  coupon:null,mat:'2032-03-10',yf:'IT0005696338.TI',price:null,pct:null,ap:null,special:'step'},
+    {id:'IT0003256820',name:'BTP 5.75% Feb33',   coupon:5.75,mat:'2033-02-01',yf:'IT0003256820.TI',price:null,pct:null,ap:null},
+    {id:'IT0005560948',name:'BTP 4.2% Mar34',    coupon:4.20,mat:'2034-03-01',yf:'IT0005560948.TI',price:null,pct:null,ap:null},
+    {id:'IT0005445306',name:'BTP 0.5% Lug28',    coupon:0.50,mat:'2028-07-15',yf:'IT0005445306.TI',price:null,pct:null,ap:null},
   ]
 };
 let btpState=null,btp_fetching=false,btp_loaded=false;
@@ -4658,7 +4657,7 @@ function btp_ytmAt(bond,price){
 }
 // YTM al prezzo di mercato corrente (mp override se presente)
 function btp_ytm(bond){
-  return btp_ytmAt(bond,bond.mp!=null?bond.mp:bond.price);
+  return btp_ytmAt(bond,bond.price);
 }
 
 function btp_fmtMat(mat){
@@ -4674,7 +4673,7 @@ function btp_netYield(bond,price){
 
 // ── ORDINAMENTO ──────────────────────────────────────────────
 function btp_sortKey(b,col){
-  const price=b.mp!=null?b.mp:b.price;
+  const price=b.price;
   switch(col){
     case'name':   return b.name.toLowerCase();
     case'coupon': return b.coupon;
@@ -4709,7 +4708,7 @@ function btp_benchmark10Y(){
   const pts=[];
   btpState.bonds.forEach(b=>{
     if(b.special||!b.coupon||!b.mat)return;
-    const price=b.mp!=null?b.mp:b.price;
+    const price=b.price;
     if(price==null)return;
     const years=(new Date(b.mat)-new Date())/(1000*60*60*24*365.25);
     const y=btp_ytmAt(b,price);
@@ -4754,11 +4753,10 @@ function btp_renderTable(){
   const bench10y=btp_benchmark10Y();
 
   const rows=btpState.bonds.map((b,idx)=>{
-    const price=b.mp!=null?b.mp:b.price;
+    const price=b.price;
     const priceStr=price!=null
       ?`${price.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2})}`
       :'<span style="color:var(--muted);font-style:italic;font-size:.7rem">…</span>';
-    const manBadge=b.mp!=null?'<span class="btp-manual-badge">M</span>':'';
     const pctStr=b.pct!=null
       ?`<span class="${b.pct>=0?'btp-pct-up':'btp-pct-dn'}">${b.pct>=0?'+':''}${b.pct.toFixed(2)}%</span>`
       :'—';
@@ -4810,16 +4808,14 @@ function btp_renderTable(){
       }
     }
 
-    const clearBtn=b.mp!=null
-      ?`<button class="sm-btn sec" style="font-size:.62rem;padding:2px 6px" onclick="btp_clearEdit(${idx})">✕ P.man</button>`:'';
     const clearApBtn=b.ap!=null
-      ?`<button class="sm-btn sec" style="font-size:.62rem;padding:2px 6px" onclick="btp_clearAp(${idx})">✕ P.acq</button>`:'';
+      ?`<button class="sm-btn sec" style="font-size:.62rem;padding:2px 6px" onclick="btp_clearAp(${idx})">✕ Rimuovi</button>`:'';
 
     return`<tr class="btp-data-row">
       <td><span class="btp-name" onclick="btp_openChart(${idx})" title="Mostra andamento ${b.name}">${b.name}</span>${badgeHtml}${b.special==='etf'?'':`<div class="btp-isin">${b.id}</div>`}</td>
       <td class="r">${b.coupon!=null?b.coupon.toFixed(2)+'%':'—'}</td>
       <td>${btp_fmtMat(b.mat)}</td>
-      <td class="r">${priceStr}${manBadge}<button class="btp-edit-btn" onclick="btp_openEdit(${idx})" title="Prezzo acquisto / manuale">✎</button></td>
+      <td class="r">${priceStr}<button class="btp-edit-btn" onclick="btp_openEdit(${idx})" title="Imposta prezzo di acquisto">✎</button></td>
       <td class="r">${pctStr}</td>
       <td class="r">${ytmStr}</td>
       <td class="r">${spreadStr}</td>
@@ -4828,21 +4824,12 @@ function btp_renderTable(){
       <td class="c"><button class="btp-del-btn" onclick="btp_removeBond(${idx})" title="Elimina ${b.name}">✕</button></td>
     </tr>
     <tr id="btp-edit-row-${idx}" style="display:none"><td colspan="10" class="btp-edit-row">
-      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
-        <div style="display:flex;gap:6px;align-items:center">
-          <span style="font-size:.72rem;color:var(--muted);white-space:nowrap">💶 Prezzo acquisto:</span>
-          <input id="btp-ap-inp-${idx}" type="number" step="0.01" min="50" max="150" class="btp-edit-inp"
-            value="${b.ap!=null?b.ap:''}" placeholder="es. 97.00">
-          <button class="sm-btn" onclick="btp_saveAp(${idx})">Salva</button>
-          ${clearApBtn}
-        </div>
-        <div style="display:flex;gap:6px;align-items:center;border-left:1px solid var(--border);padding-left:14px">
-          <span style="font-size:.72rem;color:var(--muted);white-space:nowrap">Prezzo manuale (override):</span>
-          <input id="btp-edit-inp-${idx}" type="number" step="0.01" min="50" max="150" class="btp-edit-inp"
-            value="${b.mp!=null?b.mp:''}" placeholder="es. 98.50">
-          <button class="sm-btn" onclick="btp_saveEdit(${idx})">Salva</button>
-          ${clearBtn}
-        </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:.72rem;color:var(--muted);white-space:nowrap">💶 Prezzo di acquisto:</span>
+        <input id="btp-ap-inp-${idx}" type="number" step="0.01" min="50" max="150" class="btp-edit-inp"
+          value="${b.ap!=null?b.ap:''}" placeholder="es. 97.00">
+        <button class="sm-btn" onclick="btp_saveAp(${idx})">Salva</button>
+        ${clearApBtn}
         <button class="sm-btn sec" onclick="btp_closeEdit(${idx})" style="margin-left:auto">✕</button>
       </div>
     </td></tr>`;
@@ -4863,16 +4850,6 @@ function btp_openEdit(idx){
   const isOpen=row.style.display!=='none';
   row.style.display=isOpen?'none':'';
   if(!isOpen)setTimeout(()=>{const i=document.getElementById(`btp-ap-inp-${idx}`);if(i)i.focus();},50);
-}
-function btp_saveEdit(idx){
-  const v=parseFloat(document.getElementById(`btp-edit-inp-${idx}`)?.value);
-  if(isNaN(v)||v<50||v>150)return;
-  btpState.bonds[idx].mp=v;
-  btp_saveState();btp_renderTable();
-}
-function btp_clearEdit(idx){
-  btpState.bonds[idx].mp=null;
-  btp_saveState();btp_renderTable();
 }
 function btp_saveAp(idx){
   const v=parseFloat(document.getElementById(`btp-ap-inp-${idx}`)?.value);
@@ -4908,7 +4885,7 @@ function btp_addBond(){
   if(!name)return showErr('Inserisci un nome per il titolo.');
   if(btpState.bonds.some(b=>b.id===isin))return showErr('Titolo già presente in lista.');
   const bond={id:isin,name,coupon:isNaN(coupon)?null:coupon,mat,
-    yf:type==='etf'?isin:isin+'.TI',price:null,pct:null,mp:null,ap:null};
+    yf:type==='etf'?isin:isin+'.TI',price:null,pct:null,ap:null};
   if(type)bond.special=type;
   btpState.bonds.push(bond);
   btp_saveState();
@@ -4955,7 +4932,7 @@ function btp_openChart(idx){
   document.getElementById('detail-ticker').textContent=b.name;
   document.getElementById('detail-etfname').textContent=b.special==='etf'?'ETF':b.id;
   document.getElementById('detail-driver-badge').textContent='';
-  const price=b.mp!=null?b.mp:b.price;
+  const price=b.price;
   document.getElementById('detail-price').textContent=price!=null?price.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
   const pctEl=document.getElementById('detail-pct');
   if(b.pct!=null){pctEl.textContent=(b.pct>=0?'+':'')+b.pct.toFixed(2)+'%';pctEl.className='detail-pct '+(b.pct>=0?'up':'down');}
@@ -4967,7 +4944,7 @@ function btp_openChart(idx){
   btp_loadChart();
 }
 function btp_renderChartStats(b){
-  const price=b.mp!=null?b.mp:b.price;
+  const price=b.price;
   const ytm=btp_ytm(b),net=btp_netYield(b,price);
   const rows=[
     {l:'Cedola',v:b.coupon!=null?b.coupon.toFixed(2)+'%':'—'},
