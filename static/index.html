@@ -981,7 +981,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 <div class="btp-hdr">
   <div>
     <h2>🏛️ BTP Italia — Monitoraggio portafoglio</h2>
-    <div class="btp-hdr-sub">13 titoli · prezzi live via Yahoo Finance · YTM approssimato (formula lineare)</div>
+    <div class="btp-hdr-sub">13 titoli · prezzi live via Borsa Italiana MOT · gain netto 12,5% · YTM approssimato</div>
   </div>
   <div class="btp-meta">
     <span>Agg: <span id="btp-lastUpdate">—</span></span>
@@ -1018,6 +1018,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
         <th class="r">Var%</th>
         <th class="r">YTM</th>
         <th class="r">Spread vs 10Y</th>
+        <th class="r">Gain netto</th>
       </tr>
     </thead>
     <tbody id="btp-tbody"></tbody>
@@ -1025,7 +1026,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 </div>
 
 <div class="btp-foot">
-  <div>Prezzi: Yahoo Finance via proxy Cloudflare Worker (ticker formato ISIN.TI). YTM = (cedola + (100−P)/anni) / ((100+P)/2) — approssimazione lineare, senza tassazione. IDX = indicizzato CPI, STEP = step-up: YTM non calcolabile con formula fissa. M = prezzo inserito manualmente.</div>
+  <div>Prezzi BTP/BTP Italia/BTP Valore: Borsa Italiana MOT (dati-completi) via proxy. ETF cash: Yahoo Finance. Gain netto = (100−P)×0,875 al rimborso — imposta sostitutiva 12,5% titoli di Stato italiani. YTM = (cedola + (100−P)/anni) / ((100+P)/2). IDX/STEP: YTM non calcolabile. M = prezzo manuale.</div>
   <div>Stato salvato in localStorage — nessun dato sul server.</div>
 </div>
 </div>
@@ -4685,9 +4686,29 @@ function btp_renderTable(){
     else if(b.special==='step') badgeHtml='<span class="btp-badge step">STEP</span>';
     else if(b.special==='etf')  badgeHtml='<span class="btp-badge etf">ETF</span>';
 
+    // Gain netto: se compro oggi al prezzo corrente
+    // - Plusvalenza netta: (100 - prezzo) × 0.875  (rimborso a 100 meno prezzo, dedotta imposta 12.5%)
+    // - YTM netto: rendimento annuo totale al netto del 12.5%
+    let gainStr='—';
+    if(b.special==='etf') gainStr='<span class="btp-ytm-nd">n.a.</span>';
+    else if(price==null) gainStr='<span style="color:var(--muted);font-style:italic;font-size:.7rem">…</span>';
+    else{
+      const capGross=100-price;           // plusvalenza/minusvalenza da rimborso a 100
+      const capNet=capGross*0.875;        // netto 12.5% imposta sostitutiva
+      const ytmNet=ytm!=null?ytm*0.875:null;
+      const capCls=capGross>=0?'btp-pct-up':'btp-pct-dn';
+      const sign=capGross>=0?'+':'';
+      const capLine=`<span class="${capCls}" style="font-weight:600">${sign}${capNet.toFixed(2)} pp</span>`;
+      const subLine=b.special==='idx'||b.special==='step'
+        ?'<span style="font-size:.63rem;color:var(--muted)">cap. netto</span>'
+        :ytmNet!=null
+          ?`<span style="font-size:.63rem;color:var(--muted)">YTM netto: ${ytmNet.toFixed(2)}%/a</span>`
+          :'';
+      gainStr=capLine+(subLine?'<br>'+subLine:'');
+    }
+
     const clearBtn=b.mp!=null
-      ?`<button class="sm-btn sec" style="font-size:.65rem;padding:2px 7px" onclick="btp_clearEdit(${idx})">✕ manuale</button>`
-      :'';
+      ?`<button class="sm-btn sec" style="font-size:.65rem;padding:2px 7px" onclick="btp_clearEdit(${idx})">✕ manuale</button>`:'';
 
     return`<tr class="btp-data-row">
       <td><span class="btp-name">${b.name}</span>${badgeHtml}</td>
@@ -4697,8 +4718,9 @@ function btp_renderTable(){
       <td class="r">${pctStr}</td>
       <td class="r">${ytmStr}</td>
       <td class="r">${spreadStr}</td>
+      <td class="r">${gainStr}</td>
     </tr>
-    <tr id="btp-edit-row-${idx}" style="display:none"><td colspan="7" class="btp-edit-row">
+    <tr id="btp-edit-row-${idx}" style="display:none"><td colspan="8" class="btp-edit-row">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <span style="font-size:.72rem;color:var(--muted)">Prezzo manuale (clean price):</span>
         <input id="btp-edit-inp-${idx}" type="number" step="0.01" min="50" max="150" class="btp-edit-inp"
@@ -4736,14 +4758,32 @@ function btp_closeEdit(idx){
   const r=document.getElementById(`btp-edit-row-${idx}`);if(r)r.style.display='none';
 }
 
-async function btp_fetchOne(ticker){
-  const url=`https://query1.finance.yahoo.com/v8/finance/quote?symbols=${encodeURIComponent(ticker)}&fields=regularMarketPrice,regularMarketChangePercent`;
+// Borsa Italiana HTML scraping — per tutti i BTP/BTP Italia/BTP Valore
+async function btp_fetchBI(isin){
+  const url=`https://www.borsaitaliana.it/borsa/obbligazioni/mot/btp/dati-completi.html?isin=${isin}&mic=MOTX&lang=it`;
+  const r=await sm_fetchTimeout(sm_proxied(url),20000);
+  if(!r.ok)throw new Error('BI HTTP '+r.status);
+  const html=await r.text();
+  const pm=html.match(/Prezzo\s+Ultimo\s+Contratto[\s\S]{0,500}?(\d{2,3}[,\.]\d{2,4})/);
+  const vm=html.match(/Var\s*%[\s\S]{0,500}?(-?\d+[,\.]\d+)/);
+  if(!pm)throw new Error('price not found: '+isin);
+  return{
+    price:parseFloat(pm[1].replace(',','.')),
+    pct:vm?parseFloat(vm[1].replace(',','.')):null
+  };
+}
+
+// Yahoo Finance chart API — per C3M.MI (ETF, non BTP)
+async function btp_fetchYF(ticker){
+  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=1d`;
   const r=await sm_fetchTimeout(sm_proxied(url),12000);
-  if(!r.ok)throw new Error(r.status);
+  if(!r.ok)throw new Error('YF HTTP '+r.status);
   const j=await r.json();
-  const q=j?.quoteResponse?.result?.[0];
-  if(q?.regularMarketPrice==null)throw new Error('no price');
-  return{price:q.regularMarketPrice,pct:q.regularMarketChangePercent??null};
+  const meta=j?.chart?.result?.[0]?.meta;
+  const price=meta?.regularMarketPrice;
+  if(price==null)throw new Error('no price');
+  const prev=meta?.chartPreviousClose;
+  return{price,pct:(prev&&price)?((price-prev)/prev*100):null};
 }
 
 async function btp_fetchAll(){
@@ -4752,7 +4792,10 @@ async function btp_fetchAll(){
   const btn=document.getElementById('btp-refreshBtn');
   if(btn)btn.textContent='⟳ …';
 
-  const results=await Promise.allSettled(btpState.bonds.map(b=>btp_fetchOne(b.yf)));
+  // ETF usa Yahoo Finance, BTP usa Borsa Italiana
+  const results=await Promise.allSettled(btpState.bonds.map(b=>
+    b.special==='etf' ? btp_fetchYF(b.yf) : btp_fetchBI(b.id)
+  ));
   results.forEach((r,i)=>{
     if(r.status==='fulfilled'){
       btpState.bonds[i].price=r.value.price;
@@ -4760,9 +4803,9 @@ async function btp_fetchAll(){
     }
   });
 
-  // Fetch BTP 10Y benchmark if Bond/Equity tab hasn't loaded it yet
+  // Benchmark BTP 10Y via Yahoo Finance (funziona già in Bond/Equity tab)
   if(typeof bvState==='undefined'||!bvState||bvState.italy?.yield10y==null){
-    try{const b=await btp_fetchOne('^IT10YT=RR');btpState.bench10y=b.price;}catch(e){}
+    try{btpState.bench10y=await bv_fetchOne('^IT10YT=RR');}catch(e){}
   }
 
   btpState.lastFetched=new Date().toISOString();
