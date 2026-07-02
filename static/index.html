@@ -4612,10 +4612,10 @@ function bv_onTabOpen(){
    BTP ITALIA TAB
 ═══════════════════════════════════════════════════════════ */
 const btp_STORAGE='btp_italia_v1';
-// Proxy CORS con fallback: allorigins primario (regge Borsa Italiana), poi corsproxy, poi codetabs
+// Proxy CORS con fallback: corsproxy primario (~200ms per pagina), poi allorigins, poi codetabs
 const btp_PROXIES=[
-  t=>'https://api.allorigins.win/raw?url='+encodeURIComponent(t),
   t=>'https://corsproxy.io/?'+encodeURIComponent(t),
+  t=>'https://api.allorigins.win/raw?url='+encodeURIComponent(t),
   t=>'https://api.codetabs.com/v1/proxy/?quest='+encodeURIComponent(t),
 ];
 const btp_DEFAULTS={
@@ -5047,12 +5047,12 @@ async function btp_loadChart(){
   }
 }
 
-// fetch con fallback su lista proxy — prova ciascuno finché uno risponde
+// fetch con fallback su lista proxy — prova ciascuno finché uno risponde (timeout 8s per tentativo)
 async function btp_proxiedText(target){
   let lastErr;
   for(const mk of btp_PROXIES){
     try{
-      const r=await sm_fetchTimeout(mk(target),18000);
+      const r=await fetch(mk(target),{signal:AbortSignal.timeout(8000)});
       if(!r.ok){lastErr=new Error('HTTP '+r.status);continue;}
       return await r.text();
     }catch(e){lastErr=e;}
@@ -5062,7 +5062,8 @@ async function btp_proxiedText(target){
 
 // Borsa Italiana HTML scraping — per tutti i BTP/BTP Italia/BTP Valore
 async function btp_fetchBI(isin){
-  const target=`https://www.borsaitaliana.it/borsa/obbligazioni/mot/btp/dati-completi.html?isin=${isin}&mic=MOTX&lang=it`;
+  // cache-buster: evita risposte stantie dei proxy (prezzo live "ultimo contratto")
+  const target=`https://www.borsaitaliana.it/borsa/obbligazioni/mot/btp/dati-completi.html?isin=${isin}&mic=MOTX&lang=it&_=${Date.now()}`;
   const html=await btp_proxiedText(target);
   const pm=html.match(/Prezzo\s+Ultimo\s+Contratto[\s\S]{0,500}?(\d{2,3}[,\.]\d{2,4})/);
   const vm=html.match(/Var\s*%[\s\S]{0,500}?(-?\d+[,\.]\d+)/);
@@ -5101,9 +5102,8 @@ async function btp_fetchAll(){
   if(btn)btn.textContent='⟳ …';
 
   // ETF usa Yahoo Finance, BTP usa Borsa Italiana.
-  // Concorrenza 2 con fallback proxy per non saturare (allorigins rate-limita a conc. alta).
-  // Snapshot dell'array e assegnazione per RIFERIMENTO all'oggetto: così un
-  // ordinamento/aggiunta/rimozione durante il fetch non scombina i prezzi.
+  // Concorrenza 5 (corsproxy è ~200ms/pagina). Snapshot dell'array e assegnazione per
+  // RIFERIMENTO all'oggetto: un ordinamento/aggiunta/rimozione durante il fetch non scombina i prezzi.
   const snapshot=btpState.bonds.slice();
   let done=0;const total=snapshot.length;
   await pMap(snapshot,async(b)=>{
@@ -5115,7 +5115,7 @@ async function btp_fetchAll(){
     done++;
     if(btn)btn.textContent=`⟳ ${done}/${total}`;
     if(done%3===0)btp_renderTable();  // progressivo
-  },2);
+  },5);
 
   // Spread BTP-Bund 10Y da Teleborsa (il rendimento 10Y è interpolato dai bond)
   try{btpState.spreadBund=await btp_fetchSpread();}catch(e){}
