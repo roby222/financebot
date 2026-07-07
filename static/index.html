@@ -383,11 +383,11 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
   </div>
   <div class="header-right">
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('signals')" data-i18n="tab_signals">📈 Segnali</button>
+      <button class="tab-btn active" onclick="switchTab('signals')" data-i18n="tab_signals">📈 ETF</button>
+      <button class="tab-btn" onclick="switchTab('btp')" data-i18n="tab_btp">🏛️ BTP</button>
       <button class="tab-btn" onclick="switchTab('semis')" data-i18n="tab_semis">🔬 Semis</button>
       <button class="tab-btn" onclick="switchTab('macro')" data-i18n="tab_macro">🌍 Macro</button>
       <button class="tab-btn" onclick="switchTab('bond')" data-i18n="tab_bond">💰 Bond/Equity</button>
-      <button class="tab-btn" onclick="switchTab('btp')" data-i18n="tab_btp">🏛️ BTP</button>
     </div>
     <div class="status-info">
       <div class="dot"></div>
@@ -1360,7 +1360,7 @@ let LANG = (() => { try { return localStorage.getItem('fpb_lang') || BROWSER_LAN
 
 const STRINGS = {
   it: {
-    tab_signals:'📈 Segnali', tab_semis:'🔬 Semis', tab_macro:'🌍 Macro', tab_bond:'💰 Bond/Equity', tab_btp:'🏛️ BTP',
+    tab_signals:'📈 ETF', tab_semis:'🔬 Semis', tab_macro:'🌍 Macro', tab_bond:'💰 Bond/Equity', tab_btp:'🏛️ BTP',
     // macro monitor
     mc_title:'🌍 Macro Indicators', mc_subtitle:'Commodity e macro — contesto globale per le thesis',
     mc_desc:'Indicatori commodity indipendenti dalla tesi semis. Il rame è un proxy della domanda AI infra a livello fisico.',
@@ -1546,7 +1546,7 @@ const STRINGS = {
 <div class="help-callout"><strong>⚠️ Avvertenze:</strong> I dati vengono da Yahoo Finance tramite proxy — possibili ritardi fino a 15 minuti. I segnali sono <strong>puramente indicativi</strong> e non costituiscono consulenza finanziaria.</div>`,
   },
   en: {
-    tab_signals:'📈 Signals', tab_semis:'🔬 Semis', tab_macro:'🌍 Macro', tab_bond:'💰 Bond/Equity', tab_btp:'🏛️ BTP',
+    tab_signals:'📈 ETF', tab_semis:'🔬 Semis', tab_macro:'🌍 Macro', tab_bond:'💰 Bond/Equity', tab_btp:'🏛️ BTP',
     // macro monitor
     mc_title:'🌍 Macro Indicators', mc_subtitle:'Commodity & macro — global context for theses',
     mc_desc:'Commodity indicators independent from the semis thesis. Copper is a physical-layer proxy for AI infra demand.',
@@ -2661,7 +2661,7 @@ function render() {
 
 function switchTab(tab) {
   currentTab = tab;
-  const tabs = ['signals','semis','macro','bond','btp'];
+  const tabs = ['signals','btp','semis','macro','bond'];
   document.querySelectorAll('.tab-btn').forEach((b,i)=>{
     b.classList.toggle('active', tabs[i]===tab);
   });
