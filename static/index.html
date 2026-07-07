@@ -76,39 +76,11 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 .view{max-width:1440px;margin:0 auto;display:none}
 .view.active{display:block}
 
-/* ── CARDS ── */
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;position:relative;transition:.2s;animation:fadeIn .3s ease}
-.card:hover{border-color:#30363d;transform:translateY(-1px)}
-@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
-.card-id{flex:1;min-width:0}
-.card-short{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
-.card-name{font-size:.9rem;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card-yf{font-size:.68rem;color:var(--muted);margin-top:2px}
-.card-actions{display:flex;align-items:center;gap:5px;flex-shrink:0}
 .mkt-badge{font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.3px;text-transform:uppercase}
 .mkt-open{background:var(--green-bg);color:var(--green)}
 .mkt-pre,.mkt-post{background:var(--orange-bg);color:var(--orange)}
 .mkt-closed{background:rgba(139,148,158,.12);color:var(--muted)}
-.del-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 4px;border-radius:5px;line-height:1;transition:.15s}
-.del-btn:hover{color:var(--red);background:var(--red-bg)}
-.card-price-row{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
-.card-price{font-size:1.65rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
-.badge-ccy{background:rgba(88,166,255,.12);color:var(--accent);border-radius:5px;padding:1px 6px;font-size:.67rem;font-weight:600}
-.card-chg{display:inline-flex;align-items:center;gap:4px;font-size:.8rem;font-weight:600;padding:2px 8px;border-radius:20px;margin-bottom:12px}
 .up{color:var(--green);background:var(--green-bg)}.down{color:var(--red);background:var(--red-bg)}.flat{color:var(--muted);background:rgba(139,148,158,.1)}
-.card-stats{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;border-top:1px solid var(--border);padding-top:10px}
-.stat{display:flex;flex-direction:column;gap:1px}
-.stat-label{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
-.stat-value{font-size:.78rem;font-variant-numeric:tabular-nums}
-.range-row{grid-column:1/-1;display:flex;flex-direction:column;gap:3px}
-.range-labels{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted)}
-.range-bar{height:4px;background:var(--border);border-radius:2px;position:relative}
-.range-fill{position:absolute;height:100%;border-radius:2px;background:linear-gradient(90deg,var(--red),var(--green))}
-.range-dot{position:absolute;top:50%;width:7px;height:7px;background:#fff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 2px var(--surface)}
-.card.loading .card-price{background:var(--border);border-radius:4px;color:transparent;animation:shimmer 1.4s infinite}
-@keyframes shimmer{0%{opacity:.4}50%{opacity:.8}100%{opacity:.4}}
 
 /* ── SIGNALS TABLE ── */
 .signals-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:auto}
@@ -196,9 +168,6 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 .ct-chg{display:inline-flex;align-items:center;gap:3px;font-size:.76rem;font-weight:600;padding:2px 7px;border-radius:20px;white-space:nowrap}
 
 /* ── EMPTY ── */
-.empty{max-width:600px;margin:60px auto;text-align:center;color:var(--muted)}
-.empty svg{width:44px;height:44px;margin-bottom:14px;opacity:.35}
-.empty h2{font-size:1rem;margin-bottom:6px}
 
 /* ── TOAST ── */
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:30px;font-size:.82rem;transition:.25s;pointer-events:none;z-index:100;white-space:nowrap}
@@ -372,9 +341,6 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
   .macro-section{flex-wrap:nowrap;flex-shrink:0}
   .macro-lbl,.sep{display:none}
 
-  /* cards: colonna singola */
-  .cards-grid{grid-template-columns:1fr}
-
   /* tabella segnali: già scrollabile, riduco padding celle */
   .signals-table td,.signals-table th{padding:6px 5px}
   .signals-table{font-size:.75rem}
@@ -417,7 +383,6 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
   </div>
   <div class="header-right">
     <div class="tabs">
-      <button class="tab-btn" onclick="switchTab('cards')" data-i18n="tab_live">📊 Live</button>
       <button class="tab-btn active" onclick="switchTab('signals')" data-i18n="tab_signals">📈 Segnali</button>
       <button class="tab-btn" onclick="switchTab('semis')" data-i18n="tab_semis">🔬 Semis</button>
       <button class="tab-btn" onclick="switchTab('macro')" data-i18n="tab_macro">🌍 Macro</button>
@@ -454,14 +419,6 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
   </div>
 </div>
 
-<!-- CARDS -->
-<div id="view-cards" class="view">
-  <div id="cards-grid" class="cards-grid"></div>
-  <div id="cards-empty" class="empty" style="display:none">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-    <h2 data-i18n="empty_title">Nessun titolo</h2>
-  </div>
-</div>
 
 <!-- MACRO BAR (always visible) -->
 <div class="macro-bar" id="macro-bar">
@@ -1403,7 +1360,7 @@ let LANG = (() => { try { return localStorage.getItem('fpb_lang') || BROWSER_LAN
 
 const STRINGS = {
   it: {
-    tab_live:'📊 Live', tab_signals:'📈 Segnali', tab_semis:'🔬 Semis', tab_macro:'🌍 Macro', tab_bond:'💰 Bond/Equity', tab_btp:'🏛️ BTP',
+    tab_signals:'📈 Segnali', tab_semis:'🔬 Semis', tab_macro:'🌍 Macro', tab_bond:'💰 Bond/Equity', tab_btp:'🏛️ BTP',
     // macro monitor
     mc_title:'🌍 Macro Indicators', mc_subtitle:'Commodity e macro — contesto globale per le thesis',
     mc_desc:'Indicatori commodity indipendenti dalla tesi semis. Il rame è un proxy della domanda AI infra a livello fisico.',
@@ -1442,7 +1399,6 @@ const STRINGS = {
     add_btn:'+ Aggiungi',
     export_btn:'⬇ Esporta lista', export_title:'Scarica la tua lista personalizzata',
     import_btn:'⬆ Importa lista', import_title:'Ripristina lista da file',
-    empty_title:'Nessun titolo',
     macro_lbl:'Macro', scen_lbl:'Scenario',
     scen_neutro:'⚖️ Neutro', scen_volatile:'😵 Volatile',
     scen_escalation:'🔥 Escalation', scen_tregua:'🕊️ De-escalation',
@@ -1590,7 +1546,7 @@ const STRINGS = {
 <div class="help-callout"><strong>⚠️ Avvertenze:</strong> I dati vengono da Yahoo Finance tramite proxy — possibili ritardi fino a 15 minuti. I segnali sono <strong>puramente indicativi</strong> e non costituiscono consulenza finanziaria.</div>`,
   },
   en: {
-    tab_live:'📊 Live', tab_signals:'📈 Signals', tab_semis:'🔬 Semis', tab_macro:'🌍 Macro', tab_bond:'💰 Bond/Equity', tab_btp:'🏛️ BTP',
+    tab_signals:'📈 Signals', tab_semis:'🔬 Semis', tab_macro:'🌍 Macro', tab_bond:'💰 Bond/Equity', tab_btp:'🏛️ BTP',
     // macro monitor
     mc_title:'🌍 Macro Indicators', mc_subtitle:'Commodity & macro — global context for theses',
     mc_desc:'Commodity indicators independent from the semis thesis. Copper is a physical-layer proxy for AI infra demand.',
@@ -1630,7 +1586,6 @@ const STRINGS = {
     add_btn:'+ Add',
     export_btn:'⬇ Export list', export_title:'Download your custom watchlist',
     import_btn:'⬆ Import list', import_title:'Restore list from file',
-    empty_title:'No instruments',
     macro_lbl:'Macro', scen_lbl:'Scenario',
     scen_neutro:'⚖️ Neutral', scen_volatile:'😵 Volatile',
     scen_escalation:'🔥 Escalation', scen_tregua:'🕊️ De-escalation',
@@ -1824,7 +1779,6 @@ function applyI18n() {
   // re-render dynamic tables if already loaded
   if (typeof renderSignalsTable === 'function') renderSignalsTable();
   if (typeof renderCompact === 'function') renderCompact();
-  if (typeof renderCards === 'function') renderCards();
   if (sm_initialized) sm_onTabOpen();
 }
 
@@ -2458,74 +2412,6 @@ function toast(msg,err=false){
    RENDER — CARDS
 ═══════════════════════════════════════════════════════════ */
 
-function renderCards() {
-  const grid  = document.getElementById('cards-grid');
-  const empty = document.getElementById('cards-empty');
-  const items = allItems();
-  if (!items.length) { grid.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display='none';
-
-  grid.innerHTML = items.map(item => {
-    const q = quotes[item.id];
-    const [cPrice, dispCcy] = q ? convertPrice(q.price, q.currency) : [null,'—'];
-    const chg   = q?.change;
-    const pct   = q?.pct;
-    const dir   = dirCls(chg);
-    const pctStr= pct!=null ? (pct>=0?'+':'')+(pct*100).toFixed(2)+'%' : '—';
-    const chgStr= chg!=null ? (chg>=0?'+':'')+fmtN(chg) : '—';
-    const lo=q?.low, hi=q?.high, cur=q?.price;
-    const pos = (lo!=null&&hi!=null&&hi>lo) ? ((cur-lo)/(hi-lo)*100).toFixed(1) : '50';
-    const mState = q?.mktState||'CLOSED';
-    const priceDisp = cPrice!=null ? cPrice.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:4}) : (q?'—':'···');
-
-    // Signal badge (live, scenario-aware)
-    const sig = signalCache[item.id];
-    const _liveSig = sig && q ? compositeSignal(
-      sig.rsiV, sig.macdH, q.price??0, sig.bb, sig.sma50,
-      sig.pv ? sig.pv.PP : null,
-      item.driver, item.regime, item.id
-    ) : null;
-    const sigBadge = _liveSig ? `<span class="sig-badge ${_liveSig.cls}" style="font-size:.6rem;padding:1px 6px">${_liveSig.label}</span>` : '';
-
-    return `<div class="card${!q?' loading':''}">
-      <div class="card-top">
-        <div class="card-id">
-          <div class="card-short">${item.id}</div>
-          <div class="card-name" title="${item.name}">${item.name}</div>
-          <div class="card-yf">${item.yf}</div>
-        </div>
-        <div class="card-actions">
-          ${sigBadge}
-          <span class="mkt-badge ${mktCls(mState)}">${mktLbl(mState)}</span>
-          <button class="del-btn" onclick="removeItem('${item.id}')" title="Rimuovi dalla lista">✕</button>
-        </div>
-      </div>
-      <div class="card-price-row">
-        <span class="card-price">${priceDisp}</span>
-        <span class="badge-ccy">${dispCcy}</span>
-      </div>
-      <span class="card-chg ${dir}">${arrow(chg)} ${chgStr} ${pctStr}</span>
-      <div class="card-stats">
-        ${lo!=null?`<div class="range-row">
-          <div class="range-labels"><span>${fmt(lo,3)}</span><span>${fmt(hi,3)}</span></div>
-          <div class="range-bar">
-            <div class="range-fill" style="width:100%"></div>
-            <div class="range-dot" style="left:${pos}%"></div>
-          </div>
-        </div>`:''}
-        ${q?.open !=null?`<div class="stat"><span class="stat-label">Apertura</span><span class="stat-value">${fmtN(q.open)}</span></div>`:''}
-        ${q?.prev !=null?`<div class="stat"><span class="stat-label">Chius. prev.</span><span class="stat-value">${fmtN(q.prev)}</span></div>`:''}
-        ${q?.w52h !=null?`<div class="stat"><span class="stat-label">52W Max</span><span class="stat-value">${fmt(q.w52h)}</span></div>`:''}
-        ${q?.w52l !=null?`<div class="stat"><span class="stat-label">52W Min</span><span class="stat-value">${fmt(q.w52l)}</span></div>`:''}
-        ${q?.vol  !=null?`<div class="stat"><span class="stat-label">Volume</span><span class="stat-value">${fmtVol(q.vol)}</span></div>`:''}
-        ${sig?.rsiV!=null?`<div class="stat"><span class="stat-label">RSI(14)</span><span class="stat-value">${sig.rsiV.toFixed(0)}</span></div>`:''}
-        ${sig?.pv  !=null?`<div class="stat"><span class="stat-label">Buy S1</span><span class="stat-value" style="color:var(--green)">${fmtN(sig.pv.S1)}</span></div>`:''}
-        ${sig?.pv  !=null?`<div class="stat"><span class="stat-label">Sell R1</span><span class="stat-value" style="color:var(--red)">${fmtN(sig.pv.R1)}</span></div>`:''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
 /* ═══════════════════════════════════════════════════════════
    RENDER — SIGNALS TABLE
 ═══════════════════════════════════════════════════════════ */
@@ -2766,8 +2652,7 @@ function renderCompact() {
 ═══════════════════════════════════════════════════════════ */
 
 function render() {
-  if   (currentTab==='cards')   renderCards();
-  else if (currentTab==='signals') renderSignalsTable();
+  if (currentTab==='signals') renderSignalsTable();
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -2776,7 +2661,7 @@ function render() {
 
 function switchTab(tab) {
   currentTab = tab;
-  const tabs = ['cards','signals','semis','macro','bond','btp'];
+  const tabs = ['signals','semis','macro','bond','btp'];
   document.querySelectorAll('.tab-btn').forEach((b,i)=>{
     b.classList.toggle('active', tabs[i]===tab);
   });
