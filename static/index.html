@@ -105,6 +105,8 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 .signals-table tbody tr:last-child{border-bottom:none}
 .signals-table tbody tr:hover{background:var(--surface2)}
 .signals-table td{padding:7px 8px;vertical-align:middle;white-space:nowrap}
+.sig-del-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem;padding:0 4px;line-height:1;opacity:.55}
+.sig-del-btn:hover{color:var(--red);opacity:1}
 .td-ticker{font-size:.75rem;font-weight:700;font-family:monospace;color:var(--accent);letter-spacing:.3px;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
 .td-ticker:hover{color:#fff}
 .td-name{color:var(--text);font-size:.78rem;max-width:150px;overflow:hidden;text-overflow:ellipsis}
@@ -468,6 +470,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
             <th class="r sortable" data-sort="sma" onclick="sortBy('sma')" data-i18n-title="th_sma_title">SMA50 <span class="th-sort-icon">⇅</span></th>
             <th class="c sortable" data-sort="macd" onclick="sortBy('macd')" data-i18n-title="th_macd_title">MACD <span class="th-sort-icon">⇅</span></th>
             <th class="c sortable" data-sort="vol" onclick="sortBy('vol')" data-i18n-title="th_vol_title">Vol <span class="th-sort-icon">⇅</span></th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="sig-tbody"></tbody>
@@ -2614,6 +2617,7 @@ function renderSignalsTable() {
       <td class="r">${vsCell}</td>
       <td class="c">${macdCell}</td>
       <td class="c">${volCell}</td>
+      <td class="c"><button class="sig-del-btn" onclick="removeItem('${item.id}')" title="Rimuovi ${item.id} dalla lista">✕</button></td>
     </tr>`;
   }).join('');
 }
