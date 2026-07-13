@@ -5,7 +5,27 @@ in `static/index.html` come nuova tab **🏛️ BTP**. Prezzi live da Borsa Ital
 rendimenti netti, spread, grafici d'andamento e P&L mark-to-market.
 
 Tutto il codice vive nel file singolo `static/index.html` sotto il namespace `btp_*`, isolato
-dalle altre schede (Live, Segnali, Semis, Macro, Bond/Equity) e dalle utility condivise `sm_*`.
+dalle altre schede (ETF, Semis, Macro, Bond/Equity) e dalle utility condivise `sm_*`.
+
+---
+
+## 0. Tab bar dell'app (contesto)
+
+Ordine attuale dei tab in header: **📈 ETF → 🏛️ BTP → 🔬 Semis → 🌍 Macro → 💰 Bond/Equity**.
+ETF è il tab di default all'apertura (`currentTab = 'signals'`).
+
+Cambiamenti recenti rilevanti per la posizione della scheda BTP:
+- **Rimossa la scheda 📊 Live** (vista a card): era ridondante con ETF, che mostra già
+  prezzo + variazione + segnale per riga. Rimossi `renderCards()`, `view-cards` e il CSS
+  esclusivo; mantenute le classi/funzioni condivise (`mkt-badge`, `dirCls`, `mktCls`,
+  `allItems`, `removeItem`).
+- **Tab "Segnali" rinominato in "ETF"** (chiave i18n `tab_signals`, IT/EN) e **spostato BTP
+  subito dopo ETF** nell'header (prima era in fondo, dopo Bond/Equity). L'array `tabs` in
+  `switchTab()` riflette il nuovo ordine DOM: `['signals','btp','semis','macro','bond']`.
+- **Aggiunta la ✕ per eliminare i titoli nella tabella ETF**: la vecchia scheda Live era
+  l'unica ad avere un pulsante elimina (`.del-btn`); rimossa quella, la tabella ETF
+  (`renderSignalsTable()`) è rimasta senza. Aggiunta una colonna finale con pulsante
+  `.sig-del-btn` per riga che richiama `removeItem(id)` (funzione preesistente, invariata).
 
 ---
 
@@ -269,6 +289,10 @@ durante il fetch non scombina più i prezzi tra i titoli. Render progressivo ogn
 | refactor: rimossa modalità prezzo manuale | Solo prezzo di acquisto |
 | feat: P&L mark-to-market, righe evidenziate, riepilogo posizioni | Monitor di portafoglio |
 | perf: fetch da ~30s a ~1,4s | corsproxy primario, timeout 8s, concorrenza 5, cache-buster |
+| docs: documentazione tecnica scheda BTP | Questo file |
+| refactor: rimossa tab Live (cards) | `renderCards()`, `view-cards` e CSS esclusivo eliminati |
+| refactor: BTP subito dopo ETF, Segnali rinominata ETF | Riordino tab bar + rename `tab_signals` |
+| feat: X per eliminare titoli nella scheda ETF | Colonna `.sig-del-btn` in `renderSignalsTable()` |
 
 ---
 
