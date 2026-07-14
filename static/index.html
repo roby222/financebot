@@ -2672,6 +2672,11 @@ function switchTab(tab) {
   tabs.forEach(t=>{
     document.getElementById(`view-${t}`).classList.toggle('active', t===tab);
   });
+  // La barra di ricerca globale (+ Aggiungi) opera sulla watchlist ETF: nascosta sulla
+  // tab BTP per evitare di aggiungere per sbaglio un ISIN BTP alla lista ETF invece
+  // che con il pulsante dedicato "＋ Aggiungi BTP" dentro la scheda.
+  const addWrap = document.querySelector('.add-wrap');
+  if (addWrap) addWrap.style.display = (tab==='btp') ? 'none' : '';
   if (tab==='signals' && !sigLoaded && !sigFetching) refreshSignals();
   else if (tab==='semis') sm_onTabOpen();
   else if (tab==='macro') mc_onTabOpen();
