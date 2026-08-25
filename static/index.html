@@ -1795,8 +1795,8 @@ function toggleLang() {
    CONFIG
 ═══════════════════════════════════════════════════════════ */
 // ⬇ Sostituisci con l'URL del tuo Cloudflare Worker per zero rate limit
-// Default: 'https://corsproxy.io/?' | Worker: 'https://xxx.workers.dev/?url='
-const PROXY    = localStorage.getItem('fpb_proxy') || 'https://corsproxy.io/?';
+// Default: 'https://corsproxy.io/?url=' | Worker: 'https://xxx.workers.dev/?url='
+const PROXY    = localStorage.getItem('fpb_proxy') || 'https://corsproxy.io/?url=';
 const YF_CHART = 'https://query1.finance.yahoo.com/v8/finance/chart/';
 const YF_SRCH  = 'https://query2.finance.yahoo.com/v1/finance/search?quotesCount=8&newsCount=0&q=';
 const REFRESH  = 60;
@@ -3506,7 +3506,7 @@ function drawPriceChart(canvas, pts, range, hoverIdx) {
 ═══════════════════════════════════════════════════════════ */
 // Usa lo stesso proxy del dashboard principale (Cloudflare Worker se configurato,
 // altrimenti corsproxy.io come fallback). Questo risolve i rate-limit di allorigins.
-const sm_CORS       = localStorage.getItem('fpb_proxy') || "https://corsproxy.io/?";
+const sm_CORS       = localStorage.getItem('fpb_proxy') || "https://corsproxy.io/?url=";
 
 /* ── THESIS CONFIG (SEMI ETF) ─────────────────────────── */
 const sm_THESIS = {
@@ -4460,11 +4460,13 @@ function bv_saveEdit(field){
 }
 
 async function bv_fetchOne(ticker){
-  const url=`https://query1.finance.yahoo.com/v8/finance/quote?symbols=${encodeURIComponent(ticker)}&fields=regularMarketPrice`;
+  // endpoint /v8/finance/quote dismesso da Yahoo (404): si usa /v8/finance/chart come nel resto dell'app
+  const url=`${YF_CHART}${encodeURIComponent(ticker)}?interval=1d&range=5d`;
   const r=await sm_fetchTimeout(sm_proxied(url),10000);
   if(!r.ok)throw new Error(r.status);
   const j=await r.json();
-  const p=j?.quoteResponse?.result?.[0]?.regularMarketPrice;
+  const meta=j?.chart?.result?.[0]?.meta;
+  const p=meta?.regularMarketPrice ?? meta?.chartPreviousClose;
   if(p==null)throw new Error('no price');
   return p;
 }
@@ -4508,7 +4510,7 @@ function bv_onTabOpen(){
 const btp_STORAGE='btp_italia_v1';
 // Proxy CORS con fallback: corsproxy primario (~200ms per pagina), poi allorigins, poi codetabs
 const btp_PROXIES=[
-  t=>'https://corsproxy.io/?'+encodeURIComponent(t),
+  t=>'https://corsproxy.io/?url='+encodeURIComponent(t),
   t=>'https://api.allorigins.win/raw?url='+encodeURIComponent(t),
   t=>'https://api.codetabs.com/v1/proxy/?quest='+encodeURIComponent(t),
 ];
@@ -4911,7 +4913,7 @@ async function btp_loadChart(){
     }else{
       // BTP: Borsa Italiana ChartWService (OHLC giornaliero, close = colonna 2)
       const body={request:{SampleTime:"1d",TimeFrame:tf,RequestedDataSetType:"ohlc",ChartPriceType:"price",Key:b.id+".MOT",OffSet:0,FromDate:null,ToDate:null,UseDelay:false,KeyType:"Topic",KeyType2:"Topic",Language:"it-IT"}};
-      const r=await sm_fetchTimeout('https://corsproxy.io/?'+encodeURIComponent('https://charts.borsaitaliana.it/charts/services/ChartWService.asmx/GetPrices'),
+      const r=await sm_fetchTimeout('https://corsproxy.io/?url='+encodeURIComponent('https://charts.borsaitaliana.it/charts/services/ChartWService.asmx/GetPrices'),
         {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)},18000);
       if(!r.ok)throw new Error('HTTP '+r.status);
       const rows=(await r.json()).d||[];
@@ -4958,14 +4960,16 @@ async function btp_proxiedText(target){
 async function btp_fetchBI(isin){
   // cache-buster: evita risposte stantie dei proxy (prezzo live "ultimo contratto")
   const target=`https://www.borsaitaliana.it/borsa/obbligazioni/mot/btp/dati-completi.html?isin=${isin}&mic=MOTX&lang=it&_=${Date.now()}`;
-  const html=await btp_proxiedText(target);
-  const pm=html.match(/Prezzo\s+Ultimo\s+Contratto[\s\S]{0,500}?(\d{2,3}[,\.]\d{2,4})/);
-  const vm=html.match(/Var\s*%[\s\S]{0,500}?(-?\d+[,\.]\d+)/);
-  if(!pm)throw new Error('price not found: '+isin);
-  return{
-    price:parseFloat(pm[1].replace(',','.')),
-    pct:vm?parseFloat(vm[1].replace(',','.')):null
+  const flat=(await btp_proxiedText(target)).replace(/\s+/g,' ');
+  // legge la cella valore accanto all'etichetta nella tabella dati (finestra stretta: non sconfina nella riga dopo)
+  const cell=lab=>{
+    const m=flat.match(new RegExp(lab+'<\\/strong>.{0,100}?<span class="t-text -right">\\s*(-?[\\d.]*\\d[,.]\\d+)\\s*<\\/span>'));
+    return m?parseFloat(m[1].replace(/\./g,'').replace(',','.')):null;
   };
+  // fuori orario MOT "Prezzo Ultimo Contratto" e "Var %" sono vuoti -> fallback su riferimento/ufficiale
+  const price=cell('Prezzo Ultimo Contratto')??cell('Prezzo di riferimento')??cell('Prezzo ufficiale');
+  if(price==null)throw new Error('price not found: '+isin);
+  return{ price, pct:cell('Var %') };
 }
 
 // Spread BTP-Bund 10Y (bps) da Teleborsa
