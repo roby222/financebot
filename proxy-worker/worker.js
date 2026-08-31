@@ -21,11 +21,15 @@ const ALLOWED_HOSTS = [
   'stooq.com',
   // Google News RSS — Semis Monitor headlines (indicators 03, 04, 06)
   'news.google.com',
+  // Borsa Italiana — scheda BTP (prezzi MOT, grafico dettaglio, spread BTP-Bund)
+  'www.borsaitaliana.it',
+  'charts.borsaitaliana.it',
+  'borsaitaliana.teleborsa.it',
 ];
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': '*',
 };
 
@@ -56,7 +60,13 @@ export default {
 
     try {
       const upstream = await fetch(targetUrl.toString(), {
+        method: request.method,
+        // il grafico di dettaglio BTP fa una POST con body JSON: va inoltrato
+        body: request.method === 'POST' ? await request.clone().arrayBuffer() : undefined,
         headers: {
+          ...(request.headers.get('content-type')
+            ? { 'Content-Type': request.headers.get('content-type') }
+            : {}),
           'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
           'Accept': 'application/json, text/plain, */*',
           'Accept-Language': 'en-US,en;q=0.9',
@@ -67,8 +77,11 @@ export default {
       // Cloudflare decomprime automaticamente — .text() restituisce sempre il body leggibile
       const body = await upstream.text();
       const upstreamType = upstream.headers.get('content-type') || '';
+      // le pagine Borsa Italiana sono HTML: non forzarle a JSON
       const contentType = upstreamType.includes('xml') || upstreamType.includes('rss')
         ? 'application/xml; charset=utf-8'
+        : upstreamType.includes('html')
+        ? 'text/html; charset=utf-8'
         : 'application/json; charset=utf-8';
 
       return new Response(body, {

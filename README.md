@@ -55,7 +55,7 @@ A single-file ETF dashboard with composite trading signals, geopolitical macro c
 static/
   index.html         ← entire dashboard (single file, no framework)
   watchlist.json     ← default ETF list (edit here to change defaults)
-proxy-worker/        ← Cloudflare Worker CORS proxy (Yahoo Finance + Google News)
+proxy-worker/        ← Cloudflare Worker CORS proxy (Yahoo, Google News, Borsa Italiana)
 quotes.py            ← CLI utility: live quotes
 trading_signals.py   ← CLI utility: technical signals in terminal
 theses/
@@ -75,6 +75,27 @@ python3 -m http.server 8080 --directory static
 ```
 
 Then open `http://localhost:8080`.
+
+## Proxy CORS
+
+Il browser non puo' chiamare Yahoo Finance o Borsa Italiana direttamente (nessun header CORS),
+quindi tutte le richieste passano da una catena di proxy definita in un unico punto
+(`PROXY_CHAIN` in `static/index.html`), condivisa da tutte le schede:
+
+1. il proxy personale, se configurato in `localStorage` sotto `fpb_proxy` — **consigliato**
+2. `proxy.cors.sh` (target non urlencoded)
+3. `api.allorigins.win` (ripiego lento: regge poche richieste in parallelo)
+
+I proxy pubblici gratuiti sono inaffidabili: `corsproxy.io` e' passato a sola API key
+(risponde 401) e `api.codetabs.com` non risponde piu'. Per un funzionamento stabile
+deploya il Worker in `proxy-worker/` e configuralo una volta:
+
+```js
+localStorage.setItem('fpb_proxy', 'https://TUO-WORKER.workers.dev/?url=')
+```
+
+Se nessun proxy risponde, la scheda BTP mostra un banner con la causa invece di
+restare in caricamento.
 
 ## Watchlist format
 

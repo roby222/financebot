@@ -962,6 +962,8 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
   </div>
 </div>
 
+<div id="btp-proxy-warn" style="display:none;margin:0 0 14px;padding:12px 14px;border:1px solid #f85149;border-radius:8px;background:rgba(248,81,73,.08);font-size:.85rem;line-height:1.55"></div>
+
 <div id="btp-add-form" class="btp-add-form" style="display:none">
   <input id="btp-add-isin" placeholder="ISIN (es. IT0005668238)" maxlength="12" style="text-transform:uppercase">
   <input id="btp-add-name" placeholder="Nome (es. BTP 4% Feb35)">
@@ -1022,7 +1024,7 @@ header{display:flex;align-items:center;justify-content:space-between;max-width:1
 </div>
 
 <div class="btp-foot">
-  <div>Prezzi BTP/BTP Italia/BTP Valore: Borsa Italiana MOT via proxy (allorigins/corsproxy). ETF cash: Yahoo Finance. <b>Rend. netto ora</b> = rendimento netto annuo a scadenza comprando oggi al prezzo di mercato (YTM × 0,875). <b>Rend. netto acq.</b> = rendimento netto annuo in base al tuo prezzo di acquisto (✎ per impostarlo). Imposta sostitutiva 12,5% sui titoli di Stato. Clicca un'intestazione per ordinare. IDX/STEP: rendimento non calcolabile con formula fissa.</div>
+  <div>Prezzi BTP/BTP Italia/BTP Valore: Borsa Italiana MOT via proxy CORS (cors.sh, con ripiego allorigins). ETF cash: Yahoo Finance. <b>Rend. netto ora</b> = rendimento netto annuo a scadenza comprando oggi al prezzo di mercato (YTM × 0,875). <b>Rend. netto acq.</b> = rendimento netto annuo in base al tuo prezzo di acquisto (✎ per impostarlo). Imposta sostitutiva 12,5% sui titoli di Stato. Clicca un'intestazione per ordinare. IDX/STEP: rendimento non calcolabile con formula fissa.</div>
   <div>Stato salvato in localStorage — nessun dato sul server.</div>
 </div>
 </div>
@@ -1794,9 +1796,42 @@ function toggleLang() {
 /* ═══════════════════════════════════════════════════════════
    CONFIG
 ═══════════════════════════════════════════════════════════ */
-// ⬇ Sostituisci con l'URL del tuo Cloudflare Worker per zero rate limit
-// Default: 'https://corsproxy.io/?url=' | Worker: 'https://xxx.workers.dev/?url='
-const PROXY    = localStorage.getItem('fpb_proxy') || 'https://corsproxy.io/?url=';
+// ⬇ CATENA PROXY CORS — unica per tutte le schede (ETF, BTP, Semis, Macro, Bond/Equity)
+// Non esistono piu' proxy pubblici gratuiti affidabili: corsproxy.io richiede una API key
+// (risponde 401 senza chiave) e allorigins regge poche richieste in parallelo. Per un
+// funzionamento stabile configura il tuo Cloudflare Worker (vedi proxy-worker/worker.js):
+//   localStorage.setItem('fpb_proxy','https://TUO-WORKER.workers.dev/?url=')
+const PROXY_CUSTOM    = localStorage.getItem('fpb_proxy') || null;
+// Ogni anello e' una funzione url->url perche' i proxy NON concordano sul formato:
+// cors.sh vuole il target grezzo, allorigins e il Worker lo vogliono urlencoded.
+// api.codetabs.com e corsproxy.io sono stati rimossi: il primo non risponde piu'
+// (CORS fallito dopo ~20s), il secondo richiede una API key (401 senza chiave).
+const PROXY_FALLBACKS = [
+  u => 'https://proxy.cors.sh/' + u,                                   // target GREZZO — veloce (~250ms per 15 richieste)
+  u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),  // ripiego: regge poche richieste in parallelo
+];
+const PROXY_CHAIN = [
+  ...(PROXY_CUSTOM ? [u => PROXY_CUSTOM + encodeURIComponent(u)] : []),
+  ...PROXY_FALLBACKS,
+];
+
+// Ultimo errore di rete, per distinguere "proxy giu'" da "nessun dato" nella UI
+let PROXY_LAST_ERROR = null;
+
+// fetch attraverso la catena: vince il primo proxy che risponde ok
+async function proxiedFetch(url, opts={}, timeoutMs=12000){
+  let lastErr;
+  for(const mk of PROXY_CHAIN){
+    try{
+      const r = await fetch(mk(url), {...opts, signal:AbortSignal.timeout(timeoutMs)});
+      if(!r.ok){ lastErr=new Error('HTTP '+r.status); continue; }
+      PROXY_LAST_ERROR=null;
+      return r;
+    }catch(e){ lastErr=e; }
+  }
+  PROXY_LAST_ERROR = lastErr ? (lastErr.message||lastErr.name) : 'tutti i proxy hanno fallito';
+  throw lastErr||new Error('tutti i proxy hanno fallito');
+}
 const YF_CHART = 'https://query1.finance.yahoo.com/v8/finance/chart/';
 const YF_SRCH  = 'https://query2.finance.yahoo.com/v1/finance/search?quotesCount=8&newsCount=0&q=';
 const REFRESH  = 60;
@@ -2089,12 +2124,13 @@ async function fetchChart(ticker, range='1d', interval='1m', attempt=0) {
   if (attempt === 0) await new Promise(r => setTimeout(r, Math.random() * 400));
   try {
     const url = `${YF_CHART}${encodeURIComponent(ticker)}?interval=${interval}&range=${range}&_=${Date.now()}`;
-    const r   = await fetch(PROXY + encodeURIComponent(url), { cache: 'no-store' });
-    if (r.status === 429) throw Object.assign(new Error('429'), {is429: true});
+    const r   = await proxiedFetch(url, { cache: 'no-store' });
     const j   = await r.json();
     return j?.chart?.result?.[0] ?? null;
   } catch(e) {
-    const delay = e.is429
+    // proxiedFetch solleva su qualsiasi non-ok: il 429 va riconosciuto dal messaggio
+    const is429 = /\b429\b/.test(e.message || '');
+    const delay = is429
       ? 3000 + Math.random() * 2000          // 429 → aspetta 3-5s
       : 800 * (attempt + 1);                 // altro errore → back-off normale
     if (attempt < 3) {
@@ -2732,7 +2768,7 @@ async function addCustom(sym, displayName='') {
   // Se il nome non è noto (inserimento manuale), prova a risolverlo via search
   if (!displayName) {
     try {
-      const r = await fetch(PROXY + encodeURIComponent(YF_SRCH + encodeURIComponent(s)));
+      const r = await proxiedFetch(YF_SRCH + encodeURIComponent(s));
       const j = await r.json();
       const match = (j.quotes||[]).find(q => q.symbol === s);
       if (match) {
@@ -2868,7 +2904,7 @@ inp.addEventListener('input', ()=>{
   acDebounce=setTimeout(async()=>{
     try {
       const url=YF_SRCH+encodeURIComponent(q);
-      const r=await fetch(PROXY+encodeURIComponent(url));
+      const r=await proxiedFetch(url);
       const j=await r.json();
       renderAC((j.quotes||[]).map(x=>({
         symbol:x.symbol, name:x.longname||x.shortname||'', type:x.quoteType||'', exchange:x.exchDisp||x.exchange||''
@@ -3212,8 +3248,8 @@ async function loadDetailChart() {
   const yf = detailCurrentItem.yf;
 
   try {
-    const url = `${PROXY}${encodeURIComponent(YF_CHART + yf + `?range=${range}&interval=${interval}&_=${Date.now()}`)}`;
-    const res = await fetch(url, { cache: 'no-store' });
+    const url = `${YF_CHART}${yf}?range=${range}&interval=${interval}&_=${Date.now()}`;
+    const res = await proxiedFetch(url, { cache: 'no-store' });
     const json = await res.json();
     const result = json?.chart?.result?.[0];
     if (!result) throw new Error('no data');
@@ -3505,8 +3541,7 @@ function drawPriceChart(canvas, pts, range, hoverIdx) {
    SEMIS MONITOR — namespaced sm_*
 ═══════════════════════════════════════════════════════════ */
 // Usa lo stesso proxy del dashboard principale (Cloudflare Worker se configurato,
-// altrimenti corsproxy.io come fallback). Questo risolve i rate-limit di allorigins.
-const sm_CORS       = localStorage.getItem('fpb_proxy') || "https://corsproxy.io/?url=";
+// vedi PROXY_CHAIN). Un solo punto di configurazione per tutte le schede.
 
 /* ── THESIS CONFIG (SEMI ETF) ─────────────────────────── */
 const sm_THESIS = {
@@ -3666,11 +3701,10 @@ function sm_fetchTimeout(url,opts={}){
   const t=setTimeout(()=>c.abort(),sm_TIMEOUT);
   return fetch(url,Object.assign({},opts,{signal:c.signal})).finally(()=>clearTimeout(t));
 }
-function sm_proxied(url){return sm_CORS+encodeURIComponent(url);}
 
 async function sm_fetchYahoo(sym){
   const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=5d&interval=1d`;
-  const r=await sm_fetchTimeout(sm_proxied(url));
+  const r=await proxiedFetch(url,{},sm_TIMEOUT);
   if(!r.ok)throw new Error('Yahoo '+r.status);
   const j=await r.json();
   const res=j.chart?.result?.[0];
@@ -3680,7 +3714,7 @@ async function sm_fetchYahoo(sym){
 async function sm_fetchSecConcept(cik,concept){
   const padded=String(cik).padStart(10,'0');
   const url=`https://data.sec.gov/api/xbrl/companyconcept/CIK${padded}/us-gaap/${concept}.json`;
-  const r=await sm_fetchTimeout(sm_proxied(url));
+  const r=await proxiedFetch(url,{},sm_TIMEOUT);
   if(!r.ok)throw new Error('SEC '+r.status);
   return r.json();
 }
@@ -3691,7 +3725,7 @@ async function sm_fetchGithub(owner,repo){
 }
 async function sm_fetchNews(query){
   const url=`https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`;
-  const r=await sm_fetchTimeout(sm_proxied(url));
+  const r=await proxiedFetch(url,{},sm_TIMEOUT);
   if(!r.ok)throw new Error('GNews '+r.status);
   const txt=await r.text();
   const xml=new DOMParser().parseFromString(txt,'text/xml');
@@ -3710,7 +3744,7 @@ const sm_REF_KEY  = 'sm_ref_apr3_v1';
 async function sm_fetchClose(sym, ts){
   // fetch 5-day window starting 1 day before target to catch the right session
   const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?period1=${ts-86400}&period2=${ts+86400*4}&interval=1d`;
-  const r=await sm_fetchTimeout(sm_proxied(url));
+  const r=await proxiedFetch(url,{},sm_TIMEOUT);
   if(!r.ok)throw new Error(r.status);
   const j=await r.json();
   const result=j.chart?.result?.[0];
@@ -4462,7 +4496,7 @@ function bv_saveEdit(field){
 async function bv_fetchOne(ticker){
   // endpoint /v8/finance/quote dismesso da Yahoo (404): si usa /v8/finance/chart come nel resto dell'app
   const url=`${YF_CHART}${encodeURIComponent(ticker)}?interval=1d&range=5d`;
-  const r=await sm_fetchTimeout(sm_proxied(url),10000);
+  const r=await proxiedFetch(url,{},10000);
   if(!r.ok)throw new Error(r.status);
   const j=await r.json();
   const meta=j?.chart?.result?.[0]?.meta;
@@ -4509,11 +4543,7 @@ function bv_onTabOpen(){
 ═══════════════════════════════════════════════════════════ */
 const btp_STORAGE='btp_italia_v1';
 // Proxy CORS con fallback: corsproxy primario (~200ms per pagina), poi allorigins, poi codetabs
-const btp_PROXIES=[
-  t=>'https://corsproxy.io/?url='+encodeURIComponent(t),
-  t=>'https://api.allorigins.win/raw?url='+encodeURIComponent(t),
-  t=>'https://api.codetabs.com/v1/proxy/?quest='+encodeURIComponent(t),
-];
+// usa la catena proxy unica: cosi' la scheda BTP rispetta fpb_proxy come le altre
 const btp_DEFAULTS={
   _v:2,lastFetched:null,bench10y:null,spreadBund:null,
   bonds:[
@@ -4630,6 +4660,21 @@ function btp_benchmark10Y(){
 }
 
 function btp_renderInfoBar(){
+  // banner proxy: distingue "proxy giu'" da "dato assente"
+  const warnEl=document.getElementById('btp-proxy-warn');
+  if(warnEl){
+    if(btpState.fetchError){
+      warnEl.style.display='';
+      warnEl.innerHTML='<b>⚠️ Prezzi non scaricabili — il proxy CORS non risponde.</b><br>'
+        +'Nessun prezzo e\' stato recuperato ('+btpState.fetchError+'). I proxy pubblici gratuiti '
+        +'non sono piu\' affidabili: corsproxy.io richiede una API key e allorigins limita le richieste.<br>'
+        +'Soluzione: deploya il Cloudflare Worker in <code>proxy-worker/worker.js</code> e impostalo con<br>'
+        +'<code>localStorage.setItem(\'fpb_proxy\',\'https://TUO-WORKER.workers.dev/?url=\')</code>'
+        +(PROXY_CUSTOM?'<br>Proxy attualmente configurato: <code>'+PROXY_CUSTOM+'</code>':'<br>Nessun proxy personale configurato: in uso solo i fallback pubblici.');
+    }else{
+      warnEl.style.display='none';
+    }
+  }
   const bench10y=btp_benchmark10Y();
   const spread=btpState.spreadBund;  // scrapato da Teleborsa (bps)
   let cpi=(typeof bvState!=='undefined'&&bvState)?bvState.italy?.cpi:null;
@@ -4905,15 +4950,16 @@ async function btp_loadChart(){
     let pts;
     if(b.special==='etf'){
       // ETF cash: Yahoo Finance (stessa fonte del pannello ETF)
-      const url=`${PROXY}${encodeURIComponent(YF_CHART+b.yf+`?range=${yf}&interval=1d&_=${Date.now()}`)}`;
-      const res=await fetch(url,{cache:'no-store'});
+      const url=`${YF_CHART}${b.yf}?range=${yf}&interval=1d&_=${Date.now()}`;
+      const res=await proxiedFetch(url,{cache:'no-store'});
       const rr=(await res.json())?.chart?.result?.[0];
       const ts=rr.timestamp||[],cl=rr.indicators?.quote?.[0]?.close||[],op=rr.indicators?.quote?.[0]?.open||[],vo=rr.indicators?.quote?.[0]?.volume||[];
       pts=ts.map((t,i)=>({t,c:cl[i],o:op[i],v:vo[i]??null})).filter(p=>p.c!=null);
     }else{
       // BTP: Borsa Italiana ChartWService (OHLC giornaliero, close = colonna 2)
       const body={request:{SampleTime:"1d",TimeFrame:tf,RequestedDataSetType:"ohlc",ChartPriceType:"price",Key:b.id+".MOT",OffSet:0,FromDate:null,ToDate:null,UseDelay:false,KeyType:"Topic",KeyType2:"Topic",Language:"it-IT"}};
-      const r=await sm_fetchTimeout('https://corsproxy.io/?url='+encodeURIComponent('https://charts.borsaitaliana.it/charts/services/ChartWService.asmx/GetPrices'),
+      // NB: solo un proxy che inoltra il body regge questa POST (il Cloudflare Worker; i proxy pubblici no)
+      const r=await proxiedFetch('https://charts.borsaitaliana.it/charts/services/ChartWService.asmx/GetPrices',
         {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)},18000);
       if(!r.ok)throw new Error('HTTP '+r.status);
       const rows=(await r.json()).d||[];
@@ -4945,15 +4991,7 @@ async function btp_loadChart(){
 
 // fetch con fallback su lista proxy — prova ciascuno finché uno risponde (timeout 8s per tentativo)
 async function btp_proxiedText(target){
-  let lastErr;
-  for(const mk of btp_PROXIES){
-    try{
-      const r=await fetch(mk(target),{signal:AbortSignal.timeout(8000)});
-      if(!r.ok){lastErr=new Error('HTTP '+r.status);continue;}
-      return await r.text();
-    }catch(e){lastErr=e;}
-  }
-  throw lastErr||new Error('all proxies failed');
+  return (await proxiedFetch(target,{},8000)).text();
 }
 
 // Borsa Italiana HTML scraping — per tutti i BTP/BTP Italia/BTP Valore
@@ -5003,17 +5041,19 @@ async function btp_fetchAll(){
   // Concorrenza 5 (corsproxy è ~200ms/pagina). Snapshot dell'array e assegnazione per
   // RIFERIMENTO all'oggetto: un ordinamento/aggiunta/rimozione durante il fetch non scombina i prezzi.
   const snapshot=btpState.bonds.slice();
-  let done=0;const total=snapshot.length;
+  let done=0,failed=0;const total=snapshot.length;
   await pMap(snapshot,async(b)=>{
     try{
       const v=b.special==='etf'?await btp_fetchYF(b.yf):await btp_fetchBI(b.id);
       b.price=v.price;
       b.pct=v.pct;
-    }catch(e){/* mantiene ultimo prezzo noto */}
+    }catch(e){failed++;/* mantiene ultimo prezzo noto */}
     done++;
     if(btn)btn.textContent=`⟳ ${done}/${total}`;
     if(done%3===0)btp_renderTable();  // progressivo
   },5);
+  // se falliscono tutti e' il proxy, non il dato: dillo invece di lasciare "..." all'infinito
+  btpState.fetchError = failed===total ? (PROXY_LAST_ERROR||'proxy non raggiungibile') : null;
 
   // Spread BTP-Bund 10Y da Teleborsa (il rendimento 10Y è interpolato dai bond)
   try{btpState.spreadBund=await btp_fetchSpread();}catch(e){}
