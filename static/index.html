@@ -1801,7 +1801,7 @@ function toggleLang() {
 // (risponde 401 senza chiave) e allorigins regge poche richieste in parallelo. Per un
 // funzionamento stabile configura il tuo Cloudflare Worker (vedi proxy-worker/worker.js):
 //   localStorage.setItem('fpb_proxy','https://TUO-WORKER.workers.dev/?url=')
-const PROXY_CUSTOM    = localStorage.getItem('fpb_proxy') || null;
+const PROXY_CUSTOM    = localStorage.getItem('fpb_proxy') || 'https://fpb-proxy.robe-pisu.workers.dev/?url=';
 // Ogni anello e' una funzione url->url perche' i proxy NON concordano sul formato:
 // cors.sh vuole il target grezzo, allorigins e il Worker lo vogliono urlencoded.
 // api.codetabs.com e corsproxy.io sono stati rimossi: il primo non risponde piu'
