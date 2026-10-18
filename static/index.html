@@ -5015,7 +5015,7 @@ async function btp_fetchBI(isin){
   const target=`https://www.borsaitaliana.it/borsa/obbligazioni/mot/btp/dati-completi.html?isin=${isin}&mic=MOTX&lang=it&_=${Date.now()}`;
   const flat=(await btp_proxiedText(target)).replace(/\s+/g,' ');
   const cell=lab=>{
-    const m=flat.match(new RegExp(lab+'<\\/strong>.{0,100}?<span class="t-text -right">\\s*(-?[\\d.]*\\d[,.]\\d+)\\s*<\\/span>'));
+    const m=flat.match(new RegExp(lab+'<\\/strong>.{0,100}?<span class="t-text -right">\\s*([+-]?[\\d.]*\\d[,.]\\d+)\\s*<\\/span>'));
     return m?parseFloat(m[1].replace(/\./g,'').replace(',','.')):null;
   };
   const price=cell('Prezzo Ultimo Contratto')??cell('Prezzo di riferimento')??cell('Prezzo ufficiale');

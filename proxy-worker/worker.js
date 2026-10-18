@@ -60,7 +60,7 @@ function itNum(s) {
 
 // legge la cella valore accanto all'etichetta nella tabella "dati completi"
 function biCell(flat, label) {
-  const re = new RegExp(label + '<\\/strong>.{0,100}?<span class="t-text -right">\\s*(-?[\\d.]*\\d[,.]\\d+)\\s*<\\/span>');
+  const re = new RegExp(label + '<\\/strong>.{0,100}?<span class="t-text -right">\\s*([+-]?[\\d.]*\\d[,.]\\d+)\\s*<\\/span>');
   const m = flat.match(re);
   return m ? itNum(m[1]) : null;
 }
