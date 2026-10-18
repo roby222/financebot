@@ -154,6 +154,13 @@ async function makePage({
   const page = await context.newPage();
   page.setDefaultTimeout(12000);
   page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (message) => {
+    if (
+      message.type() === "error" &&
+      !message.text().startsWith("Failed to load resource:")
+    )
+      errors.push(message.text());
+  });
   if (!live) await page.route("**/*", fixture);
   await page.goto(base);
   return { page, context };
@@ -208,20 +215,16 @@ try {
   const download = page.waitForEvent("download");
   await action(page, "exportList").click();
   assert.ok((await download).suggestedFilename().endsWith(".json"));
-  await page
-    .locator("#import-input")
-    .setInputFiles({
-      name: "watchlist.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(
-        JSON.stringify({
-          version: 2,
-          watchlist: [
-            { id: "IMPORTED.MI", yf: "IMPORTED.MI", name: "Imported" },
-          ],
-        }),
-      ),
-    });
+  await page.locator("#import-input").setInputFiles({
+    name: "watchlist.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(
+      JSON.stringify({
+        version: 2,
+        watchlist: [{ id: "IMPORTED.MI", yf: "IMPORTED.MI", name: "Imported" }],
+      }),
+    ),
+  });
   await page.waitForFunction(() =>
     JSON.parse(localStorage.getItem("fpb_extra") || "[]").some(
       (i) => i.id === "IMPORTED.MI",
@@ -229,12 +232,55 @@ try {
   );
   assert.equal(await page.locator("#sig-tbody tr").count(), initialRows + 1);
   // Every lazy feature opens and renders from the same fixture transport.
-  for (const tab of ["semis", "macro", "bond", "btp"])
+  for (const [tab, prefix, key] of [
+    ["semis", "sm", "semis_ai_monitor_v2"],
+    ["macro", "mc", "macro_monitor_v1"],
+  ]) {
     await selectTab(page, tab);
+    await page.waitForFunction(
+      (key) =>
+        Boolean(JSON.parse(localStorage.getItem(key) || "{}").lastUpdate),
+      key,
+    );
+    const edit = action(page, `${prefix}_toggleEdit`).first();
+    const id = await edit.getAttribute("data-arg-0");
+    await edit.click();
+    await page
+      .locator(`#${prefix}-note-${id}`)
+      .fill("Persisted smoke-test note");
+    await action(page, `${prefix}_saveInd`, id).click();
+    assert.equal(
+      await page.evaluate(
+        ({ key, id }) =>
+          JSON.parse(localStorage.getItem(key)).indicators.find(
+            (i) => i.id === id,
+          ).note,
+        { key, id },
+      ),
+      "Persisted smoke-test note",
+    );
+  }
+  await selectTab(page, "bond");
+  await action(page, "bv_openEdit", "cpi").click();
+  await page.locator("#bv-edit-inp").fill("2.1");
+  await action(page, "bv_saveEdit", "cpi").click();
+  await selectTab(page, "btp");
   await page.waitForFunction(
     () =>
       document.querySelector("#btp-refreshBtn").textContent === "Aggiorna ora",
   );
+  assert.equal(await page.locator(".btp-data-row").count(), 13);
+  await action(page, "btp_toggleAddForm").first().click();
+  await page.locator("#btp-add-isin").fill("IT0000000000");
+  await page.locator("#btp-add-name").fill("Regression test bond");
+  await page.locator("#btp-add-coupon").fill("4");
+  await page.locator("#btp-add-mat").fill("2036-10-18");
+  await action(page, "btp_addBond").click();
+  await page.waitForFunction(
+    () => document.querySelectorAll(".btp-data-row").length === 14,
+  );
+  page.once("dialog", (dialog) => dialog.accept());
+  await action(page, "btp_removeBond", "13").click();
   assert.equal(await page.locator(".btp-data-row").count(), 13);
   await action(page, "btp_setSort", "price").click();
   await action(page, "btp_openEdit", "0").click();
