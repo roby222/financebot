@@ -62,7 +62,7 @@ Per ogni ETF ricevuto in input (ticker, ISIN o nome):
 - **Terre rare ≠ METALLI**: ETF come REMX hanno >40% aziende cinesi → `GEO`, non `METALLI`, perché il rischio dominante è geopolitico non estrattivo.
 - **Litio**: I fondi litio (BATT) partono da mining di litio → `METALLI`, regime `risk-on`.
 - **Ticker .MI diverso dall'ISIN**: Il ticker Yahoo Finance per Borsa Italiana spesso differisce dal codice Bloomberg o ISIN. Verificare su Yahoo Finance direttamente se incerto.
-- **Due copie sincronizzate**: dopo la classificazione, aggiornare sia `static/watchlist.json` sia `WATCHLIST_DEFAULT` in `static/index.html`.
+- **Due copie sincronizzate**: dopo la classificazione, aggiornare sia `static/watchlist.json` sia `WATCHLIST_DEFAULT` in `static/js/features/etf/watchlist-store.js`.
 
 ## Classificazioni di riferimento
 

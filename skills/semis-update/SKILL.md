@@ -3,7 +3,7 @@ name: semis-update
 description: >
   Aggiorna automaticamente gli indicatori del Semis Monitor e la thesis SEMI dopo un evento
   catalizzatore (earnings, dati mensili, annunci). Lancia la skill di equity-research appropriata,
-  estrae i segnali rilevanti e riscrive sm_DEFAULTS in static/index.html + theses/SEMI_thesis.md.
+  estrae i segnali rilevanti e riscrive sm_DEFAULTS in static/js/features/semis/defaults.js + theses/SEMI_thesis.md.
   Usare ogni volta che un evento del catalyst calendar del monitor è appena avvenuto:
   NVDA earnings, TSMC mensile/trimestrale, hyperscaler Q earnings, SK Hynix/Micron/Samsung,
   AMD Advancing AI, KLAC/AMAT earnings.
@@ -89,7 +89,7 @@ signal.
 
 ### Step 3 — Leggi i valori correnti in sm_DEFAULTS
 
-Leggi `static/index.html` e individua il blocco `const sm_DEFAULTS = {` — specificatamente
+Leggi `static/js/features/semis/defaults.js` e individua il blocco `const sm_DEFAULTS = {` — specificatamente
 l'array `indicators` e il campo `calendar`. Localizza l'indicatore da aggiornare tramite il suo `id`.
 
 I campi da aggiornare per ciascun indicatore sono:
@@ -100,7 +100,7 @@ I campi da aggiornare per ciascun indicatore sono:
 - `labels` — array delle etichette: rimuovi la prima, aggiungi la label del nuovo periodo (es. `"Q2 26"`)
 - `lastFetched` — imposta a `null` (verrà aggiornato dal browser al prossimo fetch)
 
-### Step 4 — Aggiorna sm_DEFAULTS in static/index.html
+### Step 4 — Aggiorna sm_DEFAULTS in static/js/features/semis/defaults.js
 
 Usa lo strumento Edit per aggiornare i campi dell'indicatore specifico.
 **Non toccare altri indicatori o altri campi del file.**
@@ -133,7 +133,7 @@ Aggiungi una riga al **Version Log** della thesis:
 
 Se il nuovo stato degli indicatori cambia il verdict della thesis (es. da ACCUMULA a HOLD),
 aggiorna anche:
-- `sm_THESIS.verdict` in `static/index.html` (campo `verdict:` in `const sm_THESIS`)
+- `sm_THESIS.verdict` in `static/js/features/semis/defaults.js` (campo `verdict:` in `const sm_THESIS`)
 - Il badge nel file markdown (`**Status:** ACCUMULATE (with conditions)`)
 - La sezione **§9 VERDICT** del file markdown con il razionale aggiornato
 
@@ -202,7 +202,7 @@ Leggi `skills/semis-update/CALENDAR.txt` e:
 ### Step 9 — Commit
 
 ```bash
-git add static/index.html theses/SEMI_thesis.md skills/semis-update/CALENDAR.txt
+git add static/js/features/semis/defaults.js theses/SEMI_thesis.md skills/semis-update/CALENDAR.txt
 git commit -m "update: semis monitor post-[TICKER] [PERIOD] — [headline 1 frase]
 
 - [indicatori aggiornati e nuovi valori]
@@ -248,7 +248,7 @@ gross margin, data center revenue, guidance language.
 - status = green/yellow/red secondo soglie
 - signal = frase con il takeaway
 
-**Step 4:** Edita `static/index.html`, blocco `nvda_inv`:
+**Step 4:** Edita `static/js/features/semis/defaults.js`, blocco `nvda_inv`:
 - aggiorna `value`, `status`, `signal`, `history`, `labels`
 
 **Step 5:** Aggiorna nel calendar il campo `matters` dell'entry NVDA FY27 Q1
