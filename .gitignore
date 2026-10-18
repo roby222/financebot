@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 .DS_Store
 .claude/
+node_modules/
+output/
+.superpowers/
+.playwright-cli/

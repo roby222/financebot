@@ -1,0 +1,161 @@
+import { state } from "../../core/state.js";
+
+const WATCHLIST_DEFAULT = [
+  {
+    id: "EXUS",
+    name: "Xtrackers MSCI World ex USA",
+    yf: "EXUS.MI",
+    driver: "EQUITY",
+    dEmoji: "📈",
+    regime: "risk-on",
+  },
+  {
+    id: "XMME",
+    name: "Xtrackers MSCI Emerging Markets",
+    yf: "XMME.MI",
+    driver: "EQUITY",
+    dEmoji: "📈",
+    regime: "risk-on",
+  },
+  {
+    id: "PHAG",
+    name: "WisdomTree Physical Silver",
+    yf: "PHAG.MI",
+    driver: "METALLI",
+    dEmoji: "🥈",
+    regime: "risk-off",
+  },
+  {
+    id: "NUCL",
+    name: "VanEck Uranium & Nuclear",
+    yf: "NUCL.MI",
+    driver: "ENERGIA",
+    dEmoji: "⚡",
+    regime: "neutro",
+  },
+  {
+    id: "REMX",
+    name: "VanEck Rare Earth & Metals",
+    yf: "REMX.MI",
+    driver: "GEO",
+    dEmoji: "🌍",
+    regime: "neutro",
+  },
+  {
+    id: "QNTM",
+    name: "VanEck Quantum Computing",
+    yf: "QNTM.MI",
+    driver: "TECH",
+    dEmoji: "💻",
+    regime: "risk-on",
+  },
+  {
+    id: "GLUG",
+    name: "L&G Clean Water",
+    yf: "GLUG.MI",
+    driver: "INFRA",
+    dEmoji: "🏗️",
+    regime: "neutro",
+  },
+  {
+    id: "RENW",
+    name: "L&G Clean Energy",
+    yf: "RENW.MI",
+    driver: "ENERGIA",
+    dEmoji: "⚡",
+    regime: "risk-on",
+  },
+  {
+    id: "BATT",
+    name: "L&G Battery Value-Chain",
+    yf: "BATT.MI",
+    driver: "METALLI",
+    dEmoji: "🥈",
+    regime: "risk-on",
+  },
+  {
+    id: "SEME",
+    name: "iShares MSCI Global Semiconductors",
+    yf: "SEME.MI",
+    driver: "TECH",
+    dEmoji: "💻",
+    regime: "risk-on",
+  },
+  {
+    id: "IWQU",
+    name: "iShares MSCI World Quality Factor",
+    yf: "IWQU.MI",
+    driver: "EQUITY",
+    dEmoji: "📈",
+    regime: "risk-on",
+  },
+  {
+    id: "SWDA",
+    name: "iShares Core MSCI World",
+    yf: "SWDA.MI",
+    driver: "EQUITY",
+    dEmoji: "📈",
+    regime: "risk-on",
+  },
+  {
+    id: "COPM",
+    name: "iShares Copper Miners",
+    yf: "COPM.MI",
+    driver: "METALLI",
+    dEmoji: "🥈",
+    regime: "neutro",
+  },
+  {
+    id: "SGLE",
+    name: "Invesco Gold ETC EUR Hedged",
+    yf: "SGLE.MI",
+    driver: "PAURA",
+    dEmoji: "😰",
+    regime: "risk-off",
+  },
+  {
+    id: "UKRN",
+    name: "Ukraine Reconstruction",
+    yf: "UKRN.MI",
+    driver: "GEO",
+    dEmoji: "🌍",
+    regime: "neutro",
+  },
+  {
+    id: "GRIDG",
+    name: "First Trust Smart Grid Infra",
+    yf: "GRID.MI",
+    driver: "INFRA",
+    dEmoji: "🏗️",
+    regime: "neutro",
+  },
+  {
+    id: "STLAM.MI",
+    name: "Stellantis N.V.",
+    yf: "STLAM.MI",
+    driver: "",
+    dEmoji: "",
+    regime: "neutro",
+  },
+  {
+    id: "RACE.MI",
+    name: "Ferrari N.V.",
+    yf: "RACE.MI",
+    driver: "",
+    dEmoji: "",
+    regime: "neutro",
+  },
+];
+
+/* Extra simboli aggiunti dall'utente (localStorage) */
+
+function allItems() {
+  const seen = new Set();
+  return [...state.WATCHLIST, ...state.extraItems].filter((i) => {
+    if (seen.has(i.id) || state.hiddenIds.has(i.id)) return false;
+    seen.add(i.id);
+    return true;
+  });
+}
+
+export { WATCHLIST_DEFAULT, allItems };

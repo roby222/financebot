@@ -1,0 +1,77 @@
+/* ── Macro Monitor: dark-theme scoped CSS ── */
+#view-macro {
+  --sc-bg: var(--bg);
+  --sc-surf: var(--surface);
+  --sc-surf2: var(--surface2);
+  --sc-border: var(--border);
+  --sc-text: var(--text);
+  --sc-mute: var(--muted);
+  --sc-primary: #e3b341;
+  --sc-secondary: #ffa657;
+  --sc-green: #3fb950;
+  --sc-green-bg: rgba(63, 185, 80, 0.13);
+  --sc-yellow: #d29922;
+  --sc-yellow-bg: rgba(210, 153, 34, 0.13);
+  --sc-red: #f85149;
+  --sc-red-bg: rgba(248, 81, 73, 0.13);
+  --sc-radius: 10px;
+  --sc-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  background: var(--sc-bg);
+  padding: 8px 0 40px;
+}
+/* ── threshold gauge widget ── */
+.mc-gauge {
+  margin: 6px 0 2px;
+  user-select: none;
+}
+.mc-gauge-track {
+  height: 10px;
+  border-radius: 5px;
+  position: relative;
+}
+.mc-gauge-marker {
+  position: absolute;
+  top: -4px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+.mc-gauge-needle {
+  width: 3px;
+  height: 18px;
+  background: var(--sc-text);
+  border-radius: 2px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+}
+.mc-gauge-val {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--sc-text);
+  white-space: nowrap;
+  margin-top: 3px;
+  background: var(--sc-surf2);
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid var(--sc-border);
+}
+.mc-gauge-scale {
+  position: relative;
+  height: 16px;
+  margin-top: 2px;
+}
+.mc-gauge-scale span {
+  position: absolute;
+  font-size: 0.6rem;
+  color: var(--sc-mute);
+  transform: translateX(-50%);
+}
+.mc-gauge-scale span:first-child {
+  transform: none;
+}
+.mc-gauge-scale span:last-child {
+  transform: none;
+  right: 0;
+  left: auto;
+}

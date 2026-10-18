@@ -1,0 +1,17 @@
+{
+  "name": "financepalmiriobot",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:browser": "node tests/browser-smoke.js",
+    "check": "node tools/check-source.js",
+    "dev": "python3 -m http.server 8080 --directory static"
+  },
+  "devDependencies": {
+    "playwright": "1.64.1"
+  }
+}
