@@ -22,3 +22,17 @@ segnali in `static/js/features/etf/signals.js`, configurazione macro/scenari in
 `static/js/data/market-config.js`, default Semis in `static/js/features/semis/defaults.js`.
 Prima di un push esegui `npm run check`, `npm test` e `npm run test:browser`.
 Il deploy GitHub Pages attende i controlli CI; il Worker Cloudflare si pubblica separatamente.
+
+## Agent skills
+
+### Issue tracker
+
+Attività e specifiche vivono in GitHub Issues. Prima di creare, leggere o aggiornare ticket, segui `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Per classificare le issue, usa la mappatura dei cinque ruoli in `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Il progetto usa un unico contesto di dominio (single-context). Prima di esplorare il codice, segui `docs/agents/domain.md` per glossario e decisioni architetturali.
