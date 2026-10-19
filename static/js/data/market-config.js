@@ -16,18 +16,17 @@ function brentFrontMonth() {
 }
 
 const MACRO_TICKERS = [
-  { id: "brent", yf: brentFrontMonth(), label: "Brent", emoji: "🛢️" },
-  { id: "gold", yf: "GC=F", label: "Gold", emoji: "🥇" },
+  { id: "brent", yf: brentFrontMonth(), label: "Brent" },
+  { id: "gold", yf: "GC=F", label: "Gold" },
   {
     id: "copper",
     yf: "HG=F",
     label: "Rame",
-    emoji: "🟤",
     scale: 2204.62,
     unit: "$/t",
   }, // HG=F in $/lb → ×2204.62 = $/t
-  { id: "spy", yf: "^GSPC", label: "S&P500", emoji: "📊" },
-  { id: "vix", yf: "^VIX", label: "VIX", emoji: "😰" },
+  { id: "spy", yf: "^GSPC", label: "S&P500" },
+  { id: "vix", yf: "^VIX", label: "VIX" },
 ];
 
 // Sanity bounds [min, max] — se il prezzo è fuori range, il dato è spazzatura

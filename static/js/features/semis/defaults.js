@@ -38,7 +38,6 @@ const sm_DEFAULTS = {
   indicators: [
     {
       id: "hbm3e",
-      number: "01",
       title: "HBM3E contract pricing",
       subtitle:
         "Il canarino. Prima discesa sequenziale = supply raggiunge demand.",
@@ -71,7 +70,6 @@ const sm_DEFAULTS = {
     },
     {
       id: "cowos",
-      number: "02",
       title: "CoWoS shipments (TSMC)",
       subtitle:
         "Il bottleneck fisico. Over-shipment vs accelerator builds = inventario nascosto.",
@@ -107,7 +105,6 @@ const sm_DEFAULTS = {
     },
     {
       id: "hyperscaler",
-      number: "03",
       title: "Hyperscaler 2027 capex language",
       subtitle:
         "Primi tagli appaiono come 'mix shift to opex' o 'operating leverage'.",
@@ -142,7 +139,6 @@ const sm_DEFAULTS = {
     },
     {
       id: "nvda_inv",
-      number: "04",
       title: "Nvidia data center inventory days",
       subtitle: "Anticipa il ciclo di 2 trimestri. AUTO da SEC EDGAR.",
       value: 113,
@@ -174,7 +170,6 @@ const sm_DEFAULTS = {
     },
     {
       id: "amd_rocm",
-      number: "05",
       title: "AMD MI400 & ROCm adoption",
       subtitle: "Erosione del moat CUDA. AUTO da GitHub API.",
       value: 12,
@@ -208,7 +203,6 @@ const sm_DEFAULTS = {
     },
     {
       id: "memory_capex",
-      number: "06",
       title: "Memory capex pause signals",
       subtitle: "Samsung + SK Hynix + Micron. Pausa coordinata = svolta.",
       value: 115,
@@ -246,7 +240,7 @@ const sm_DEFAULTS = {
       ticker: "NVDA",
       what: "FY27 Q1 earnings",
       matters:
-        "✓ Rev $81.6B (+85% YoY), DC $75.2B. Inv 113gg (RED, build Vera Rubin). Q2 guide $91B vs $87B est. No digestion.",
+        "Rev $81.6B (+85% YoY), DC $75.2B. Inv 113gg (RED, build Vera Rubin). Q2 guide $91B vs $87B est. No digestion.",
       url: "https://investor.nvidia.com",
     },
     {
@@ -353,7 +347,7 @@ const sm_DEFAULTS = {
       ticker: "OpenAI",
       what: "Custom AI chip (atteso)",
       matters:
-        "⚠️ Wildcard: primo ASIC custom targeting training — rischio CUDA moat",
+        "Wildcard: primo ASIC custom targeting training — rischio CUDA moat",
       url: "https://openai.com",
     },
     {
@@ -368,7 +362,7 @@ const sm_DEFAULTS = {
       ticker: "Hyperscalers",
       what: "Q3 earnings (MSFT/GOOGL/META/AMZN)",
       matters:
-        "⚠️ Capex 2027 language — segnale più importante H2 2026 per la thesis",
+        "Capex 2027 language — segnale più importante H2 2026 per la thesis",
       url: "https://www.microsoft.com/en-us/Investor",
     },
     {

@@ -17,15 +17,17 @@
   color: var(--text);
 }
 .btp-hdr-sub {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: var(--muted);
   margin-top: 3px;
 }
 .btp-meta {
   display: flex;
+  flex-wrap: wrap;
+  max-width: 100%;
   align-items: center;
   gap: 10px;
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: var(--muted);
   flex-shrink: 0;
 }
@@ -37,7 +39,6 @@
   padding: 13px 18px;
   margin-bottom: 16px;
   flex-wrap: wrap;
-  border: 1px solid var(--border);
 }
 .btp-info-item {
   display: flex;
@@ -45,10 +46,8 @@
   gap: 2px;
 }
 .btp-info-lbl {
-  font-size: 0.6rem;
+  font-size: 0.82rem;
   color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
   font-weight: 600;
 }
 .btp-info-val {
@@ -57,25 +56,23 @@
   color: var(--text);
 }
 .btp-info-sub {
-  font-size: 0.6rem;
+  font-size: 0.82rem;
   color: var(--muted);
 }
 .btp-tbl-wrap {
+  background: var(--surface2);
   overflow-x: auto;
   border-radius: 8px;
-  border: 1px solid var(--border);
 }
 .btp-tbl {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.76rem;
+  font-size: 1rem;
 }
 .btp-tbl th {
   background: var(--surface2);
   color: var(--muted);
-  text-transform: uppercase;
-  font-size: 0.62rem;
-  letter-spacing: 0.5px;
+  font-size: 0.82rem;
   padding: 8px 10px;
   font-weight: 600;
   text-align: left;
@@ -98,26 +95,24 @@
   background: rgba(255, 255, 255, 0.03);
 }
 .btp-tbl tr.btp-owned td:first-child {
-  box-shadow: inset 3px 0 0 #388bfd;
+  border-left: 3px solid #388bfd;
 }
 .btp-tbl tr.btp-owned td {
   background: rgba(56, 139, 253, 0.045);
 }
 .btp-name {
   font-weight: 600;
-  font-size: 0.78rem;
+  font-size: 1rem;
   cursor: pointer;
   color: var(--text);
-  border-bottom: 1px dotted transparent;
 }
 .btp-name:hover {
   color: #58a6ff;
-  border-bottom-color: #58a6ff;
+  text-decoration: underline dotted;
 }
 .btp-isin {
-  font-size: 0.62rem;
+  font-size: 0.82rem;
   color: var(--muted);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   letter-spacing: 0.3px;
   margin-top: 1px;
 }
@@ -125,7 +120,7 @@
   display: inline-block;
   padding: 1px 5px;
   border-radius: 3px;
-  font-size: 0.58rem;
+  font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -159,7 +154,7 @@
 .btp-ytm-nd {
   color: var(--muted);
   font-style: italic;
-  font-size: 0.68rem;
+  font-size: 0.82rem;
 }
 .btp-spread-pos {
   color: #f85149;
@@ -172,7 +167,8 @@
   border: none;
   cursor: pointer;
   color: var(--muted);
-  font-size: 0.74rem;
+  font-size: 0.82rem;
+  opacity: 0.55;
   padding: 0 3px;
   margin-left: 2px;
   vertical-align: middle;
@@ -180,6 +176,7 @@
 }
 .btp-edit-btn:hover {
   color: var(--text);
+  opacity: 1;
 }
 .btp-edit-row td {
   padding: 6px 12px !important;
@@ -193,13 +190,12 @@
   border: 1px solid var(--border);
   border-radius: 5px;
   color: var(--text);
-  font-size: 0.76rem;
+  font-size: 1rem;
 }
 .btp-foot {
   margin-top: 16px;
   padding-top: 12px;
-  border-top: 1px solid var(--border);
-  font-size: 0.63rem;
+  font-size: 0.82rem;
   color: var(--muted);
   display: flex;
   justify-content: space-between;
@@ -216,7 +212,7 @@
   color: var(--text);
 }
 .btp-sort-arr {
-  font-size: 0.6rem;
+  font-size: 0.82rem;
   opacity: 0.9;
 }
 .btp-net-val {
@@ -242,7 +238,6 @@
   flex-wrap: wrap;
   align-items: center;
   background: var(--surface);
-  border: 1px solid var(--border);
   border-radius: 9px;
   padding: 12px 16px;
   margin-bottom: 14px;
@@ -254,7 +249,7 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   color: var(--text);
-  font-size: 0.78rem;
+  font-size: 1rem;
 }
 .btp-add-form input::placeholder {
   color: var(--muted);
@@ -264,6 +259,6 @@
     gap: 14px;
   }
   .btp-tbl {
-    font-size: 0.7rem;
+    font-size: 0.82rem;
   }
 }

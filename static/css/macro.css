@@ -15,7 +15,7 @@
   --sc-red: #f85149;
   --sc-red-bg: rgba(248, 81, 73, 0.13);
   --sc-radius: 10px;
-  --sc-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  --sc-shadow: none;
   background: var(--sc-bg);
   padding: 8px 0 40px;
 }
@@ -43,10 +43,9 @@
   height: 18px;
   background: var(--sc-text);
   border-radius: 2px;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
 }
 .mc-gauge-val {
-  font-size: 0.66rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--sc-text);
   white-space: nowrap;
@@ -54,7 +53,6 @@
   background: var(--sc-surf2);
   padding: 1px 5px;
   border-radius: 3px;
-  border: 1px solid var(--sc-border);
 }
 .mc-gauge-scale {
   position: relative;
@@ -63,7 +61,7 @@
 }
 .mc-gauge-scale span {
   position: absolute;
-  font-size: 0.6rem;
+  font-size: 0.82rem;
   color: var(--sc-mute);
   transform: translateX(-50%);
 }

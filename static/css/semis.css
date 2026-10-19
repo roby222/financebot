@@ -15,7 +15,7 @@
   --sc-red: #f85149;
   --sc-red-bg: rgba(248, 81, 73, 0.13);
   --sc-radius: 10px;
-  --sc-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  --sc-shadow: none;
   background: var(--sc-bg);
   padding: 8px 0 40px;
 }
@@ -41,7 +41,7 @@
   color: var(--sc-primary);
 }
 .sm-hdr .sm-meta {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: var(--sc-mute);
   text-align: right;
 }
@@ -50,20 +50,16 @@
   background: var(--sc-surf);
   padding: 8px 14px;
   border-radius: var(--sc-radius);
-  box-shadow: var(--sc-shadow);
   margin-bottom: 16px;
   display: flex;
   gap: 20px;
   align-items: center;
   flex-wrap: wrap;
-  border: 1px solid var(--sc-border);
 }
 .sm-ticker .sm-tlbl {
-  font-size: 0.65rem;
+  font-size: 0.82rem;
   color: var(--sc-mute);
   font-weight: 700;
-  letter-spacing: 0.7px;
-  text-transform: uppercase;
   flex-shrink: 0;
 }
 .sm-ticker .sm-tlist {
@@ -76,7 +72,7 @@
   display: inline-flex;
   gap: 5px;
   align-items: baseline;
-  font-size: 0.75rem;
+  font-size: 1rem;
 }
 .sm-tick .sym {
   font-weight: 700;
@@ -87,7 +83,7 @@
 }
 .sm-tick .chg {
   font-weight: 600;
-  font-size: 0.7rem;
+  font-size: 0.82rem;
 }
 .sm-tick .chg.up {
   color: var(--sc-green);
@@ -99,7 +95,7 @@
   color: var(--sc-mute);
 }
 .sm-tick .chg-ref {
-  font-size: 0.62rem;
+  font-size: 0.82rem;
   font-weight: 600;
   padding: 1px 5px;
   border-radius: 3px;
@@ -126,10 +122,11 @@
   background: var(--sc-surf);
   padding: 16px 20px;
   border-radius: var(--sc-radius);
-  box-shadow: var(--sc-shadow);
   margin-bottom: 20px;
   align-items: center;
-  border: 1px solid var(--sc-border);
+}
+.sm-composite-plain {
+  grid-template-columns: 1fr auto;
 }
 .sm-score-circle {
   width: 100px;
@@ -143,10 +140,8 @@
   font-weight: 600;
 }
 .sm-score-circle .slbl {
-  font-size: 0.65rem;
+  font-size: 0.82rem;
   opacity: 0.9;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
 }
 .sm-score-circle .sval {
   font-size: 1.6rem;
@@ -154,7 +149,7 @@
   margin: 3px 0;
 }
 .sm-score-circle .sstat {
-  font-size: 0.7rem;
+  font-size: 0.82rem;
 }
 .sm-breakdown {
   display: flex;
@@ -164,7 +159,7 @@
 .sm-pill {
   padding: 4px 10px;
   border-radius: 999px;
-  font-size: 0.72rem;
+  font-size: 1rem;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
@@ -176,7 +171,7 @@
   border-radius: 50%;
 }
 .sm-narrative {
-  font-size: 0.78rem;
+  font-size: 1rem;
   color: var(--sc-mute);
   max-width: 500px;
   line-height: 1.5;
@@ -193,7 +188,7 @@
   border: none;
   padding: 6px 12px;
   border-radius: 6px;
-  font-size: 0.72rem;
+  font-size: 1rem;
   cursor: pointer;
   font-weight: 600;
   display: inline-flex;
@@ -207,9 +202,9 @@
   cursor: not-allowed;
 }
 .sm-btn.sec {
+  border: none;
   background: var(--sc-surf2);
   color: var(--sc-text);
-  border: 1px solid var(--sc-border);
 }
 .sm-btn:hover:not(:disabled) {
   opacity: 0.85;
@@ -237,13 +232,11 @@
 .sm-card {
   background: var(--sc-surf);
   border-radius: var(--sc-radius);
-  box-shadow: var(--sc-shadow);
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 9px;
   border-left: 4px solid var(--sc-border);
-  border: 1px solid var(--sc-border);
   border-left: 4px solid var(--sc-border);
   position: relative;
   overflow: hidden;
@@ -264,12 +257,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--sc-primary),
-    transparent
-  );
+  background: var(--sc-primary);
   animation: sm-shimmer 1.4s linear infinite;
 }
 @keyframes sm-shimmer {
@@ -288,12 +276,12 @@
 }
 .sm-card-hdr h3 {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--sc-text);
 }
 .sm-card-hdr .sm-num {
-  font-size: 0.65rem;
+  font-size: 0.82rem;
   color: var(--sc-mute);
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -307,7 +295,7 @@
 .sm-badge {
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: 0.62rem;
+  font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.4px;
@@ -346,11 +334,11 @@
   color: var(--sc-primary);
 }
 .sm-reading .unit {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: var(--sc-mute);
 }
 .sm-reading .delta {
-  font-size: 0.68rem;
+  font-size: 0.82rem;
   padding: 2px 7px;
   border-radius: 4px;
   font-weight: 600;
@@ -378,7 +366,7 @@
   color: var(--sc-secondary);
   padding: 2px 7px;
   border-radius: 4px;
-  font-size: 0.68rem;
+  font-size: 0.82rem;
   display: inline-flex;
   gap: 4px;
 }
@@ -399,10 +387,9 @@
   background: var(--sc-surf2);
   border-radius: 6px;
   padding: 9px 11px;
-  font-size: 0.75rem;
+  font-size: 1rem;
   color: var(--sc-mute);
   line-height: 1.5;
-  border: 1px solid var(--sc-border);
 }
 .sm-signal b {
   color: var(--sc-text);
@@ -416,8 +403,7 @@
   background: var(--sc-surf2);
   border-radius: 6px;
   padding: 7px 9px;
-  font-size: 0.72rem;
-  border: 1px solid var(--sc-border);
+  font-size: 1rem;
 }
 .sm-headlines summary {
   cursor: pointer;
@@ -450,7 +436,7 @@
 .sm-headlines li a {
   color: var(--sc-text);
   text-decoration: none;
-  font-size: 0.7rem;
+  font-size: 0.82rem;
 }
 .sm-headlines li a:hover {
   color: var(--sc-primary);
@@ -458,17 +444,16 @@
 }
 .sm-headlines li .when {
   color: var(--sc-mute);
-  font-size: 0.62rem;
+  font-size: 0.82rem;
   margin-left: 3px;
 }
 .sm-card-footer {
-  border-top: 1px solid var(--sc-border);
   padding-top: 9px;
   margin-top: auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   gap: 10px;
   flex-wrap: wrap;
 }
@@ -479,22 +464,22 @@
   color: var(--sc-primary);
   text-decoration: none;
   margin-right: 7px;
-  font-size: 0.66rem;
+  font-size: 0.82rem;
 }
 .sm-card-footer .sources a:hover {
   text-decoration: underline;
 }
 .sm-card-footer .stamp {
   color: var(--sc-mute);
-  font-size: 0.64rem;
+  font-size: 0.82rem;
 }
 .sm-edit-trigger {
-  background: transparent;
-  border: 1px dashed var(--sc-border);
+  border: none;
+  background: var(--sc-surf2);
   color: var(--sc-mute);
   border-radius: 4px;
   padding: 2px 7px;
-  font-size: 0.68rem;
+  font-size: 0.82rem;
   cursor: pointer;
 }
 .sm-edit-trigger:hover {
@@ -509,13 +494,12 @@
   padding: 9px;
   background: var(--sc-surf2);
   border-radius: 6px;
-  border: 1px solid var(--sc-border);
 }
 .sm-edit-form.open {
   display: flex;
 }
 .sm-edit-form label {
-  font-size: 0.68rem;
+  font-size: 0.82rem;
   color: var(--sc-mute);
   font-weight: 600;
 }
@@ -525,7 +509,7 @@
   border: 1px solid var(--sc-border);
   border-radius: 4px;
   padding: 5px 8px;
-  font-size: 0.8rem;
+  font-size: 1rem;
   font-family: inherit;
   width: 100%;
   background: var(--sc-surf);
@@ -548,7 +532,7 @@
 .sm-note {
   font-style: italic;
   color: var(--sc-mute);
-  font-size: 0.72rem;
+  font-size: 1rem;
   background: rgba(210, 153, 34, 0.07);
   border-left: 3px solid var(--sc-yellow);
   padding: 7px 9px;
@@ -559,17 +543,15 @@
   border-left: 3px solid var(--sc-red);
   padding: 5px 9px;
   color: var(--sc-red);
-  font-size: 0.68rem;
+  font-size: 0.82rem;
   border-radius: 4px;
 }
 /* calendar */
 .sm-cal {
   background: var(--sc-surf);
   border-radius: var(--sc-radius);
-  box-shadow: var(--sc-shadow);
   padding: 18px;
   margin-top: 20px;
-  border: 1px solid var(--sc-border);
 }
 .sm-cal h3 {
   margin: 0 0 12px 0;
@@ -580,7 +562,7 @@
 .sm-cal table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.78rem;
+  font-size: 1rem;
 }
 .sm-cal th {
   text-align: left;
@@ -588,9 +570,7 @@
   color: var(--sc-mute);
   padding: 7px;
   border-bottom: 1px solid var(--sc-border);
-  font-size: 0.66rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 0.82rem;
 }
 .sm-cal td {
   padding: 9px 7px;
@@ -612,7 +592,7 @@
 }
 .sm-cal td.matters {
   color: var(--sc-mute);
-  font-size: 0.72rem;
+  font-size: 1rem;
 }
 .sm-cal .imminent {
   background: var(--sc-yellow-bg);
@@ -628,10 +608,8 @@
 .sm-thesis {
   background: var(--sc-surf);
   border-radius: var(--sc-radius);
-  box-shadow: var(--sc-shadow);
   padding: 16px;
   margin-bottom: 20px;
-  border: 1px solid var(--sc-border);
   border-left: 4px solid var(--sc-primary);
 }
 .sm-thesis-hdr {
@@ -644,12 +622,12 @@
 }
 .sm-thesis-hdr h4 {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--sc-text);
 }
 .sm-thesis-sub {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: var(--sc-mute);
   margin-top: 3px;
   font-style: italic;
@@ -666,10 +644,8 @@
 .sm-verdict {
   padding: 4px 12px;
   border-radius: 999px;
-  font-size: 0.72rem;
+  font-size: 1rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 .sm-verdict.accumulate {
   background: var(--sc-green-bg);
@@ -685,7 +661,7 @@
   color: var(--sc-red);
 }
 .sm-thesis-ver {
-  font-size: 0.66rem;
+  font-size: 0.82rem;
   color: var(--sc-mute);
   white-space: nowrap;
 }
@@ -701,8 +677,7 @@
   padding: 5px 8px;
   border-radius: 5px;
   background: var(--sc-surf2);
-  border: 1px solid var(--sc-border);
-  font-size: 0.72rem;
+  font-size: 1rem;
 }
 .sm-th-row .th-dot {
   width: 9px;
@@ -729,12 +704,12 @@
 }
 .sm-th-row .th-red {
   color: var(--sc-mute);
-  font-size: 0.62rem;
-  white-space: nowrap;
+  font-size: 0.82rem;
+  text-align: right;
 }
 .sm-th-stop {
   margin-top: 10px;
-  font-size: 0.68rem;
+  font-size: 0.82rem;
   color: var(--sc-red);
   background: var(--sc-red-bg);
   border-left: 3px solid var(--sc-red);
@@ -745,8 +720,7 @@
 .sm-foot {
   margin-top: 20px;
   padding-top: 14px;
-  border-top: 1px solid var(--sc-border);
-  font-size: 0.66rem;
+  font-size: 0.82rem;
   color: var(--sc-mute);
   display: flex;
   justify-content: space-between;
@@ -762,5 +736,20 @@
   }
   .sm-actions {
     flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .sm-grid {
+    grid-template-columns: 1fr;
+  }
+  .sm-cal td,
+  .sm-cal th {
+    white-space: normal;
+  }
+  .sm-cal {
+    overflow-x: auto;
+  }
+  .sm-cal td.date,
+  .sm-cal td.ticker {
+    width: auto;
   }
 }

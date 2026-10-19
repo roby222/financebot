@@ -34,7 +34,7 @@ function openDetail(id) {
   document.getElementById("detail-ticker").textContent = item.id;
   document.getElementById("detail-etfname").textContent = item.name;
   document.getElementById("detail-driver-badge").textContent =
-    (item.dEmoji || "") + " " + item.driver;
+    item.driver;
 
   const [cP, dispCcy] = q ? convertPrice(q.price, q.currency) : [null, ""];
   const priceEl = document.getElementById("detail-price");

@@ -100,7 +100,7 @@ function mc_renderGauge(ind) {
     stops.push(`${colors[cur]} ${pct}%`);
   });
   stops.push(`${colors[cur]} 100%`);
-  const gradient = `linear-gradient(to right,${stops.join(",")})`;
+  const gradient = `linear-gradient(to right,${stops.join(",")})`; // taste-skill-ignore: gauge zones
   // marker
   const markerPct = Math.max(
     1,
@@ -175,7 +175,7 @@ function mc_renderCards() {
       : "";
     card.innerHTML = `
       <div class="sm-card-hdr">
-        <div><div class="sm-num">${t("sm_indicator")} ${ind.number}</div><h3>${ind.title}</h3></div>
+        <div><h3>${ind.title}</h3></div>
         <div class="sm-badges">${autoBadge}<span class="sm-badge ${ind.status}">${stLbl}</span></div>
       </div>
       <div style="font-size:.72rem;color:var(--muted);line-height:1.4">${ind.subtitle}</div>

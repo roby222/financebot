@@ -281,7 +281,7 @@ function sm_renderCards() {
         ind.github
           .map(
             (g) =>
-              `<div class="sm-chip"><span class="lbl">${g.label}:</span><span class="v">${g.stars.toLocaleString()} ★</span></div>`,
+              `<div class="sm-chip"><span class="lbl">${g.label}:</span><span class="v">${g.stars.toLocaleString()} stelle</span></div>`,
           )
           .join("") +
         "</div>";
@@ -295,10 +295,10 @@ function sm_renderCards() {
       : "";
     card.innerHTML = `
       <div class="sm-card-hdr">
-        <div><div class="sm-num">${t("sm_indicator")} ${ind.number}</div><h3>${ind.title}</h3></div>
+        <div><h3>${ind.title}</h3></div>
         <div class="sm-badges">${autoBadge}<span class="sm-badge ${ind.status}">${stLbl}</span></div>
       </div>
-      <div style="font-size:.72rem;color:var(--muted);line-height:1.4">${ind.subtitle}</div>
+      <div style="font-size: 1rem;color:var(--muted);line-height:1.4">${ind.subtitle}</div>
       <div class="sm-reading">
         <span class="val">${sm_fmtVal(ind.value)}</span>
         <span class="unit">${ind.unit}</span>
@@ -416,7 +416,7 @@ function sm_renderCalendar() {
         if (diff >= 0 && diff <= 14) tr.classList.add("imminent");
       }
     }
-    tr.innerHTML = `<td class="date">${row.date}</td><td class="ticker">${row.ticker}<div style="font-weight:400;color:var(--muted);font-size:.66rem">${row.what}</div></td><td class="matters">${row.matters}</td><td><a href="${row.url}" target="_blank" rel="noopener">IR →</a></td>`;
+    tr.innerHTML = `<td class="date">${row.date}</td><td class="ticker">${row.ticker}<div style="font-weight:400;color:var(--muted);font-size: 0.82rem">${row.what}</div></td><td class="matters">${row.matters}</td><td><a href="${row.url}" target="_blank" rel="noopener">IR →</a></td>`;
     tbody.appendChild(tr);
   });
 }

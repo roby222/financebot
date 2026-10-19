@@ -2,7 +2,6 @@ const mc_DEFAULTS = {
   indicators: [
     {
       id: "copper_copm",
-      number: "01",
       title: "Copper / COPM — AI Infra Picks & Shovels",
       subtitle:
         "Un livello sotto i semi: datacenter AI usa 4–5× più rame di un DC cloud tradizionale. Supply strutturalmente rigida.",

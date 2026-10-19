@@ -6,7 +6,6 @@ const WATCHLIST_DEFAULT = [
     name: "Xtrackers MSCI World ex USA",
     yf: "EXUS.MI",
     driver: "EQUITY",
-    dEmoji: "📈",
     regime: "risk-on",
   },
   {
@@ -14,7 +13,6 @@ const WATCHLIST_DEFAULT = [
     name: "Xtrackers MSCI Emerging Markets",
     yf: "XMME.MI",
     driver: "EQUITY",
-    dEmoji: "📈",
     regime: "risk-on",
   },
   {
@@ -22,7 +20,6 @@ const WATCHLIST_DEFAULT = [
     name: "WisdomTree Physical Silver",
     yf: "PHAG.MI",
     driver: "METALLI",
-    dEmoji: "🥈",
     regime: "risk-off",
   },
   {
@@ -30,7 +27,6 @@ const WATCHLIST_DEFAULT = [
     name: "VanEck Uranium & Nuclear",
     yf: "NUCL.MI",
     driver: "ENERGIA",
-    dEmoji: "⚡",
     regime: "neutro",
   },
   {
@@ -38,7 +34,6 @@ const WATCHLIST_DEFAULT = [
     name: "VanEck Rare Earth & Metals",
     yf: "REMX.MI",
     driver: "GEO",
-    dEmoji: "🌍",
     regime: "neutro",
   },
   {
@@ -46,7 +41,6 @@ const WATCHLIST_DEFAULT = [
     name: "VanEck Quantum Computing",
     yf: "QNTM.MI",
     driver: "TECH",
-    dEmoji: "💻",
     regime: "risk-on",
   },
   {
@@ -54,7 +48,6 @@ const WATCHLIST_DEFAULT = [
     name: "L&G Clean Water",
     yf: "GLUG.MI",
     driver: "INFRA",
-    dEmoji: "🏗️",
     regime: "neutro",
   },
   {
@@ -62,7 +55,6 @@ const WATCHLIST_DEFAULT = [
     name: "L&G Clean Energy",
     yf: "RENW.MI",
     driver: "ENERGIA",
-    dEmoji: "⚡",
     regime: "risk-on",
   },
   {
@@ -70,7 +62,6 @@ const WATCHLIST_DEFAULT = [
     name: "L&G Battery Value-Chain",
     yf: "BATT.MI",
     driver: "METALLI",
-    dEmoji: "🥈",
     regime: "risk-on",
   },
   {
@@ -78,7 +69,6 @@ const WATCHLIST_DEFAULT = [
     name: "iShares MSCI Global Semiconductors",
     yf: "SEME.MI",
     driver: "TECH",
-    dEmoji: "💻",
     regime: "risk-on",
   },
   {
@@ -86,7 +76,6 @@ const WATCHLIST_DEFAULT = [
     name: "iShares MSCI World Quality Factor",
     yf: "IWQU.MI",
     driver: "EQUITY",
-    dEmoji: "📈",
     regime: "risk-on",
   },
   {
@@ -94,7 +83,6 @@ const WATCHLIST_DEFAULT = [
     name: "iShares Core MSCI World",
     yf: "SWDA.MI",
     driver: "EQUITY",
-    dEmoji: "📈",
     regime: "risk-on",
   },
   {
@@ -102,7 +90,6 @@ const WATCHLIST_DEFAULT = [
     name: "iShares Copper Miners",
     yf: "COPM.MI",
     driver: "METALLI",
-    dEmoji: "🥈",
     regime: "neutro",
   },
   {
@@ -110,7 +97,6 @@ const WATCHLIST_DEFAULT = [
     name: "Invesco Gold ETC EUR Hedged",
     yf: "SGLE.MI",
     driver: "PAURA",
-    dEmoji: "😰",
     regime: "risk-off",
   },
   {
@@ -118,7 +104,6 @@ const WATCHLIST_DEFAULT = [
     name: "Ukraine Reconstruction",
     yf: "UKRN.MI",
     driver: "GEO",
-    dEmoji: "🌍",
     regime: "neutro",
   },
   {
@@ -126,7 +111,6 @@ const WATCHLIST_DEFAULT = [
     name: "First Trust Smart Grid Infra",
     yf: "GRID.MI",
     driver: "INFRA",
-    dEmoji: "🏗️",
     regime: "neutro",
   },
   {
@@ -134,7 +118,6 @@ const WATCHLIST_DEFAULT = [
     name: "Stellantis N.V.",
     yf: "STLAM.MI",
     driver: "",
-    dEmoji: "",
     regime: "neutro",
   },
   {
@@ -142,7 +125,6 @@ const WATCHLIST_DEFAULT = [
     name: "Ferrari N.V.",
     yf: "RACE.MI",
     driver: "",
-    dEmoji: "",
     regime: "neutro",
   },
 ];

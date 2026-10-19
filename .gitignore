@@ -6,3 +6,4 @@ node_modules/
 output/
 .superpowers/
 .playwright-cli/
+.taste-skill/inspect/

@@ -171,7 +171,6 @@ async function fetchMacro() {
             price: null,
             pct: null,
             label: m.label,
-            emoji: m.emoji,
             err: true,
           };
           return;
@@ -180,7 +179,6 @@ async function fetchMacro() {
           price,
           pct,
           label: m.label,
-          emoji: m.emoji,
           unit: m.unit,
         };
       } catch {}

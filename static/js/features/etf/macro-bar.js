@@ -11,9 +11,9 @@ function renderMacroBar() {
   container.innerHTML = MACRO_TICKERS.map((m) => {
     const d = state.macroData[m.id];
     if (!d)
-      return `<span class="macro-item"><span class="mi-label">${m.emoji} ${m.label}</span> <span class="mi-price mi-pct" style="color:var(--muted)">…</span></span>`;
+      return `<span class="macro-item"><span class="mi-label">${m.label}</span> <span class="mi-price mi-pct" style="color:var(--muted)">…</span></span>`;
     if (d.err || d.price == null)
-      return `<span class="macro-item" title="Dato non disponibile o fuori range"><span class="mi-label">${m.emoji} ${m.label}</span> <span class="mi-price" style="color:var(--orange)">⚠️ N/D</span></span>`;
+      return `<span class="macro-item" title="Dato non disponibile o fuori range"><span class="mi-label">${m.label}</span> <span class="mi-price" style="color:var(--orange)">N/D</span></span>`;
     const pctStr =
       d.pct != null
         ? ` <span class="mi-pct ${d.pct >= 0 ? "up" : "down"}">${d.pct >= 0 ? "+" : ""}${(d.pct * 100).toFixed(2)}%</span>`
@@ -26,14 +26,14 @@ function renderMacroBar() {
             maximumFractionDigits: 2,
           });
     const unitStr = d.unit ? ` <span class="mi-label">${d.unit}</span>` : "";
-    return `<span class="macro-item"><span class="mi-label">${m.emoji} ${m.label}</span> <span class="mi-price">${priceStr}</span>${unitStr}${pctStr}</span>`;
+    return `<span class="macro-item"><span class="mi-label">${m.label}</span> <span class="mi-price">${priceStr}</span>${unitStr}${pctStr}</span>`;
   }).join("");
   const badge = document.getElementById("regime-badge");
   if (badge) {
     const MAP = {
-      "risk-on": ["regime-risk-on", "📈 Risk-On"],
-      "risk-off": ["regime-risk-off", "🛡️ Risk-Off"],
-      volatile: ["regime-volatile", "😵 Volatile"],
+      "risk-on": ["regime-risk-on", "Risk-On"],
+      "risk-off": ["regime-risk-off", "Risk-Off"],
+      volatile: ["regime-volatile", "Volatile"],
     };
     const [cls, label] = MAP[state.macroRegime] || [
       "regime-unknown",

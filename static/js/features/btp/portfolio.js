@@ -129,7 +129,7 @@ function btp_renderInfoBar() {
     if (btpState.fetchError) {
       warnEl.style.display = "";
       warnEl.innerHTML =
-        "<b>⚠️ Prezzi non scaricabili — il proxy CORS non risponde.</b><br>" +
+        "<b>Prezzi non scaricabili — il proxy CORS non risponde.</b><br>" +
         "Nessun prezzo e' stato recuperato (" +
         btpState.fetchError +
         "). I proxy pubblici gratuiti " +
@@ -181,11 +181,11 @@ function btp_renderInfoBar() {
       const avgPnl =
         owned.reduce((s, b) => s + ((b.price - b.ap) / b.ap) * 100, 0) /
         owned.length;
-      posValEl.innerHTML = `${owned.length} <span style="font-size:.72rem;font-weight:600;color:${avgPnl >= 0 ? "#3fb950" : "#f85149"}">${avgPnl >= 0 ? "+" : ""}${avgPnl.toFixed(2)}%</span>`;
+      posValEl.innerHTML = `${owned.length} <span style="font-size: 1rem;font-weight:600;color:${avgPnl >= 0 ? "#3fb950" : "#f85149"}">${avgPnl >= 0 ? "+" : ""}${avgPnl.toFixed(2)}%</span>`;
       if (posSubEl) posSubEl.textContent = "P&L medio vs acquisto";
     } else {
       posValEl.textContent = "—";
-      if (posSubEl) posSubEl.textContent = "imposta un prezzo di acquisto (✎)";
+      if (posSubEl) posSubEl.textContent = "imposta un prezzo di acquisto (modifica)";
     }
   }
 }
@@ -199,7 +199,7 @@ function btp_renderTable() {
       const priceStr =
         price != null
           ? `${price.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-          : '<span style="color:var(--muted);font-style:italic;font-size:.7rem">…</span>';
+          : '<span style="color:var(--muted);font-style:italic;font-size: 0.82rem">…</span>';
       const pctStr =
         b.pct != null
           ? `<span class="${b.pct >= 0 ? "btp-pct-up" : "btp-pct-dn"}">${b.pct >= 0 ? "+" : ""}${b.pct.toFixed(2)}%</span>`
@@ -238,7 +238,7 @@ function btp_renderTable() {
         netoraStr = '<span class="btp-ytm-nd">variabile</span>';
       else if (price == null)
         netoraStr =
-          '<span style="color:var(--muted);font-style:italic;font-size:.7rem">…</span>';
+          '<span style="color:var(--muted);font-style:italic;font-size: 0.82rem">…</span>';
       else {
         const ny = btp_netYield(b, price);
         if (ny != null) {
@@ -250,20 +250,20 @@ function btp_renderTable() {
       // Rendimento netto annuo in base al PREZZO DI ACQUISTO impostato dall'utente
       // + P&L mark-to-market (quotazione attuale vs prezzo di acquisto)
       let acqStr =
-        '<span style="color:var(--muted);font-size:.66rem">✎ imposta P.acq.</span>';
+        '<span style="color:var(--muted);font-size: 0.82rem">imposta P.acq.</span>';
       if (b.ap != null) {
         const pnl = price != null ? ((price - b.ap) / b.ap) * 100 : null;
         const pnlStr =
           pnl != null
             ? ` · <span style="color:${pnl >= 0 ? "#3fb950" : "#f85149"}">${pnl >= 0 ? "+" : ""}${pnl.toFixed(1)}%</span>`
             : "";
-        const subAcq = `<span style="font-size:.62rem;color:var(--muted)">acq. ${b.ap.toFixed(2)}${pnlStr}</span>`;
+        const subAcq = `<span style="font-size: 0.82rem;color:var(--muted)">acq. ${b.ap.toFixed(2)}${pnlStr}</span>`;
         if (b.special === "etf") {
           acqStr =
             (pnl != null
               ? `<span class="btp-net-val ${pnl >= 0 ? "btp-pct-up" : "btp-pct-dn"}">${pnl >= 0 ? "+" : ""}${pnl.toFixed(1)}%</span><br>`
               : "") +
-            `<span style="font-size:.62rem;color:var(--muted)">acq. ${b.ap.toFixed(2)}</span>`;
+            `<span style="font-size: 0.82rem;color:var(--muted)">acq. ${b.ap.toFixed(2)}</span>`;
         } else if (b.special === "idx" || b.special === "step") {
           acqStr = `<span class="btp-ytm-nd">variabile</span><br>${subAcq}`;
         } else {
@@ -277,29 +277,29 @@ function btp_renderTable() {
 
       const clearApBtn =
         b.ap != null
-          ? `<button class="sm-btn sec" style="font-size:.62rem;padding:2px 6px" data-action="btp_clearAp" data-arg-0="${idx}">✕ Rimuovi</button>`
+          ? `<button class="sm-btn sec" style="font-size: 0.82rem;padding:2px 6px" data-action="btp_clearAp" data-arg-0="${idx}">× Rimuovi</button>`
           : "";
 
       return `<tr class="btp-data-row${b.ap != null ? " btp-owned" : ""}">
       <td><span class="btp-name" data-action="btp_openChart" data-arg-0="${idx}" title="Mostra andamento ${b.name}">${b.name}</span>${badgeHtml}${b.special === "etf" ? "" : `<div class="btp-isin">${b.id}</div>`}</td>
       <td class="r">${b.coupon != null ? b.coupon.toFixed(2) + "%" : "—"}</td>
       <td>${btp_fmtMat(b.mat)}</td>
-      <td class="r">${priceStr}<button class="btp-edit-btn" data-action="btp_openEdit" data-arg-0="${idx}" title="Imposta prezzo di acquisto">✎</button></td>
+      <td class="r">${priceStr}<button class="btp-edit-btn" data-action="btp_openEdit" data-arg-0="${idx}" title="Imposta prezzo di acquisto">modifica</button></td>
       <td class="r">${pctStr}</td>
       <td class="r">${ytmStr}</td>
       <td class="r">${spreadStr}</td>
       <td class="r">${netoraStr}</td>
       <td class="r">${acqStr}</td>
-      <td class="c"><button class="btp-del-btn" data-action="btp_removeBond" data-arg-0="${idx}" title="Elimina ${b.name}">✕</button></td>
+      <td class="c"><button class="btp-del-btn" data-action="btp_removeBond" data-arg-0="${idx}" title="Elimina ${b.name}">×</button></td>
     </tr>
     <tr id="btp-edit-row-${idx}" style="display:none"><td colspan="10" class="btp-edit-row">
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <span style="font-size:.72rem;color:var(--muted);white-space:nowrap">💶 Prezzo di acquisto:</span>
+        <span style="font-size: 1rem;color:var(--muted);white-space:nowrap">Prezzo di acquisto:</span>
         <input id="btp-ap-inp-${idx}" type="number" step="0.01" min="50" max="150" class="btp-edit-inp"
           value="${b.ap != null ? b.ap : ""}" placeholder="es. 97.00">
         <button class="sm-btn" data-action="btp_saveAp" data-arg-0="${idx}">Salva</button>
         ${clearApBtn}
-        <button class="sm-btn sec" data-action="btp_closeEdit" data-arg-0="${idx}" style="margin-left:auto">✕</button>
+        <button class="sm-btn sec" data-action="btp_closeEdit" data-arg-0="${idx}" style="margin-left:auto">×</button>
       </div>
     </td></tr>`;
     })
@@ -412,7 +412,7 @@ function btp_addBond() {
     } catch (e) {
       toast &&
         toast(
-          "Prezzo non trovato per " + isin + " — inseriscilo manualmente (✎)",
+          "Prezzo non trovato per " + isin + " — inseriscilo manualmente (modifica)",
         );
     }
   })();

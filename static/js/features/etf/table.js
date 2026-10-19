@@ -221,7 +221,7 @@ function renderSignalsTable() {
           : "—";
 
       // ── Driver badge ─────────────────────────────────────────
-      const drvCell = `<span class="drv-badge drv-${item.driver || ""}">${item.dEmoji || ""} ${item.driver || "—"}</span>`;
+      const drvCell = `<span class="drv-badge drv-${item.driver || ""}">${item.driver || "—"}</span>`;
 
       // ── Signal (computed live — scenario/regime aware) ────────
       let sigCell;
@@ -258,7 +258,7 @@ function renderSignalsTable() {
       const curPrice = state.quotes[item.id]?.price ?? null;
       // Se prezzo < S2 (tutti i supporti rotti), mostra warning invece di valori
       const belowAll = pv && curPrice !== null && curPrice < pv.S2;
-      const warnSpan = `<span title="${t("warn_below_supports")}" style="color:var(--orange);font-size:.75rem">⚠️</span>`;
+      const warnSpan = `<span title="${t("warn_below_supports")}" style="color:var(--orange);font-size: 1rem;font-weight:700">!</span>`;
       const e1Cell = loading
         ? spin
         : pv
@@ -339,7 +339,7 @@ function renderSignalsTable() {
 
       const priceDisp =
         cP != null
-          ? `${cP.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 3 })} <span style="font-size:.65rem;color:var(--muted)">${dispCcy}</span>`
+          ? `${cP.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 3 })} <span style="font-size: 0.82rem;color:var(--muted)">${dispCcy}</span>`
           : "—";
 
       return `<tr>
@@ -358,7 +358,7 @@ function renderSignalsTable() {
       <td class="r">${vsCell}</td>
       <td class="c">${macdCell}</td>
       <td class="c">${volCell}</td>
-      <td class="c"><button class="sig-del-btn" data-action="removeItem" data-arg-0="${item.id}" title="Rimuovi ${item.id} dalla lista">✕</button></td>
+      <td class="c"><button class="sig-del-btn" data-action="removeItem" data-arg-0="${item.id}" title="Rimuovi ${item.id} dalla lista">×</button></td>
     </tr>`;
     })
     .join("");

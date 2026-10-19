@@ -91,7 +91,7 @@ function bv_renderCountries() {
               : ""
           : "";
       return `<div class="bv-country-card">
-      <div class="bv-cc-head"><span class="bv-flag">${c.flag}</span><span class="bv-cc-name">${c.name}</span>${bv_chip(v)}</div>
+      <div class="bv-cc-head"><span class="bv-cc-name">${c.name}</span>${bv_chip(v)}</div>
       <div class="bv-cc-rows">
         <div class="bv-cc-row"><span>Tasso CB</span><b>${bv_pct(c.cbRate)}</b></div>
         <div class="bv-cc-row"><span>10Y yield</span><b>${c.yield10y != null ? bv_pct(c.yield10y) : '<span class="bv-loading">…</span>'}</b></div>
@@ -141,22 +141,22 @@ function bv_renderItaly() {
   document.getElementById("bv-italy-wrap").innerHTML = `
     <div class="bv-italy-card">
       <div class="bv-italy-head">
-        <div><span class="bv-flag-lg">🇮🇹</span><span class="bv-italy-title">Italia — analisi dettagliata</span></div>
+        <div><span class="bv-italy-title">Italia — analisi dettagliata</span></div>
         ${bv_chip(v)}
       </div>
       <div class="bv-italy-grid">
         <div class="bv-kv"><span>Tasso BCE</span><b>${bv_pct(it.cbRate)}</b></div>
         <div class="bv-kv"><span>BTP 10Y</span><b>${it.yield10y != null ? bv_pct(it.yield10y) : '<span class="bv-loading">…</span>'}</b></div>
         <div class="bv-kv"><span>Spread BTP-Bund</span><b style="${spreadColor}">${spread != null ? bv_num(spread) + "pp" : "—"}</b></div>
-        <div class="bv-kv"><span>Inflazione CPI</span><b>${bv_pct(it.cpi)}</b><button class="bv-edit-btn" data-action="bv_openEdit" data-arg-0="cpi" data-arg-1="Inflazione CPI (%)" data-arg-2="0.1">✎</button></div>
+        <div class="bv-kv"><span>Inflazione CPI</span><b>${bv_pct(it.cpi)}</b><button class="bv-edit-btn" data-action="bv_openEdit" data-arg-0="cpi" data-arg-1="Inflazione CPI (%)" data-arg-2="0.1">modifica</button></div>
         <div class="bv-kv"><span>Real yield</span><b style="${realColor}">${real != null ? bv_pct(real) : "—"}</b></div>
-        <div class="bv-kv"><span>FTSE MIB P/E</span><b>${bv_num(it.pe, 1)}×</b><button class="bv-edit-btn" data-action="bv_openEdit" data-arg-0="pe" data-arg-1="FTSE MIB P/E" data-arg-2="0.1">✎</button></div>
+        <div class="bv-kv"><span>FTSE MIB P/E</span><b>${bv_num(it.pe, 1)}×</b><button class="bv-edit-btn" data-action="bv_openEdit" data-arg-0="pe" data-arg-1="FTSE MIB P/E" data-arg-2="0.1">modifica</button></div>
         <div class="bv-kv"><span>Earnings yield</span><b>${ey != null ? bv_pct(ey) : "—"}</b></div>
         <div class="bv-kv"><span>Bond Premium</span><b style="${bpColor}">${bp != null ? bv_num(bp) + "pp" : "—"}</b></div>
-        <div class="bv-kv"><span>Debito/PIL</span><b>${bv_num(it.debtGdp, 0)}%</b><button class="bv-edit-btn" data-action="bv_openEdit" data-arg-0="debtGdp" data-arg-1="Debito/PIL (%)" data-arg-2="1">✎</button></div>
+        <div class="bv-kv"><span>Debito/PIL</span><b>${bv_num(it.debtGdp, 0)}%</b><button class="bv-edit-btn" data-action="bv_openEdit" data-arg-0="debtGdp" data-arg-1="Debito/PIL (%)" data-arg-2="1">modifica</button></div>
       </div>
       <div id="bv-italy-edit" class="bv-edit-panel" style="display:none"></div>
-      ${it.note ? `<div class="bv-note" style="font-size:.74rem;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">${it.note}</div>` : ""}
+      ${it.note ? `<div class="bv-note" style="font-size: 1rem;color:var(--muted);margin-top:8px">${it.note}</div>` : ""}
     </div>`;
 }
 
@@ -165,11 +165,11 @@ function bv_openEdit(field, label, step) {
   const panel = document.getElementById("bv-italy-edit");
   panel.style.display = "block";
   panel.innerHTML = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-    <label style="font-size:.74rem;color:var(--muted)">${label}</label>
+    <label style="font-size: 1rem;color:var(--muted)">${label}</label>
     <input id="bv-edit-inp" type="number" step="${step}" value="${it[field]}"
       style="width:90px;padding:4px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.82rem">
     <button class="sm-btn" data-action="bv_saveEdit" data-arg-0="${field}">Salva</button>
-    <button class="sm-btn sec" data-action="closeBondEdit">✕</button>
+    <button class="sm-btn sec" data-action="closeBondEdit">×</button>
   </div>`;
   setTimeout(() => {
     const i = document.getElementById("bv-edit-inp");

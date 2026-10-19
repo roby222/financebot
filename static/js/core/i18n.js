@@ -59,7 +59,7 @@ function applyI18n() {
   if (helpTitle) helpTitle.innerHTML = t("help_title");
   // lang button flag
   const langBtn = document.getElementById("lang-btn");
-  if (langBtn) langBtn.textContent = LANG === "it" ? "🇬🇧" : "🇮🇹";
+  if (langBtn) langBtn.textContent = LANG === "it" ? "EN" : "IT";
   langBtn.title = LANG === "it" ? "Switch to English" : "Passa all'italiano";
   // help button title
   const helpBtn = document.getElementById("help-btn");
